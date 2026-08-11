@@ -1,0 +1,43 @@
+# CODEOWNERS
+# GitHub will automatically request reviews from the code owners
+# when a pull request changes files that match a pattern.
+# Paths are relative to the repository root.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repository
+* @ericksonlopezf
+
+# Core library source
+/src/ @ericksonlopezf
+
+# Tests
+/tests/ @ericksonlopezf
+
+# Benchmarks
+/benchmarks/ @ericksonlopezf
+
+# Samples
+/samples/ @ericksonlopezf
+
+# Architecture Decision Records and RFCs (governance-sensitive)
+/docs/adr/ @ericksonlopezf
+/docs/rfcs/ @ericksonlopezf
+
+# CI/CD and release infrastructure (high-impact changes)
+/.github/workflows/ @ericksonlopezf
+/.github/dependabot.yml @ericksonlopezf
+/.release-please-config.json @ericksonlopezf
+/.release-please-manifest.json @ericksonlopezf
+
+# Build infrastructure
+/Directory.Build.props @ericksonlopezf
+/Directory.Build.targets @ericksonlopezf
+/Directory.Packages.props @ericksonlopezf
+/global.json @ericksonlopezf
+
+# Security-sensitive files
+/SECURITY.md @ericksonlopezf
+/EricksonLopez.snk @ericksonlopezf
+
+# Governance
+/GOVERNANCE.md @ericksonlopezf

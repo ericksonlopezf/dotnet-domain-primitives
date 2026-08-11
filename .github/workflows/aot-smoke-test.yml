@@ -1,0 +1,78 @@
+name: NativeAOT Smoke Test
+
+on:
+  workflow_call:
+    secrets:
+      SNK_KEY:
+        description: "Base64-encoded Strong Name key (.snk) for assembly signing"
+        required: false
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  aot-smoke-test:
+    name: NativeAOT Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore Strong Name key
+        env:
+          SNK_KEY: ${{ secrets.SNK_KEY }}
+        run: |
+          if [ -n "$SNK_KEY" ]; then
+            echo "$SNK_KEY" | tr -d '\n\r ' | base64 --decode > EricksonLopez.snk
+          fi
+
+      - name: Install NativeAOT prerequisites (clang, lld, zlib)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends clang lld zlib1g-dev
+
+      - name: Restore dependencies
+        run: dotnet restore EricksonLopez.DomainPrimitives.slnx
+
+      - name: Build (Release)
+        run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
+
+      - name: Publish AotProbe (NativeAOT)
+        run: >
+          dotnet publish
+          tests/EricksonLopez.DomainPrimitives.AotProbe/EricksonLopez.DomainPrimitives.AotProbe.csproj
+          --configuration Release
+          --runtime linux-x64
+          --self-contained
+          -p:TreatWarningsAsErrors=true
+          -p:WarningLevel=5
+          --output ./aot-output
+        env:
+          DOTNET_EnableAotCompilationWarningsAsErrors: true
+
+      - name: Run NativeAOT binary
+        run: |
+          chmod +x ./aot-output/EricksonLopez.DomainPrimitives.AotProbe
+          ./aot-output/EricksonLopez.DomainPrimitives.AotProbe
+          echo "Exit code: $?"
+
+      - name: Upload AOT artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aot-output-${{ github.run_id }}
+          path: ./aot-output/
+          retention-days: 7

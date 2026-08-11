@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <AssemblyName>EricksonLopez.DomainPrimitives.Mapster</AssemblyName>
+    <RootNamespace>EricksonLopez.DomainPrimitives.Mapster</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <PackageId>EricksonLopez.DomainPrimitives.Mapster</PackageId>
+    <Description>Mapster integration for EricksonLopez.DomainPrimitives. Automatically registers domain primitives in Mapster without reflection.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mapster" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Mapster.SourceGenerators\EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives\EricksonLopez.DomainPrimitives.csproj" />
+  </ItemGroup>
+  <PropertyGroup>    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+</Project>
+
+
+
+
+

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives.AspNetCore\EricksonLopez.DomainPrimitives.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives\EricksonLopez.DomainPrimitives.csproj" />
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.UnitTests\EricksonLopez.DomainPrimitives.UnitTests.csproj" />
+  </ItemGroup>
+</Project>
+
+
+
+

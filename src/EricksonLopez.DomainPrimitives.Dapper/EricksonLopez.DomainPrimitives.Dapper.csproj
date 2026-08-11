@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <AssemblyName>EricksonLopez.DomainPrimitives.Dapper</AssemblyName>
+    <RootNamespace>EricksonLopez.DomainPrimitives.Dapper</RootNamespace>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>EricksonLopez.DomainPrimitives.Dapper</PackageId>
+    <Description>Dapper integration for EricksonLopez.DomainPrimitives. Automatically generates NativeAOT-ready SqlMapper.TypeHandler implementations for all domain primitives without reflection.</Description>
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Abstractions\EricksonLopez.DomainPrimitives.Abstractions.csproj" />
+    <!-- Reference the Source Generator so it gets packed with this meta-package as an analyzer -->
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Dapper.SourceGenerators\EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    
+  </ItemGroup>
+</Project>
+
+
+
+

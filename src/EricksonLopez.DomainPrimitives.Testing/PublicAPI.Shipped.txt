@@ -1,0 +1,198 @@
+#nullable enable
+#nullable enable
+AssertCreationFails<TPrimitive, TValue>
+BeFailure<T>
+BeFailureWithErrorCode<T>
+BeSuccess<T>
+BeValidPrimitiveWithValue<TValue>
+CountryCodeNormalizationScenarios.get
+Create<TPrimitive, TValue>
+CreateUnvalidated<TPrimitive, TValue>
+DomainPrimitiveAssertionsExtensions
+DomainPrimitiveFakeFactory
+DomainPrimitiveScenarios
+DomainPrimitiveTestBuilder
+DomainPrimitiveVerifyExtensions
+EmailNormalizationScenarios.get
+EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions
+EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory
+EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios
+EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveTestBuilder
+EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveVerifyExtensions
+FutureDate.get
+HavePrimitiveValue<TPrimitive, TValue>
+Initialize
+InvalidAges.get
+InvalidAgeValues.get
+InvalidBusinessDates.get
+InvalidDiscounts.get
+InvalidDistances.get
+InvalidEmailInputs.get
+InvalidEmails.get
+InvalidExpirationDates.get
+InvalidFiscalYears.get
+InvalidGuidStrings.get
+InvalidHeights.get
+InvalidLatitudes.get
+InvalidLongitudes.get
+InvalidMoneyAmounts.get
+InvalidPercentages.get
+InvalidPercentageValues.get
+InvalidPhoneInputs.get
+InvalidPhones.get
+InvalidPrices.get
+InvalidQuantities.get
+InvalidScores.get
+InvalidSlugInputs.get
+InvalidSlugs.get
+InvalidTaxRates.get
+InvalidTemperatures.get
+InvalidUrls.get
+InvalidWeights.get
+PastDate.get
+ShouldBeValidPrimitive<TPrimitive, TValue>
+ShouldFailCreationWith<TPrimitive, TValue>
+ShouldHaveValidationError<TPrimitive, TValue>
+ShouldSucceedCreation<TPrimitive, TValue>
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.BeFailure<T>(this FluentAssertions.Primitives.ObjectAssertions! assertions) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.BeFailureWithErrorCode<T>(this FluentAssertions.Primitives.ObjectAssertions! assertions, string! errorCode) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.BeSuccess<T>(this FluentAssertions.Primitives.ObjectAssertions! assertions) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.BeValidPrimitiveWithValue<TValue>(this FluentAssertions.Primitives.ObjectAssertions! assertions, TValue expectedValue) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.HavePrimitiveValue<TPrimitive, TValue>(this FluentAssertions.Primitives.ObjectAssertions! assertions, TValue expectedValue) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.ShouldBeValidPrimitive<TPrimitive, TValue>(this FluentAssertions.Primitives.ObjectAssertions! assertions) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.ShouldFailCreationWith<TPrimitive, TValue>(TValue value, string! errorCode) -> void
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.ShouldHaveValidationError<TPrimitive, TValue>(this FluentAssertions.Primitives.ObjectAssertions! assertions, string! errorCode) -> FluentAssertions.AndConstraint<FluentAssertions.Primitives.ObjectAssertions!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.ShouldSucceedCreation<TPrimitive, TValue>(TValue value) -> TPrimitive
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.ThrowDomainPrimitiveException(this FluentAssertions.Specialized.ActionAssertions! assertions) -> FluentAssertions.Specialized.ExceptionAssertions<EricksonLopez.DomainPrimitives.DomainPrimitiveException!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveAssertionsExtensions.ThrowDomainPrimitiveExceptionWithErrorCode(this FluentAssertions.Specialized.ActionAssertions! assertions, string! errorCode) -> FluentAssertions.Specialized.ExceptionAssertions<EricksonLopez.DomainPrimitives.DomainPrimitiveException!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.FutureDate.get -> System.DateOnly
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidAges.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidBusinessDates.get -> System.Collections.Generic.IReadOnlyList<System.DateOnly>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidDiscounts.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidDistances.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidEmails.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidExpirationDates.get -> System.Collections.Generic.IReadOnlyList<System.DateOnly>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidFiscalYears.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidGuidStrings.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidHeights.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidLatitudes.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidLongitudes.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidMoneyAmounts.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidPercentages.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidPhones.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidPrices.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidQuantities.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidScores.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidSlugs.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidTaxRates.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidTemperatures.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidUrls.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.InvalidWeights.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.PastDate.get -> System.DateOnly
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.Today.get -> System.DateOnly
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidAge.get -> int
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidAges.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidBirthDate.get -> System.DateOnly
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidBusinessDates.get -> System.Collections.Generic.IReadOnlyList<System.DateOnly>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidCountryCode.get -> string!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidCountryCodes.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidCurrencyCodes.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidDiscounts.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidDistances.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidEmail.get -> string!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidEmails.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidExpirationDates.get -> System.Collections.Generic.IReadOnlyList<System.DateOnly>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidFiscalYears.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidGuid.get -> System.Guid
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidGuids.get -> System.Collections.Generic.IReadOnlyList<System.Guid>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidGuidStrings.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidHeights.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidHexColors.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidIBANs.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidISBNs.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidLatitudes.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidLongitudes.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidMoneyAmount.get -> decimal
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidMoneyAmounts.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidPercentages.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidPhone.get -> string!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidPhones.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidPrices.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidQuantities.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidRatings.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidScores.get -> System.Collections.Generic.IReadOnlyList<int>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidSlug.get -> string!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidSlugs.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidTaxRates.get -> System.Collections.Generic.IReadOnlyList<decimal>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidTemperatures.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidUrl.get -> string!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidUrls.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidVINs.get -> System.Collections.Generic.IReadOnlyList<string!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveFakeFactory.ValidWeights.get -> System.Collections.Generic.IReadOnlyList<double>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.CountryCodeNormalizationScenarios.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.EmailNormalizationScenarios.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.InvalidAgeValues.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.InvalidEmailInputs.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.InvalidGuidStrings.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.InvalidPercentageValues.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.InvalidPhoneInputs.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.InvalidSlugInputs.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.ValidAgeValues.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.ValidEmailInputs.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.ValidGuidStrings.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.ValidPercentageValues.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.ValidPhoneInputs.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveScenarios.ValidSlugInputs.get -> System.Collections.Generic.IEnumerable<object![]!>!
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveTestBuilder.AssertCreationFails<TPrimitive, TValue>(TValue value) -> EricksonLopez.Result.Result<TPrimitive>
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveTestBuilder.Create<TPrimitive, TValue>(TValue value) -> TPrimitive
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveTestBuilder.CreateUnvalidated<TPrimitive, TValue>(TValue value) -> TPrimitive
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveTestBuilder.TryCreate<TPrimitive, TValue>(TValue value) -> EricksonLopez.Result.Result<TPrimitive>
+static EricksonLopez.DomainPrimitives.Testing.DomainPrimitiveVerifyExtensions.Initialize() -> void
+ThrowDomainPrimitiveException
+ThrowDomainPrimitiveExceptionWithErrorCode
+Today.get
+TryCreate<TPrimitive, TValue>
+ValidAge.get
+ValidAges.get
+ValidAgeValues.get
+ValidBirthDate.get
+ValidBusinessDates.get
+ValidCountryCode.get
+ValidCountryCodes.get
+ValidCurrencyCodes.get
+ValidDiscounts.get
+ValidDistances.get
+ValidEmail.get
+ValidEmailInputs.get
+ValidEmails.get
+ValidExpirationDates.get
+ValidFiscalYears.get
+ValidGuid.get
+ValidGuids.get
+ValidGuidStrings.get
+ValidHeights.get
+ValidHexColors.get
+ValidIBANs.get
+ValidISBNs.get
+ValidLatitudes.get
+ValidLongitudes.get
+ValidMoneyAmount.get
+ValidMoneyAmounts.get
+ValidPercentages.get
+ValidPercentageValues.get
+ValidPhone.get
+ValidPhoneInputs.get
+ValidPhones.get
+ValidPrices.get
+ValidQuantities.get
+ValidRatings.get
+ValidScores.get
+ValidSlug.get
+ValidSlugInputs.get
+ValidSlugs.get
+ValidTaxRates.get
+ValidTemperatures.get
+ValidUrl.get
+ValidUrls.get
+ValidVINs.get
+ValidWeights.get

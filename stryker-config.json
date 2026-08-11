@@ -1,0 +1,27 @@
+{
+  "stryker-config": {
+    "solution": "Stryker.slnx",
+    "coverage-analysis": "off",
+    "target-framework": "net8.0",
+    "test-projects": [
+      "tests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests.csproj",
+      "tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj",
+      "tests/EricksonLopez.DomainPrimitives.Testing.UnitTests/EricksonLopez.DomainPrimitives.Testing.UnitTests.csproj",
+      "tests/EricksonLopez.DomainPrimitives.Mapster.Tests/EricksonLopez.DomainPrimitives.Mapster.Tests.csproj",
+      "tests/EricksonLopez.DomainPrimitives.Dapper.IntegrationTests/EricksonLopez.DomainPrimitives.Dapper.IntegrationTests.csproj"
+    ],
+
+    "thresholds": {
+      "high": 100,
+      "low": 98,
+      "break": 95
+    },
+    "reporters": [
+      "html",
+      "cleartext",
+      "progress",
+      "json"
+    ],
+    "concurrency": 4
+  }
+}

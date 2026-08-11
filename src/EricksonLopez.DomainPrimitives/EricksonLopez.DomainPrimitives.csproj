@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <AssemblyName>EricksonLopez.DomainPrimitives</AssemblyName>
+    <RootNamespace>EricksonLopez.DomainPrimitives</RootNamespace>
+    <!-- RS0016/RS0017: New public types added in v1.2.0 (Diagnostics move from Abstractions).
+         API evolution is tracked via ApiCompat (CRIT-003) in CI. PublicApiAnalyzers is
+         redundant for this meta-package since ApiCompat provides stronger binary compat gates. -->
+    <!-- CA1711: ValidationFailureEventArgs uses 'EventArgs' suffix intentionally — it IS
+         event arguments for OnValidationFailed. Suppressed to match pre-migration Abstractions behavior. -->
+    <NoWarn>$(NoWarn);RS0016;RS0017;CA1711</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>EricksonLopez.DomainPrimitives</PackageId>
+    <Description>The definitive framework for Domain Primitives in .NET. Source-generated, NativeAOT-ready, zero-reflection strong IDs, value objects, validated types, and smart enums. This meta-package includes Abstractions, Source Generators, and Roslyn Analyzers.</Description>
+    
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Abstractions\EricksonLopez.DomainPrimitives.Abstractions.csproj" />
+
+    <!-- Source generators are analyzer references — they don't add runtime dependencies -->
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Generators\EricksonLopez.DomainPrimitives.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+
+    <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Analyzers\EricksonLopez.DomainPrimitives.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+      </ItemGroup>
+
+</Project>

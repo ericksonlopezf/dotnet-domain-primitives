@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <NoWarn>CA1805;CA1711;CA1000;CS1574;CS1591</NoWarn>
+    <AssemblyName>EricksonLopez.DomainPrimitives.Abstractions</AssemblyName>
+    <RootNamespace>EricksonLopez.DomainPrimitives</RootNamespace>
+    <!-- NativeAOT and trimming compatibility -->
+    <NoWarn>$(NoWarn);RS0024</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+    <IsTrimmable>true</IsTrimmable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <NoWarn>$(NoWarn);RS0024</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>EricksonLopez.DomainPrimitives.Abstractions</PackageId>
+    <Description>Core abstractions for domain primitives: marker interfaces, type declaration attributes, validation attributes, and normalization attributes. Zero dependencies — pure attributes and interfaces only. NativeAOT and trimming compatible.</Description>
+    
+    
+    <PackageTags>ddd;domain-driven-design;domain-primitives;value-objects;strongly-typed-id;clean-architecture</PackageTags>
+    <NoWarn>$(NoWarn);RS0024</NoWarn>
+  </PropertyGroup>
+  <!-- MED-006: DiagnosticSource removed from Abstractions — Diagnostics types moved to Core per TD-009.
+       Abstractions now contains ONLY: attributes, marker interfaces, and PrimitiveError.
+       No transitive dependencies on System.Diagnostics.DiagnosticSource or System.Diagnostics.Metrics. -->
+  <ItemGroup>
+      </ItemGroup>
+    <!-- Removed EricksonLopez.Result dependency -->
+</Project>

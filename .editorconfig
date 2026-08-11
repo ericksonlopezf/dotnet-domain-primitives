@@ -1,0 +1,15 @@
+root = true
+
+[*.cs]
+# Enforce Zero-Allocation Policy on Result types
+dotnet_diagnostic.BANNED_RESULT_TYPE.severity = error
+dotnet_diagnostic.BANNED_RESULT_TYPE.message = "Do not use Result<T> for validation returns. Use bool Try... with out parameter instead to avoid heap allocations."
+dotnet_diagnostic.BANNED_RESULT_TYPE.match = "Result<"
+
+# Enforce general C# rules
+csharp_style_var_when_type_is_apparent = true:error
+csharp_style_var_elsewhere = true:suggestion
+[*.cs]
+dotnet_diagnostic.RS0024.severity = none
+[*.txt]
+dotnet_diagnostic.RS0024.severity = none

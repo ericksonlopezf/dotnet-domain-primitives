@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EricksonLopez.DomainPrimitives.Abstractions/EricksonLopez.DomainPrimitives.Abstractions.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.AspNetCore/EricksonLopez.DomainPrimitives.AspNetCore.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Dapper/EricksonLopez.DomainPrimitives.Dapper.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.EFCore/EricksonLopez.DomainPrimitives.EFCore.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster/EricksonLopez.DomainPrimitives.Mapster.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi/EricksonLopez.DomainPrimitives.OpenApi.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Testing/EricksonLopez.DomainPrimitives.Testing.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.AspNetCore.UnitTests/EricksonLopez.DomainPrimitives.AspNetCore.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Dapper.IntegrationTests/EricksonLopez.DomainPrimitives.Dapper.IntegrationTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.IntegrationTests/EricksonLopez.DomainPrimitives.EFCore.IntegrationTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.UnitTests/EricksonLopez.DomainPrimitives.EFCore.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.Tests/EricksonLopez.DomainPrimitives.Mapster.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Testing.UnitTests/EricksonLopez.DomainPrimitives.Testing.UnitTests.csproj" />
+  </Folder>
+</Solution>

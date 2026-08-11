@@ -1,0 +1,123 @@
+name: Mutation Testing (Stryker)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mutation-level:
+        description: "Stryker mutation level (Basic, Standard, Advanced)"
+        required: false
+        default: "Standard"
+        type: choice
+        options:
+          - Basic
+          - Standard
+          - Advanced
+  schedule:
+    - cron: "0 4 * * 1"
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  mutation-test:
+    name: Stryker Mutation Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore Strong Name key
+        env:
+          SNK_KEY: ${{ secrets.SNK_KEY }}
+        run: |
+          if [ -n "$SNK_KEY" ]; then
+            echo "$SNK_KEY" | tr -d '\n\r ' | base64 --decode > EricksonLopez.snk
+          fi
+
+      - name: Restore dependencies
+        run: dotnet restore EricksonLopez.DomainPrimitives.slnx
+
+      - name: Build (Release)
+        run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
+
+      - name: Install Stryker
+        run: dotnet tool install --global dotnet-stryker
+
+      - name: Run Stryker (Core package)
+        run: >
+          dotnet stryker
+          --project src/dotnet-primitive-core/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj
+          --test-project tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj
+          --mutation-level ${{ inputs.mutation-level || 'Standard' }}
+          --reporter html
+          --reporter json
+          --reporter progress
+          --output StrykerOutput/ci
+        continue-on-error: false
+
+      - name: Upload Stryker report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stryker-report-${{ github.run_id }}
+          path: StrykerOutput/ci/
+          retention-days: 30
+
+      - name: Extract and report mutation score
+        if: always()
+        run: |
+          REPORT=$(find StrykerOutput/ci -name "*.json" -not -name "*.html.json" | head -1)
+          if [ -f "$REPORT" ]; then
+            python3 - "$REPORT" << 'PYEOF'
+          import sys, json
+
+          report_path = sys.argv[1]
+          with open(report_path) as f:
+              data = json.load(f)
+
+          files = data.get('files', {})
+          total  = sum(f.get('mutants', {}).get('total',  0) for f in files.values() if 'mutants' in f)
+          killed = sum(f.get('mutants', {}).get('killed', 0) for f in files.values() if 'mutants' in f)
+          score  = round(killed / total * 100, 1) if total > 0 else 0.0
+
+          HIGH  = 100
+          LOW   = 98
+          BREAK = 95
+
+          if score >= HIGH:
+              status = "✅ HIGH"
+          elif score >= LOW:
+              status = "🟡 LOW"
+          elif score >= BREAK:
+              status = "🟠 WARNING (approaching break threshold)"
+          else:
+              status = "❌ BELOW BREAK THRESHOLD (CI gate failed)"
+
+          summary = f"""
+          ## Stryker Mutation Testing Results
+
+          | Metric | Value |
+          |--------|-------|
+          | Mutation Score | **{score}%** |
+          | Mutants Killed | {killed} / {total} |
+          | Status | {status} |
+          | High Threshold | ≥{HIGH}% |
+          | Low Threshold  | ≥{LOW}% |
+          | Break Threshold| ≥{BREAK}% |
+          """
+          print(summary)
+
+          import os
+          with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/stdout'), 'a') as gh:
+              gh.write(summary)
+          PYEOF
+          else
+            echo "### ⚠️ Stryker report not found — mutation score unavailable" >> "$GITHUB_STEP_SUMMARY"
+          fi
