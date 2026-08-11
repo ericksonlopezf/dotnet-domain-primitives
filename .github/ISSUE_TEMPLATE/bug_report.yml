@@ -1,0 +1,37 @@
+name: 🐛 Bug Report
+description: Create a report to help us fix a bug or generator issue
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please ensure you have searched existing issues before submitting.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps / Code to Reproduce
+      description: Provide the code definition or minimal example that reproduces the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: E.g., .NET SDK version, OS, Package Version
+    validations:
+      required: true

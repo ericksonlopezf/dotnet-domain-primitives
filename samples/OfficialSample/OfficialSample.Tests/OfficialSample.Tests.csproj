@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\01-GettingStarted\01-GettingStarted.csproj" />
+    <ProjectReference Include="..\02-PrimerResult\02-PrimerResult.csproj" />
+    <ProjectReference Include="..\03-Errores\03-Errores.csproj" />
+    <ProjectReference Include="..\04-ValueObjects\04-ValueObjects.csproj" />
+    <ProjectReference Include="..\05-StronglyTypedIds\05-StronglyTypedIds.csproj" />
+    <ProjectReference Include="..\06-EntitiesAndAggregates\06-EntitiesAndAggregates.csproj" />
+    <ProjectReference Include="..\07-DomainEvents\07-DomainEvents.csproj" />
+    <ProjectReference Include="..\08-SerializationAndMapping\08-SerializationAndMapping.csproj" />
+    <ProjectReference Include="..\09-SourceGenerators\09-SourceGenerators.csproj" />
+    <ProjectReference Include="..\10-Analyzers\10-Analyzers.csproj" />
+    <ProjectReference Include="..\11-SmartEnums\11-SmartEnums.csproj" />
+    <ProjectReference Include="..\12-Specifications\12-Specifications.csproj" />
+    <ProjectReference Include="..\13-DomainCollections\13-DomainCollections.csproj" />
+    <ProjectReference Include="..\14-Performance\14-Performance.csproj" />
+    <ProjectReference Include="..\15-AspNetCoreIntegration\15-AspNetCoreIntegration.csproj" />
+    <ProjectReference Include="..\16-EFCoreIntegration\16-EFCoreIntegration.csproj" />
+    <ProjectReference Include="..\17-MediatRIntegration\17-MediatRIntegration.csproj" />
+    <ProjectReference Include="..\18-Observability\18-Observability.csproj" />
+    <ProjectReference Include="..\19-UnitTesting\19-UnitTesting.csproj" />
+    <ProjectReference Include="..\20-EndToEndApplication\20-EndToEndApplication.csproj" />
+  </ItemGroup>
+
+</Project>
+

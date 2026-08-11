@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives.Abstractions\EricksonLopez.DomainPrimitives.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives\EricksonLopez.DomainPrimitives.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="AutoFixture.Xunit2" />
+    <PackageReference Update="xunit" VersionOverride="2.9.0" />
+    <PackageReference Update="xunit.runner.visualstudio" VersionOverride="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FsCheck.Xunit" />
+  </ItemGroup>
+</Project>

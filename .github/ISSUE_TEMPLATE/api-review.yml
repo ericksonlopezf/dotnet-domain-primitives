@@ -1,0 +1,42 @@
+name: API Review
+description: Propose a new addition to the public API
+title: "[API-REVIEW] "
+labels: ["api-review", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "Thank you for proposing a new API for DomainPrimitives!"
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation and Context
+      description: Why is this API necessary? What use cases does it unlock?
+    validations:
+      required: true
+  - type: textarea
+    id: api-proposal
+    attributes:
+      label: API Proposal
+      description: Provide the exact signature of the proposed API.
+      render: csharp
+    validations:
+      required: true
+  - type: textarea
+    id: usage-example
+    attributes:
+      label: Usage Example
+      description: Show how a consumer would use the new API.
+      render: csharp
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: API Review Checklist
+      options:
+        - label: I have verified this does not introduce any heap allocations on hot paths.
+          required: true
+        - label: This API adheres to the 15-year forward compatibility horizon.
+          required: true
+        - label: This API is consistent with .NET BCL naming conventions.
+          required: true

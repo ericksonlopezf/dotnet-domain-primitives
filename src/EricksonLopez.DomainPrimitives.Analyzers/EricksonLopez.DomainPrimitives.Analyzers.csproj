@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PublishAot>false</PublishAot>
+    <AssemblyName>EricksonLopez.DomainPrimitives.Analyzers</AssemblyName>
+    <RootNamespace>EricksonLopez.DomainPrimitives.Analyzers</RootNamespace>
+    <LangVersion>latest</LangVersion>
+
+    <!-- Analyzer requirements -->
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    
+    <PackageId>EricksonLopez.DomainPrimitives.Analyzers</PackageId>
+    <Description>Roslyn Analyzers and Code Fixes for EricksonLopez.DomainPrimitives. Detects misuse at compile time: public constructors, bypassed validation, conflicting attributes, missing partial keywords, and more.</Description>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+
+    <!-- Suppress nullable warnings for netstandard2.0 -->
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS8600;CS8602;CS8603;CS8604;CS8618;CS8625;RS1038;RS2007</NoWarn>
+    <PackageTags>$(PackageTags);analyzers;roslyn</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+      </ItemGroup>
+
+</Project>
+
+
+
+

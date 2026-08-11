@@ -1,0 +1,91 @@
+<Solution>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  src — All publishable packages                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <Folder Name="/src/">
+
+    <!-- Core -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.Abstractions/EricksonLopez.DomainPrimitives.Abstractions.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Generators/EricksonLopez.DomainPrimitives.Generators.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Analyzers/EricksonLopez.DomainPrimitives.Analyzers.csproj" />
+
+
+
+    <!-- ASP.NET Core -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.AspNetCore/EricksonLopez.DomainPrimitives.AspNetCore.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.csproj" />
+
+    <!-- EF Core -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.EFCore/EricksonLopez.DomainPrimitives.EFCore.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.csproj" />
+
+    <!-- Dapper -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.Dapper/EricksonLopez.DomainPrimitives.Dapper.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.csproj" />
+
+    <!-- OpenAPI -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi/EricksonLopez.DomainPrimitives.OpenApi.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.csproj" />
+
+
+    <!-- Mapster -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster/EricksonLopez.DomainPrimitives.Mapster.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.csproj" />
+
+    <!-- Testing -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.Testing/EricksonLopez.DomainPrimitives.Testing.csproj" />
+
+  </Folder>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  tests — Test suites                                -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <Folder Name="/tests/">
+
+    <!-- Core -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.SourceGenerators.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Analyzers.Tests/EricksonLopez.DomainPrimitives.Analyzers.Tests.csproj" />
+
+    <!-- ASP.NET Core -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.AspNetCore.UnitTests/EricksonLopez.DomainPrimitives.AspNetCore.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.Tests.csproj" />
+
+    <!-- EF Core -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.UnitTests/EricksonLopez.DomainPrimitives.EFCore.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.IntegrationTests/EricksonLopez.DomainPrimitives.EFCore.IntegrationTests.csproj" />
+
+    <!-- Dapper -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Dapper.IntegrationTests/EricksonLopez.DomainPrimitives.Dapper.IntegrationTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.Tests.csproj" />
+
+    <!-- OpenAPI -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.OpenApi.Tests/EricksonLopez.DomainPrimitives.OpenApi.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.Tests.csproj" />
+
+
+
+    <!-- Mapster -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.Tests/EricksonLopez.DomainPrimitives.Mapster.Tests.csproj" />
+
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.Tests.csproj" />
+
+    <!-- Testing utilities -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.Testing.UnitTests/EricksonLopez.DomainPrimitives.Testing.UnitTests.csproj" />
+
+  </Folder>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!--  benchmarks                                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/EricksonLopez.DomainPrimitives.Benchmarks/EricksonLopez.DomainPrimitives.Benchmarks.csproj" />
+  </Folder>
+
+</Solution>
+
+

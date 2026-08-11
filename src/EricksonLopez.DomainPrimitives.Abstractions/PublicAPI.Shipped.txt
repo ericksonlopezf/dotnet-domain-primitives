@@ -1,0 +1,455 @@
+#nullable enable
+AddError
+Addition
+Additive
+AgeAttribute
+All
+AllowedSchemes.get
+AllowedSchemes.init
+AllowWeekends.get
+AllowWeekends.init
+ArithmeticPolicy
+AspNetCoreAttribute
+BirthDateAttribute
+Build
+BuildResult
+BusinessDateAttribute
+implicit constructor for "AgeAttribute"
+implicit constructor for "AspNetCoreAttribute"
+implicit constructor for "BirthDateAttribute"
+implicit constructor for "BusinessDateAttribute"
+implicit constructor for "CountryCodeAttribute"
+implicit constructor for "CurrencyCodeAttribute"
+implicit constructor for "CustomValidatorAttribute<TValidator>"
+implicit constructor for "DapperAttribute"
+implicit constructor for "DatePrimitiveAttribute"
+implicit constructor for "DateRangeAttribute"
+implicit constructor for "DiscountAttribute"
+implicit constructor for "DistanceAttribute"
+implicit constructor for "EFCoreAttribute"
+implicit constructor for "EmailAttribute"
+implicit constructor for "ExpirationDateAttribute"
+implicit constructor for "FiscalYearAttribute"
+implicit constructor for "FluentValidationAttribute"
+implicit constructor for "HeightAttribute"
+implicit constructor for "HexColorAttribute"
+implicit constructor for "IBANAttribute"
+implicit constructor for "IPAddressAttribute"
+implicit constructor for "ISBNAttribute"
+implicit constructor for "JsonAttribute"
+implicit constructor for "LanguageCodeAttribute"
+implicit constructor for "LatitudeAttribute"
+implicit constructor for "LongitudeAttribute"
+implicit constructor for "LowerCaseAttribute"
+implicit constructor for "MacAddressAttribute"
+implicit constructor for "MapsterAttribute"
+implicit constructor for "MonthAttribute"
+implicit constructor for "NormalizeAttribute<TNormalizer>"
+implicit constructor for "NormalizeWhitespaceAttribute"
+implicit constructor for "NotEmptyAttribute"
+implicit constructor for "NumericPrimitiveAttribute<TValue>"
+implicit constructor for "OpenApiAttribute"
+implicit constructor for "PasswordHashAttribute"
+implicit constructor for "PercentageAttribute"
+implicit constructor for "PhoneAttribute"
+implicit constructor for "PriceAttribute"
+implicit constructor for "PrimitiveBuilder<TPrimitive, TValue>"
+implicit constructor for "QuantityAttribute"
+implicit constructor for "QuarterAttribute"
+implicit constructor for "RatingAttribute"
+implicit constructor for "ScoreAttribute"
+implicit constructor for "SlugAttribute"
+implicit constructor for "SmartEnumAttribute<TValue>"
+CountryCodeAttribute
+Create
+Currency.get
+Currency.init
+CurrencyCodeAttribute
+CustomValidatorAttribute<TValidator>
+DapperAttribute
+DateOnly
+DatePrimitiveAttribute
+DatePrimitiveKind
+DateRangeAttribute
+DateTime
+DateTimeOffset
+
+DiscountAttribute
+DistanceAttribute
+DomainPrimitiveEventSource
+DomainPrimitiveException
+DomainPrimitivesDiagnostics
+DomainPrimitivesMetrics
+DomainRangeAttribute
+EFCoreAttribute
+EmailAttribute
+Empty.get
+EricksonLopez.DomainPrimitives.AgeAttribute
+EricksonLopez.DomainPrimitives.AgeAttribute.AgeAttribute() -> void
+EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.Addition = 1 -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.Additive = EricksonLopez.DomainPrimitives.ArithmeticPolicy.Negation | EricksonLopez.DomainPrimitives.ArithmeticPolicy.Subtraction | EricksonLopez.DomainPrimitives.ArithmeticPolicy.Addition -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.All = EricksonLopez.DomainPrimitives.ArithmeticPolicy.Multiplicative | EricksonLopez.DomainPrimitives.ArithmeticPolicy.Additive -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.Multiplicative = EricksonLopez.DomainPrimitives.ArithmeticPolicy.ScalarMultiplication | EricksonLopez.DomainPrimitives.ArithmeticPolicy.ScalarDivision -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.Negation = 16 -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.None = 0 -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.ScalarDivision = 8 -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.ScalarMultiplication = 4 -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.ArithmeticPolicy.Subtraction = 2 -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.AspNetCoreAttribute
+EricksonLopez.DomainPrimitives.AspNetCoreAttribute.AspNetCoreAttribute() -> void
+EricksonLopez.DomainPrimitives.BirthDateAttribute
+EricksonLopez.DomainPrimitives.BirthDateAttribute.BirthDateAttribute() -> void
+EricksonLopez.DomainPrimitives.BirthDateAttribute.MaxAge.get -> int
+EricksonLopez.DomainPrimitives.BirthDateAttribute.MaxAge.init -> void
+EricksonLopez.DomainPrimitives.BusinessDateAttribute
+EricksonLopez.DomainPrimitives.BusinessDateAttribute.AllowWeekends.get -> bool
+EricksonLopez.DomainPrimitives.BusinessDateAttribute.AllowWeekends.init -> void
+EricksonLopez.DomainPrimitives.BusinessDateAttribute.BusinessDateAttribute() -> void
+EricksonLopez.DomainPrimitives.CountryCodeAttribute
+EricksonLopez.DomainPrimitives.CountryCodeAttribute.CountryCodeAttribute() -> void
+EricksonLopez.DomainPrimitives.CurrencyCodeAttribute
+EricksonLopez.DomainPrimitives.CurrencyCodeAttribute.CurrencyCodeAttribute() -> void
+EricksonLopez.DomainPrimitives.DapperAttribute
+EricksonLopez.DomainPrimitives.DapperAttribute.DapperAttribute() -> void
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.DatePrimitiveAttribute() -> void
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.FutureOnly.get -> bool
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.FutureOnly.init -> void
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.Kind.get -> EricksonLopez.DomainPrimitives.DatePrimitiveKind
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.Kind.init -> void
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.PastOnly.get -> bool
+EricksonLopez.DomainPrimitives.DatePrimitiveAttribute.PastOnly.init -> void
+EricksonLopez.DomainPrimitives.DatePrimitiveKind
+EricksonLopez.DomainPrimitives.DatePrimitiveKind.DateOnly = 0 -> EricksonLopez.DomainPrimitives.DatePrimitiveKind
+EricksonLopez.DomainPrimitives.DatePrimitiveKind.DateTime = 1 -> EricksonLopez.DomainPrimitives.DatePrimitiveKind
+EricksonLopez.DomainPrimitives.DatePrimitiveKind.DateTimeOffset = 2 -> EricksonLopez.DomainPrimitives.DatePrimitiveKind
+EricksonLopez.DomainPrimitives.DateRangeAttribute
+EricksonLopez.DomainPrimitives.DateRangeAttribute.DateRangeAttribute() -> void
+EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitiveEventSource
+EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesDiagnostics
+EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetrics
+EricksonLopez.DomainPrimitives.DiscountAttribute
+EricksonLopez.DomainPrimitives.DiscountAttribute.DiscountAttribute() -> void
+EricksonLopez.DomainPrimitives.DiscountAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.DiscountAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.DistanceAttribute
+EricksonLopez.DomainPrimitives.DistanceAttribute.DistanceAttribute() -> void
+EricksonLopez.DomainPrimitives.DistanceAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.DistanceAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.DomainPrimitiveException
+EricksonLopez.DomainPrimitives.DomainPrimitiveException.DomainPrimitiveException() -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveException.DomainPrimitiveException(string! message) -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveException.DomainPrimitiveException(string! message, System.Exception! innerException) -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveException.DomainPrimitiveException(string! primitiveName, string! message) -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveException.DomainPrimitiveException(string! primitiveName, string! message, System.Exception! innerException) -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveException.PrimitiveName.get -> string!
+EricksonLopez.DomainPrimitives.DomainRangeAttribute
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.DomainRangeAttribute(double min, double max) -> void
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.DomainRangeAttribute(string! stringMin, string! stringMax) -> void
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.MaxExclusive.get -> bool
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.MaxExclusive.init -> void
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.MinExclusive.get -> bool
+EricksonLopez.DomainPrimitives.DomainRangeAttribute.MinExclusive.init -> void
+EricksonLopez.DomainPrimitives.EFCoreAttribute
+EricksonLopez.DomainPrimitives.EFCoreAttribute.EFCoreAttribute() -> void
+EricksonLopez.DomainPrimitives.EmailAttribute
+EricksonLopez.DomainPrimitives.EmailAttribute.EmailAttribute() -> void
+EricksonLopez.DomainPrimitives.EmailAttribute.MaxLength.get -> int
+EricksonLopez.DomainPrimitives.EmailAttribute.MaxLength.init -> void
+EricksonLopez.DomainPrimitives.ExpirationDateAttribute
+EricksonLopez.DomainPrimitives.ExpirationDateAttribute.ExpirationDateAttribute() -> void
+EricksonLopez.DomainPrimitives.FiscalYearAttribute
+EricksonLopez.DomainPrimitives.FiscalYearAttribute.FiscalYearAttribute() -> void
+EricksonLopez.DomainPrimitives.FiscalYearAttribute.MinYear.get -> int
+EricksonLopez.DomainPrimitives.FiscalYearAttribute.MinYear.init -> void
+EricksonLopez.DomainPrimitives.FluentValidationAttribute
+EricksonLopez.DomainPrimitives.FluentValidationAttribute.FluentValidationAttribute() -> void
+EricksonLopez.DomainPrimitives.HeightAttribute
+EricksonLopez.DomainPrimitives.HeightAttribute.HeightAttribute() -> void
+EricksonLopez.DomainPrimitives.HeightAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.HeightAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.HexColorAttribute
+EricksonLopez.DomainPrimitives.HexColorAttribute.HexColorAttribute() -> void
+EricksonLopez.DomainPrimitives.IBANAttribute
+EricksonLopez.DomainPrimitives.IBANAttribute.IBANAttribute() -> void
+EricksonLopez.DomainPrimitives.IDomainPrimitive<TSelf, TValue>
+EricksonLopez.DomainPrimitives.IDomainPrimitive<TSelf, TValue>.Create(TValue value) -> TSelf
+EricksonLopez.DomainPrimitives.IDomainPrimitive<TSelf>
+EricksonLopez.DomainPrimitives.IDomainPrimitive<TSelf>.IsDefault.get -> bool
+EricksonLopez.DomainPrimitives.IDomainPrimitive<TSelf>.PrimitiveName.get -> string!
+EricksonLopez.DomainPrimitives.INormalizer<T>
+EricksonLopez.DomainPrimitives.INormalizer<T>.Normalize(T value) -> T
+EricksonLopez.DomainPrimitives.IPAddressAttribute
+EricksonLopez.DomainPrimitives.IPAddressAttribute.IPAddressAttribute() -> void
+EricksonLopez.DomainPrimitives.ISBNAttribute
+EricksonLopez.DomainPrimitives.ISBNAttribute.ISBNAttribute() -> void
+EricksonLopez.DomainPrimitives.IStrongId<TSelf, TValue>
+EricksonLopez.DomainPrimitives.IStrongId<TSelf, TValue>.Create() -> TSelf
+EricksonLopez.DomainPrimitives.IStrongId<TSelf, TValue>.Empty.get -> TSelf
+EricksonLopez.DomainPrimitives.JsonAttribute
+EricksonLopez.DomainPrimitives.JsonAttribute.JsonAttribute() -> void
+EricksonLopez.DomainPrimitives.LanguageCodeAttribute
+EricksonLopez.DomainPrimitives.LanguageCodeAttribute.LanguageCodeAttribute() -> void
+EricksonLopez.DomainPrimitives.LatitudeAttribute
+EricksonLopez.DomainPrimitives.LatitudeAttribute.LatitudeAttribute() -> void
+EricksonLopez.DomainPrimitives.LengthAttribute
+EricksonLopez.DomainPrimitives.LengthAttribute.LengthAttribute(int min, int max) -> void
+EricksonLopez.DomainPrimitives.LengthAttribute.Max.get -> int
+EricksonLopez.DomainPrimitives.LengthAttribute.Min.get -> int
+EricksonLopez.DomainPrimitives.LongitudeAttribute
+EricksonLopez.DomainPrimitives.LongitudeAttribute.LongitudeAttribute() -> void
+EricksonLopez.DomainPrimitives.MacAddressAttribute
+EricksonLopez.DomainPrimitives.MacAddressAttribute.MacAddressAttribute() -> void
+EricksonLopez.DomainPrimitives.MapsterAttribute
+EricksonLopez.DomainPrimitives.MapsterAttribute.MapsterAttribute() -> void
+EricksonLopez.DomainPrimitives.MaxLengthAttribute
+EricksonLopez.DomainPrimitives.MaxLengthAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.MaxLengthAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.MaxLengthAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.MaxLengthAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.MaxLengthAttribute.Length.get -> int
+EricksonLopez.DomainPrimitives.MaxLengthAttribute.MaxLengthAttribute(int length) -> void
+EricksonLopez.DomainPrimitives.MinLengthAttribute
+EricksonLopez.DomainPrimitives.MinLengthAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.MinLengthAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.MinLengthAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.MinLengthAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.MinLengthAttribute.Length.get -> int
+EricksonLopez.DomainPrimitives.MinLengthAttribute.MinLengthAttribute(int length) -> void
+EricksonLopez.DomainPrimitives.MoneyAttribute
+EricksonLopez.DomainPrimitives.MoneyAttribute.Currency.get -> string!
+EricksonLopez.DomainPrimitives.MoneyAttribute.Currency.init -> void
+EricksonLopez.DomainPrimitives.MoneyAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.MoneyAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.MoneyAttribute.MoneyAttribute() -> void
+EricksonLopez.DomainPrimitives.MoneyAttribute.MoneyAttribute(string! currency) -> void
+EricksonLopez.DomainPrimitives.MoneyAttribute.MoneyAttribute(string! currency, double min, double max = 1.7976931348623157E+308) -> void
+EricksonLopez.DomainPrimitives.MonthAttribute
+EricksonLopez.DomainPrimitives.MonthAttribute.MonthAttribute() -> void
+EricksonLopez.DomainPrimitives.Normalization.LowerCaseAttribute
+EricksonLopez.DomainPrimitives.Normalization.LowerCaseAttribute.LowerCaseAttribute() -> void
+EricksonLopez.DomainPrimitives.Normalization.NormalizeWhitespaceAttribute
+EricksonLopez.DomainPrimitives.Normalization.NormalizeWhitespaceAttribute.NormalizeWhitespaceAttribute() -> void
+EricksonLopez.DomainPrimitives.NormalizeAttribute<TNormalizer>
+EricksonLopez.DomainPrimitives.NormalizeAttribute<TNormalizer>.NormalizeAttribute() -> void
+EricksonLopez.DomainPrimitives.NotEmptyAttribute
+EricksonLopez.DomainPrimitives.NotEmptyAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.NotEmptyAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.NotEmptyAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.NotEmptyAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.NotEmptyAttribute.NotEmptyAttribute() -> void
+EricksonLopez.DomainPrimitives.NumericPrimitiveAttribute<TValue>.Operations.get -> EricksonLopez.DomainPrimitives.NumericOperations
+EricksonLopez.DomainPrimitives.NumericPrimitiveAttribute<TValue>.Operations.init -> void
+EricksonLopez.DomainPrimitives.NumericPrimitiveAttribute<TValue>.Policy.get -> EricksonLopez.DomainPrimitives.ArithmeticPolicy
+EricksonLopez.DomainPrimitives.NumericPrimitiveAttribute<TValue>.Policy.init -> void
+EricksonLopez.DomainPrimitives.OpenApiAttribute
+EricksonLopez.DomainPrimitives.OpenApiAttribute.OpenApiAttribute() -> void
+EricksonLopez.DomainPrimitives.PasswordHashAttribute
+EricksonLopez.DomainPrimitives.PasswordHashAttribute.PasswordHashAttribute() -> void
+EricksonLopez.DomainPrimitives.PercentageAttribute
+EricksonLopez.DomainPrimitives.PercentageAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.PercentageAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.PercentageAttribute.PercentageAttribute() -> void
+EricksonLopez.DomainPrimitives.PhoneAttribute
+EricksonLopez.DomainPrimitives.PhoneAttribute.PhoneAttribute() -> void
+EricksonLopez.DomainPrimitives.PriceAttribute
+EricksonLopez.DomainPrimitives.PriceAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.PriceAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.PriceAttribute.PriceAttribute() -> void
+EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>
+EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>.Build(out TPrimitive result) -> bool
+EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>.BuildOrThrow() -> TPrimitive
+EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>.BuildResult() -> object!
+EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>.Must(System.Func<TValue, bool>! predicate, string! errorCode, string! errorMessage) -> EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>!
+EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>.PrimitiveBuilder() -> void
+EricksonLopez.DomainPrimitives.PrimitiveCollectionExtensions
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.MaxExclusive.get -> bool
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.MaxExclusive.init -> void
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.MinExclusive.get -> bool
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.MinExclusive.init -> void
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.PrimitiveRangeAttribute(double min, double max) -> void
+EricksonLopez.DomainPrimitives.PrimitiveRangeAttribute.PrimitiveRangeAttribute(string! stringMin, string! stringMax) -> void
+EricksonLopez.DomainPrimitives.QuantityAttribute
+EricksonLopez.DomainPrimitives.QuantityAttribute.Max.get -> int
+EricksonLopez.DomainPrimitives.QuantityAttribute.Min.get -> int
+EricksonLopez.DomainPrimitives.QuantityAttribute.QuantityAttribute() -> void
+EricksonLopez.DomainPrimitives.QuarterAttribute
+EricksonLopez.DomainPrimitives.QuarterAttribute.QuarterAttribute() -> void
+EricksonLopez.DomainPrimitives.RangeAttribute
+EricksonLopez.DomainPrimitives.RangeAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.RangeAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.RangeAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.RangeAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.RangeAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.RangeAttribute.MaxExclusive.get -> bool
+EricksonLopez.DomainPrimitives.RangeAttribute.MaxExclusive.init -> void
+EricksonLopez.DomainPrimitives.RangeAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.RangeAttribute.MinExclusive.get -> bool
+EricksonLopez.DomainPrimitives.RangeAttribute.MinExclusive.init -> void
+EricksonLopez.DomainPrimitives.RangeAttribute.RangeAttribute(double min, double max) -> void
+EricksonLopez.DomainPrimitives.RangeAttribute.RangeAttribute(string! stringMin, string! stringMax) -> void
+EricksonLopez.DomainPrimitives.RatingAttribute
+EricksonLopez.DomainPrimitives.RatingAttribute.Max.get -> double
+EricksonLopez.DomainPrimitives.RatingAttribute.Min.get -> double
+EricksonLopez.DomainPrimitives.RatingAttribute.RatingAttribute() -> void
+EricksonLopez.DomainPrimitives.RatingAttribute.Scale.get -> int
+EricksonLopez.DomainPrimitives.RatingAttribute.Scale.init -> void
+EricksonLopez.DomainPrimitives.RegexAttribute
+EricksonLopez.DomainPrimitives.RegexAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.RegexAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.RegexAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.RegexAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.RegexAttribute.Pattern.get -> string!
+EricksonLopez.DomainPrimitives.RegexAttribute.RegexAttribute(string! pattern) -> void
+EricksonLopez.DomainPrimitives.ScoreAttribute
+EricksonLopez.DomainPrimitives.ScoreAttribute.Max.get -> int
+EricksonLopez.DomainPrimitives.ScoreAttribute.Min.get -> int
+EricksonLopez.DomainPrimitives.ScoreAttribute.ScoreAttribute() -> void
+EricksonLopez.DomainPrimitives.SlugAttribute
+EricksonLopez.DomainPrimitives.SlugAttribute.MaxLength.get -> int
+EricksonLopez.DomainPrimitives.SlugAttribute.MaxLength.init -> void
+EricksonLopez.DomainPrimitives.SlugAttribute.SlugAttribute() -> void
+EricksonLopez.DomainPrimitives.SmartEnumAttribute<TValue>
+EricksonLopez.DomainPrimitives.SmartEnumAttribute<TValue>.SmartEnumAttribute() -> void
+EricksonLopez.DomainPrimitives.Validation.CustomValidatorAttribute<TValidator>
+EricksonLopez.DomainPrimitives.Validation.CustomValidatorAttribute<TValidator>.CustomValidatorAttribute() -> void
+EricksonLopez.DomainPrimitives.Validation.ICustomValidator<T>
+ErrorCode.get
+ErrorCode.set
+ErrorMessage.get
+ErrorMessage.set
+Errors.get
+ExpirationDateAttribute
+FiscalYearAttribute
+FluentValidationAttribute
+For
+FutureOnly.get
+FutureOnly.init
+HasErrors.get
+HeightAttribute
+HexColorAttribute
+IBANAttribute
+ICustomValidator<T>
+IDomainPrimitive<TSelf, TValue>
+IDomainPrimitive<TSelf>
+INormalizer<T>
+IPAddressAttribute
+ISBNAttribute
+IsDefault.get
+IsEnabled.get
+IsEnabled.set
+IsoWeekNumbering.get
+IsoWeekNumbering.init
+IStrongId<TSelf, TValue>
+JsonAttribute
+Kind.get
+Kind.init
+LanguageCodeAttribute
+LatitudeAttribute
+Length.get
+LengthAttribute
+ListenerName
+LongitudeAttribute
+LowerCaseAttribute
+MacAddressAttribute
+MapsterAttribute
+Max.get
+MaxAge.get
+MaxAge.init
+MaxExclusive.get
+MaxExclusive.init
+MaxLength.get
+MaxLength.init
+MaxLengthAttribute
+Meter
+MeterName
+Min.get
+MinExclusive.get
+MinExclusive.init
+MinLength.get
+MinLength.init
+MinLengthAttribute
+MinYear.get
+MinYear.init
+MoneyAttribute
+MonthAttribute
+Multiplicative
+Must
+Negation
+New
+None
+Normalize
+NormalizeAttribute<TNormalizer>
+NormalizeWhitespaceAttribute
+NotEmptyAttribute
+NumericPrimitiveAttribute<TValue>
+OnValidationFailed
+OpenApiAttribute
+PasswordHashAttribute
+PastOnly.get
+PastOnly.init
+Pattern.get
+PercentageAttribute
+PhoneAttribute
+Policy.get
+Policy.init
+PriceAttribute
+PrimitiveBuilder<TPrimitive, TValue>
+PrimitiveCollectionExtensions
+PrimitiveName.get
+PrimitiveRangeAttribute
+QuantityAttribute
+QuarterAttribute
+RangeAttribute
+RatingAttribute
+RecordCreation
+RecordValidationFailure
+RegexAttribute
+RejectEmpty.get
+RejectEmpty.set
+ScalarDivision
+ScalarMultiplication
+Scale.get
+Scale.init
+ScoreAttribute
+SlugAttribute
+SmartEnumAttribute<TValue>
+static EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetrics.IsEnabled.get -> bool
+static EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetrics.IsEnabled.set -> void
+static EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetrics.RecordCreation(string! primitiveName) -> void
+static EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetrics.RecordValidationFailure(string! primitiveName, string! errorType, string! errorMessage) -> void
+static EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>.For() -> EricksonLopez.DomainPrimitives.PrimitiveBuilder<TPrimitive, TValue>!
+static readonly EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesDiagnostics.ListenerName -> string!
+static readonly EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesDiagnostics.Meter -> System.Diagnostics.Metrics.Meter!
+static readonly EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetrics.MeterName -> string!
+#nullable enable
+EricksonLopez.DomainPrimitives.DomainPrimitiveFormatException
+EricksonLopez.DomainPrimitives.DomainPrimitiveFormatException.DomainPrimitiveFormatException(string! primitiveName, string! message) -> void
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.Build(out TPrimitive result) -> bool
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.BuildOrThrow() -> TPrimitive
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.BuildResult() -> object!
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.For() -> EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>!
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.Must(System.Func<TValue, bool>! predicate, string! errorCode, string! errorMessage) -> EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>!
+EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.WithValue(TValue value) -> EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>!
+EricksonLopez.DomainPrimitives.LengthAttribute.ErrorCode.get -> string?
+EricksonLopez.DomainPrimitives.LengthAttribute.ErrorCode.set -> void
+EricksonLopez.DomainPrimitives.LengthAttribute.ErrorMessage.get -> string?
+EricksonLopez.DomainPrimitives.LengthAttribute.ErrorMessage.set -> void
+EricksonLopez.DomainPrimitives.NumericPrimitiveAttribute<TValue>.NumericPrimitiveAttribute() -> void
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError.Create(string! code, string! message) -> EricksonLopez.DomainPrimitives.Validation.PrimitiveError
+

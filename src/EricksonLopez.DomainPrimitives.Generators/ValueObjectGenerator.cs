@@ -1,0 +1,395 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Immutable;
+using EricksonLopez.DomainPrimitives.Generators.Models;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace EricksonLopez.DomainPrimitives.Generators;
+
+/// <summary>
+/// Source generator that augments partial record structs decorated with <c>[ValueObject]</c>.
+/// Generates validation factory methods (<c>Create</c>, <c>TryCreate</c>), BCL interface
+/// implementations (<c>IFormattable</c>, <c>ISpanFormattable</c>), and
+/// infrastructure (<c>JsonConverter</c>, <c>TypeConverter</c>).
+/// </summary>
+[Generator(LanguageNames.CSharp)]
+internal sealed class ValueObjectGenerator : IIncrementalGenerator
+{
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        // TD-014: ForAttributeWithMetadataName for [ValueObject] — single trigger.
+        var valueObjects = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                EricksonLopez.DomainPrimitives.Generators.Shared.GeneratorShared.ValueObjectFqn,
+                predicate: static (node, ct) => EricksonLopez.DomainPrimitives.Generators.Shared.GeneratorShared.IsReadonlyRecordStruct(node, ct),
+                transform: static (ctx, ct) => ExtractTypeInfo(ctx.SemanticModel, (RecordDeclarationSyntax)ctx.TargetNode, ct))
+            .Where(static info => info is not null)
+            .Select(static (info, _) => info!);
+
+        context.RegisterSourceOutput(valueObjects, static (spc, info) =>
+        {
+            var source = GenerateValueObject(info);
+            spc.AddSource($"{info.TypeName}.g.cs", source);
+        });
+    }
+
+    private static ValueObjectTypeInfo? ExtractTypeInfo(
+        GeneratorSyntaxContext context,
+        CancellationToken ct)
+        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
+
+    private static ValueObjectTypeInfo? ExtractTypeInfo(
+        SemanticModel semanticModel,
+        RecordDeclarationSyntax recordSyntax,
+        CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+
+        var typeSymbol = semanticModel.GetDeclaredSymbol(recordSyntax, ct) as INamedTypeSymbol;
+        if (typeSymbol is null)
+            return null;
+
+        var attributes = typeSymbol.GetAttributes();
+        bool hasValueObject = false;
+
+        foreach (var attr in attributes)
+        {
+            if (attr.AttributeClass?.Name == "ValueObjectAttribute")
+            {
+                hasValueObject = true;
+                break;
+            }
+        }
+
+        if (!hasValueObject)
+            return null;
+
+        var properties = ImmutableArray.CreateBuilder<ValueObjectPropertyInfo>();
+
+        foreach (var member in typeSymbol.GetMembers())
+        {
+            if (member is IPropertySymbol propSymbol &&
+                !propSymbol.IsStatic &&
+                propSymbol.DeclaredAccessibility == Accessibility.Public)
+            {
+                var name = propSymbol.Name;
+                var camelCase = char.ToLowerInvariant(name[0]) + name.Substring(1);
+                properties.Add(new ValueObjectPropertyInfo(
+                    Name: name,
+                    TypeName: propSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    CamelCaseName: camelCase));
+            }
+        }
+
+        // Extract containing types for nested type support
+        var containingType = typeSymbol.ContainingType;
+        var containingList = ImmutableArray.CreateBuilder<string>();
+        while (containingType is not null)
+        {
+            containingList.Insert(0, containingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+            containingType = containingType.ContainingType;
+        }
+
+        return new ValueObjectTypeInfo(
+            Namespace: typeSymbol.ContainingNamespace.ToDisplayString(),
+            TypeName: typeSymbol.Name,
+            Accessibility: typeSymbol.DeclaredAccessibility switch
+            {
+                Accessibility.Public => "public",
+                Accessibility.Internal => "internal",
+                Accessibility.Protected => "protected",
+                Accessibility.Private => "private",
+                Accessibility.ProtectedOrInternal => "protected internal",
+                Accessibility.ProtectedAndInternal => "private protected",
+                _ => "public"
+            },
+            ContainingTypes: new EquatableArray<string>(containingList.ToImmutable()),
+            Properties: new EquatableArray<ValueObjectPropertyInfo>(properties.ToImmutable()));
+    }
+
+    private static string GenerateValueObject(ValueObjectTypeInfo info)
+    {
+        var sb = new SourceBuilder();
+
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("// Tool: EricksonLopez.DomainPrimitives.Generators");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.ComponentModel;");
+        sb.AppendLine("using System.Runtime.CompilerServices;");
+        sb.AppendLine("using EricksonLopez.DomainPrimitives;");
+        sb.AppendLine("using EricksonLopez.DomainPrimitives.Validation;");
+        sb.AppendLine();
+
+        sb.AppendLine($"namespace {info.Namespace};");
+        sb.AppendLine();
+
+        // Build the IsDefault expression
+        var isDefaultExpr = info.Properties.Length == 0
+            ? "true"
+            : string.Join(" && ", info.Properties.Values.Select(p => $"{p.Name} == default"));
+
+        // Type declaration with attributes
+        sb.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+        sb.AppendLine($"[global::System.Text.Json.Serialization.JsonConverter(typeof({info.TypeName}JsonConverter))]");
+        sb.AppendLine($"[global::System.ComponentModel.TypeConverter(typeof({info.TypeName}TypeConverter))]");
+        sb.AppendLine($"[global::System.Diagnostics.DebuggerDisplay(\"{{{info.TypeName}}}({{IsDefault ? \\\"<default>\\\" : ToString()}})\")]");
+        sb.AppendLine("[global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Auto)]");
+        sb.AppendLine($"{info.Accessibility} readonly partial record struct {info.TypeName} :");
+        sb.IncreaseIndent();
+        sb.AppendLine($"IDomainPrimitive<{info.TypeName}>,");
+        sb.AppendLine("IFormattable,");
+        sb.AppendLine($"ISpanFormattable,");
+        sb.AppendLine($"System.Numerics.IEqualityOperators<{info.TypeName}, {info.TypeName}, bool>");
+        sb.DecreaseIndent();
+        sb.OpenBrace();
+
+        // ── IsDefault ──────────────────────────────────────────────────────────
+        sb.AppendLine("/// <summary>Returns true if this instance was created via default(T) rather than via Create().</summary>");
+        sb.AppendLine($"public bool IsDefault => {isDefaultExpr};");
+        sb.AppendLine();
+
+        // ── PrimitiveName ──────────────────────────────────────────────────────
+        sb.AppendLine("#if NET7_0_OR_GREATER");
+        sb.AppendLine("/// <inheritdoc/>");
+        sb.AppendLine($"public static string PrimitiveName => \"{info.TypeName}\";");
+        sb.AppendLine("#endif");
+        sb.AppendLine();
+
+        // ── Error Constants ────────────────────────────────────────────────────
+        sb.AppendLine("/// <summary>Canonical error codes for this value object.</summary>");
+        sb.AppendLine("public static class Errors");
+        sb.OpenBrace();
+        sb.AppendLine("/// <summary>Error code for null input.</summary>");
+        sb.AppendLine("public const string NullInput = \"NULL_INPUT\";");
+        sb.AppendLine("/// <summary>Error code for invariant violation (cross-property validation failure).</summary>");
+        sb.AppendLine("public const string Invariant = \"INVARIANT\";");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // ── Validation hook ────────────────────────────────────────────────────
+        GenerateValidationHook(sb, info);
+
+        // ── Factory Methods ────────────────────────────────────────────────────
+        GenerateFactoryMethods(sb, info);
+
+        // ── Formatting ─────────────────────────────────────────────────────────
+        GenerateFormatting(sb, info);
+
+        // ── TypeConverter ──────────────────────────────────────────────────────
+        GenerateTypeConverter(sb, info);
+
+        // ── STJ JsonConverter ─────────────────────────────────────────────────
+        GenerateJsonConverter(sb, info);
+
+        sb.CloseBrace(); // close type
+        return sb.ToString();
+    }
+
+    private static void GenerateValidationHook(SourceBuilder sb, ValueObjectTypeInfo info)
+    {
+        sb.AppendLine("// ─── Validation Hook ─────────────────────────────────────────────────");
+        sb.AppendLine("/// <summary>");
+        sb.AppendLine("/// Implement this partial method to add cross-property validation logic.");
+        sb.AppendLine("/// Set <paramref name=\"error\"/> to a non-default <see cref=\"PrimitiveError\"/> to indicate failure.");
+        sb.AppendLine("/// </summary>");
+        sb.AppendLine($"static partial void Validate(ref {info.TypeName} value, ref global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError error);");
+        sb.AppendLine();
+    }
+
+    private static void GenerateFactoryMethods(SourceBuilder sb, ValueObjectTypeInfo info)
+    {
+        sb.AppendLine("// ─── Factory Methods ──────────────────────────────────────────────────");
+        sb.AppendLine();
+
+        if (info.Properties.Length == 0) return;
+
+        var parameters = string.Join(", ", info.Properties.Values.Select(p => $"{p.TypeName} {p.CamelCaseName}"));
+        var assignments = string.Join(", ", info.Properties.Values.Select(p => $"{p.Name} = {p.CamelCaseName}"));
+
+        // Create(...)
+        sb.AppendLine("/// <summary>Creates a valid instance. Throws on invariant violation.</summary>");
+        sb.AppendLine("/// <exception cref=\"DomainPrimitiveValidationException\">Thrown when cross-property validation fails.</exception>");
+        sb.AppendLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        sb.AppendLine($"public static {info.TypeName} Create({parameters})");
+        sb.OpenBrace();
+        sb.AppendLine("var error = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;");
+        sb.AppendLine($"var instance = new {info.TypeName} {{ {assignments} }};");
+        sb.AppendLine("Validate(ref instance, ref error);");
+        sb.AppendLine("if (error.IsError)");
+        sb.OpenBrace();
+        sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        sb.CloseBrace();
+        sb.AppendLine("return instance;");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // TryCreate(...)
+        sb.AppendLine("/// <summary>Tries to create a valid instance. Returns false if invariant validation fails.</summary>");
+        sb.AppendLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        sb.AppendLine($"public static bool TryCreate({parameters}, out {info.TypeName} result, out global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError validationError)");
+        sb.OpenBrace();
+        sb.AppendLine("validationError = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;");
+        sb.AppendLine($"var instance = new {info.TypeName} {{ {assignments} }};");
+        sb.AppendLine("Validate(ref instance, ref validationError);");
+        sb.AppendLine("if (validationError.IsError)");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine("result = instance;");
+        sb.AppendLine("return true;");
+        sb.CloseBrace();
+        sb.AppendLine();
+    }
+
+    private static void GenerateFormatting(SourceBuilder sb, ValueObjectTypeInfo info)
+    {
+        sb.AppendLine("// ─── Formatting (IFormattable, ISpanFormattable) ──────────────────────");
+        sb.AppendLine();
+
+        // ToString()
+        sb.AppendLine("/// <summary>Returns a human-readable representation of this value object.</summary>");
+        sb.AppendLine("public override string ToString()");
+        sb.OpenBrace();
+
+        if (info.Properties.Length == 0)
+        {
+            sb.AppendLine($"return \"{info.TypeName} {{ }}\";");
+        }
+        else if (info.Properties.Length <= 3)
+        {
+            // Inline concatenation for small VOs — avoids StringBuilder heap allocation
+            var parts = string.Join(" + \", \" + ", info.Properties.Values.Select(p =>
+                $"\"{p.Name} = \" + ({p.Name}?.ToString() ?? \"null\")"));
+            sb.AppendLine($"return \"{info.TypeName} {{ \" + {parts} + \" }}\";");
+        }
+        else
+        {
+            // StringBuilder for larger VOs to avoid excessive string concatenation allocations
+            sb.AppendLine("var buf = new global::System.Text.StringBuilder();");
+            sb.AppendLine($"buf.Append(\"{info.TypeName} {{ \");");
+            bool first = true;
+            foreach (var p in info.Properties.Values)
+            {
+                if (!first) sb.AppendLine("buf.Append(\", \");");
+                sb.AppendLine($"buf.Append(\"{p.Name} = \");");
+                sb.AppendLine($"buf.Append({p.Name});");
+                first = false;
+            }
+            sb.AppendLine("buf.Append(\" }\");");
+            sb.AppendLine("return buf.ToString();");
+        }
+
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // IFormattable.ToString(string?, IFormatProvider?)
+        sb.AppendLine("/// <inheritdoc/>");
+        sb.AppendLine("public string ToString(string? format, IFormatProvider? formatProvider) => ToString();");
+        sb.AppendLine();
+
+        // ISpanFormattable.TryFormat
+        sb.AppendLine("/// <inheritdoc/>");
+        sb.AppendLine("public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null)");
+        sb.OpenBrace();
+        sb.AppendLine("var str = ToString();");
+        sb.AppendLine("var span = str.AsSpan();");
+        sb.AppendLine("if (span.TryCopyTo(destination))");
+        sb.OpenBrace();
+        sb.AppendLine("charsWritten = span.Length;");
+        sb.AppendLine("return true;");
+        sb.CloseBrace();
+        sb.AppendLine("charsWritten = 0;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine();
+    }
+
+    private static void GenerateTypeConverter(SourceBuilder sb, ValueObjectTypeInfo info)
+    {
+        sb.AppendLine("// ─── TypeConverter (ASP.NET / WinForms model binding) ─────────────────");
+        sb.AppendLine();
+        sb.AppendLine($"private sealed class {info.TypeName}TypeConverter : global::System.ComponentModel.TypeConverter");
+        sb.OpenBrace();
+
+        // CanConvertFrom
+        sb.AppendLine("public override bool CanConvertFrom(global::System.ComponentModel.ITypeDescriptorContext? context, global::System.Type sourceType)");
+        sb.OpenBrace();
+        sb.AppendLine("return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // ConvertFrom (string → ValueObject via JSON deserialization, since composite types need structure)
+        sb.AppendLine("public override object? ConvertFrom(global::System.ComponentModel.ITypeDescriptorContext? context, global::System.Globalization.CultureInfo? culture, object value)");
+        sb.OpenBrace();
+        sb.AppendLine("if (value is string s)");
+        sb.OpenBrace();
+        sb.AppendLine("try");
+        sb.OpenBrace();
+        sb.AppendLine($"return global::System.Text.Json.JsonSerializer.Deserialize<{info.TypeName}>(s);");
+        sb.CloseBrace();
+        sb.AppendLine("catch (global::System.Text.Json.JsonException)");
+        sb.OpenBrace();
+        sb.AppendLine("return base.ConvertFrom(context, culture, value);");
+        sb.CloseBrace();
+        sb.CloseBrace();
+        sb.AppendLine("return base.ConvertFrom(context, culture, value);");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // CanConvertTo
+        sb.AppendLine("public override bool CanConvertTo(global::System.ComponentModel.ITypeDescriptorContext? context, global::System.Type? destinationType)");
+        sb.OpenBrace();
+        sb.AppendLine("return destinationType == typeof(string) || base.CanConvertTo(context, destinationType);");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // ConvertTo (ValueObject → string via ToString)
+        sb.AppendLine("public override object? ConvertTo(global::System.ComponentModel.ITypeDescriptorContext? context, global::System.Globalization.CultureInfo? culture, object? value, global::System.Type destinationType)");
+        sb.OpenBrace();
+        sb.AppendLine($"if (value is {info.TypeName} vo && destinationType == typeof(string))");
+        sb.OpenBrace();
+        sb.AppendLine("return vo.ToString();");
+        sb.CloseBrace();
+        sb.AppendLine("return base.ConvertTo(context, culture, value, destinationType);");
+        sb.CloseBrace();
+
+        sb.CloseBrace();
+        sb.AppendLine();
+    }
+
+    private static void GenerateJsonConverter(SourceBuilder sb, ValueObjectTypeInfo info)
+    {
+        sb.AppendLine("// ─── JSON Serialization ───────────────────────────────────────────────");
+        sb.AppendLine();
+        sb.AppendLine($"private sealed class {info.TypeName}JsonConverter : global::System.Text.Json.Serialization.JsonConverter<{info.TypeName}>");
+        sb.OpenBrace();
+
+        // Read: deserialize through the generated record struct's own deserialization
+        sb.AppendLine($"public override {info.TypeName} Read(ref global::System.Text.Json.Utf8JsonReader reader, global::System.Type typeToConvert, global::System.Text.Json.JsonSerializerOptions options)");
+        sb.OpenBrace();
+        // Avoid infinite recursion by getting the object without converter
+        sb.AppendLine($"var obj = global::System.Text.Json.JsonSerializer.Deserialize<{info.TypeName}>(ref reader, options);");
+        sb.AppendLine("return obj;");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // Write: serialize through the record struct's own serialization
+        sb.AppendLine($"public override void Write(global::System.Text.Json.Utf8JsonWriter writer, {info.TypeName} value, global::System.Text.Json.JsonSerializerOptions options)");
+        sb.OpenBrace();
+        sb.AppendLine($"global::System.Text.Json.JsonSerializer.Serialize(writer, value, options);");
+        sb.CloseBrace();
+
+        sb.CloseBrace();
+        sb.AppendLine();
+    }
+}

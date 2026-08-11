@@ -1,0 +1,17 @@
+{
+  "stryker-config": {
+    "project": "../../src/EricksonLopez.DomainPrimitives.Abstractions/EricksonLopez.DomainPrimitives.Abstractions.csproj",
+    "thresholds": {
+      "high": 100,
+      "low": 98,
+      "break": 95
+    },
+    "reporters": [
+      "html",
+      "cleartext",
+      "progress"
+    ],
+    "target-framework": "net8.0",
+    "concurrency": 4
+  }
+}

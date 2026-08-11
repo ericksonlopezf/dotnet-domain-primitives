@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);DP0007</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives.Abstractions\EricksonLopez.DomainPrimitives.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives.Testing\EricksonLopez.DomainPrimitives.Testing.csproj" />
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives.Generators\EricksonLopez.DomainPrimitives.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\EricksonLopez.DomainPrimitives.Analyzers\EricksonLopez.DomainPrimitives.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="AutoFixture.Xunit2" />
+    <PackageReference Include="FsCheck.Xunit" />
+  </ItemGroup>
+</Project>
+
+
+
+
