@@ -1,0 +1,176 @@
+
+BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
+AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 10.0.400
+  [Host]    : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  .NET 10.0 : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  .NET 8.0  : .NET 8.0.30 (8.0.30, 8.0.3026.36720), X64 RyuJIT x86-64-v3
+  .NET 9.0  : .NET 9.0.19 (9.0.19, 9.0.1926.36724), X64 RyuJIT x86-64-v3
+
+
+ Method                                    | Job       | Runtime   | Mean        | Error     | StdDev    | Median      | Ratio     | RatioSD | Rank | Gen0   | Allocated | Alloc Ratio |
+------------------------------------------ |---------- |---------- |------------:|----------:|----------:|------------:|----------:|--------:|-----:|-------:|----------:|------------:|
+ RawGuid_Create                            | .NET 10.0 | .NET 10.0 |   0.2649 ns | 0.0044 ns | 0.0034 ns |   0.2647 ns |     0.793 |    0.01 |    6 |      - |         - |          NA |
+ DomainPrimitives_Create                   | .NET 10.0 | .NET 10.0 |   0.8409 ns | 0.0017 ns | 0.0016 ns |   0.8410 ns |     2.518 |    0.01 |   12 |      - |         - |          NA |
+ Vogen_Create                              | .NET 10.0 | .NET 10.0 |   0.5532 ns | 0.0032 ns | 0.0026 ns |   0.5530 ns |     1.657 |    0.01 |   10 |      - |         - |          NA |
+ StronglyTypedId_Create                    | .NET 10.0 | .NET 10.0 |   0.1535 ns | 0.0046 ns | 0.0041 ns |   0.1544 ns |     0.460 |    0.01 |    3 |      - |         - |          NA |
+ ValueOf_Create                            | .NET 10.0 | .NET 10.0 |  14.9870 ns | 0.4584 ns | 1.3515 ns |  14.8411 ns |    44.885 |    4.03 |   33 | 0.0019 |      32 B |          NA |
+ Meziantou_Create                          | .NET 10.0 | .NET 10.0 |   0.2399 ns | 0.0042 ns | 0.0035 ns |   0.2400 ns |     0.719 |    0.01 |    5 |      - |         - |          NA |
+ TinyTypes_Create                          | .NET 10.0 | .NET 10.0 |   0.2475 ns | 0.0057 ns | 0.0050 ns |   0.2474 ns |     0.741 |    0.01 |    5 |      - |         - |          NA |
+ RawGuid_Parse                             | .NET 10.0 | .NET 10.0 |  27.7213 ns | 0.0345 ns | 0.0269 ns |  27.7261 ns |    83.023 |    0.21 |   35 |      - |         - |          NA |
+ DomainPrimitives_Parse                    | .NET 10.0 | .NET 10.0 |  28.1743 ns | 0.0409 ns | 0.0363 ns |  28.1619 ns |    84.380 |    0.22 |   35 |      - |         - |          NA |
+ Vogen_Parse                               | .NET 10.0 | .NET 10.0 |  28.3712 ns | 0.1214 ns | 0.1014 ns |  28.3496 ns |    84.969 |    0.35 |   35 |      - |         - |          NA |
+ StronglyTypedId_Parse                     | .NET 10.0 | .NET 10.0 |  27.7673 ns | 0.0589 ns | 0.0522 ns |  27.7470 ns |    83.161 |    0.24 |   35 |      - |         - |          NA |
+ ValueOf_Parse                             | .NET 10.0 | .NET 10.0 |  32.0696 ns | 0.2218 ns | 0.2075 ns |  31.9968 ns |    96.046 |    0.64 |   35 | 0.0019 |      32 B |          NA |
+ Meziantou_Parse                           | .NET 10.0 | .NET 10.0 |  27.9539 ns | 0.0483 ns | 0.0428 ns |  27.9407 ns |    83.719 |    0.23 |   35 |      - |         - |          NA |
+ TinyTypes_Parse                           | .NET 10.0 | .NET 10.0 |  27.2498 ns | 0.0446 ns | 0.0395 ns |  27.2550 ns |    81.611 |    0.22 |   35 |      - |         - |          NA |
+ DomainPrimitives_EqualityCheck            | .NET 10.0 | .NET 10.0 |   1.1055 ns | 0.0094 ns | 0.0084 ns |   1.1047 ns |     3.311 |    0.03 |   14 |      - |         - |          NA |
+ RawGuid_ToString                          | .NET 10.0 | .NET 10.0 |  11.5980 ns | 0.2413 ns | 0.2257 ns |  11.6947 ns |    34.735 |    0.66 |   32 | 0.0057 |      96 B |          NA |
+ DomainPrimitives_ToString                 | .NET 10.0 | .NET 10.0 |  12.1611 ns | 0.2293 ns | 0.2145 ns |  12.1970 ns |    36.421 |    0.63 |   32 | 0.0057 |      96 B |          NA |
+ Vogen_ToString                            | .NET 10.0 | .NET 10.0 |  15.6410 ns | 0.1543 ns | 0.1443 ns |  15.6271 ns |    46.843 |    0.43 |   33 | 0.0057 |      96 B |          NA |
+ StronglyTypedId_ToString                  | .NET 10.0 | .NET 10.0 |  11.8775 ns | 0.1877 ns | 0.1664 ns |  11.9021 ns |    35.572 |    0.49 |   32 | 0.0057 |      96 B |          NA |
+ ValueOf_ToString                          | .NET 10.0 | .NET 10.0 |  23.0008 ns | 0.2933 ns | 0.2600 ns |  22.9581 ns |    68.885 |    0.77 |   34 | 0.0076 |     128 B |          NA |
+ Meziantou_ToString                        | .NET 10.0 | .NET 10.0 |  32.1897 ns | 0.3628 ns | 0.3216 ns |  32.1703 ns |    96.405 |    0.96 |   35 | 0.0148 |     248 B |          NA |
+ TinyTypes_ToString                        | .NET 10.0 | .NET 10.0 |  11.1022 ns | 0.2757 ns | 0.5993 ns |  11.0516 ns |    33.250 |    1.78 |   32 | 0.0019 |      32 B |          NA |
+ DomainPrimitives_TryParse                 | .NET 10.0 | .NET 10.0 |  25.4763 ns | 0.0389 ns | 0.0363 ns |  25.4708 ns |    76.299 |    0.20 |   35 |      - |         - |          NA |
+ DomainPrimitives_SpanParse                | .NET 10.0 | .NET 10.0 |  25.8260 ns | 0.0562 ns | 0.0498 ns |  25.8322 ns |    77.347 |    0.23 |   35 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanParse            | .NET 10.0 | .NET 10.0 |  46.5482 ns | 0.3025 ns | 0.2681 ns |  46.5967 ns |   139.408 |    0.84 |   38 | 0.0038 |      64 B |          NA |
+ DomainPrimitives_SpanFormat               | .NET 10.0 | .NET 10.0 |   2.5829 ns | 0.0121 ns | 0.0107 ns |   2.5826 ns |     7.736 |    0.04 |   20 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanFormat           | .NET 10.0 | .NET 10.0 |   2.3927 ns | 0.0082 ns | 0.0068 ns |   2.3946 ns |     7.166 |    0.03 |   19 |      - |         - |          NA |
+ StringPrimitive_Email_Create              | .NET 10.0 | .NET 10.0 | 163.5324 ns | 0.2587 ns | 0.2293 ns | 163.4672 ns |   489.765 |    1.31 |   46 |      - |         - |          NA |
+ StringPrimitive_Email_TryParse            | .NET 10.0 | .NET 10.0 | 164.1103 ns | 0.1675 ns | 0.1485 ns | 164.1299 ns |   491.495 |    1.21 |   46 |      - |         - |          NA |
+ NumericPrimitive_Money_Create             | .NET 10.0 | .NET 10.0 |   3.6374 ns | 0.0032 ns | 0.0028 ns |   3.6381 ns |    10.894 |    0.03 |   21 |      - |         - |          NA |
+ NumericPrimitive_Money_Add                | .NET 10.0 | .NET 10.0 |   8.1343 ns | 0.0086 ns | 0.0077 ns |   8.1354 ns |    24.361 |    0.06 |   28 |      - |         - |          NA |
+ ValueObject_Create                        | .NET 10.0 | .NET 10.0 |   0.3115 ns | 0.0015 ns | 0.0014 ns |   0.3116 ns |     0.933 |    0.00 |    6 |      - |         - |          NA |
+ SmartEnum_FromValue                       | .NET 10.0 | .NET 10.0 |   0.9373 ns | 0.0015 ns | 0.0013 ns |   0.9373 ns |     2.807 |    0.01 |   12 |      - |         - |          NA |
+ RawGuid_JsonSerialize                     | .NET 10.0 | .NET 10.0 |  97.5560 ns | 0.4078 ns | 0.3405 ns |  97.5854 ns |   292.171 |    1.19 |   40 | 0.0062 |     104 B |          NA |
+ RawGuid_JsonDeserialize                   | .NET 10.0 | .NET 10.0 | 101.1832 ns | 0.1918 ns | 0.1602 ns | 101.1268 ns |   303.035 |    0.84 |   41 |      - |         - |          NA |
+ DomainPrimitives_JsonSerialize            | .NET 10.0 | .NET 10.0 | 140.7640 ns | 0.7984 ns | 0.7468 ns | 140.8133 ns |   421.575 |    2.37 |   44 | 0.0062 |     104 B |          NA |
+ DomainPrimitives_JsonDeserialize          | .NET 10.0 | .NET 10.0 | 221.1281 ns | 0.0564 ns | 0.0440 ns | 221.1292 ns |   662.259 |    1.53 |   48 |      - |         - |          NA |
+ RawGuid_Create                            | .NET 8.0  | .NET 8.0  |   0.3339 ns | 0.0009 ns | 0.0008 ns |   0.3337 ns |     1.000 |    0.00 |    7 |      - |         - |          NA |
+ DomainPrimitives_Create                   | .NET 8.0  | .NET 8.0  |   0.8586 ns | 0.0021 ns | 0.0019 ns |   0.8582 ns |     2.571 |    0.01 |   12 |      - |         - |          NA |
+ Vogen_Create                              | .NET 8.0  | .NET 8.0  |   7.7250 ns | 0.0026 ns | 0.0022 ns |   7.7242 ns |    23.136 |    0.05 |   27 |      - |         - |          NA |
+ StronglyTypedId_Create                    | .NET 8.0  | .NET 8.0  |   0.3335 ns | 0.0012 ns | 0.0010 ns |   0.3336 ns |     0.999 |    0.00 |    7 |      - |         - |          NA |
+ ValueOf_Create                            | .NET 8.0  | .NET 8.0  |  10.5533 ns | 0.1308 ns | 0.1224 ns |  10.5371 ns |    31.606 |    0.36 |   32 | 0.0019 |      32 B |          NA |
+ Meziantou_Create                          | .NET 8.0  | .NET 8.0  |   0.3376 ns | 0.0059 ns | 0.0050 ns |   0.3364 ns |     1.011 |    0.01 |    7 |      - |         - |          NA |
+ TinyTypes_Create                          | .NET 8.0  | .NET 8.0  |   0.3337 ns | 0.0013 ns | 0.0012 ns |   0.3339 ns |     1.000 |    0.00 |    7 |      - |         - |          NA |
+ RawGuid_Parse                             | .NET 8.0  | .NET 8.0  |  29.2201 ns | 0.0523 ns | 0.0489 ns |  29.2037 ns |    87.511 |    0.25 |   35 |      - |         - |          NA |
+ DomainPrimitives_Parse                    | .NET 8.0  | .NET 8.0  |  35.6214 ns | 0.3081 ns | 0.2882 ns |  35.6633 ns |   106.683 |    0.87 |   37 |      - |         - |          NA |
+ Vogen_Parse                               | .NET 8.0  | .NET 8.0  |  33.7501 ns | 0.1097 ns | 0.0972 ns |  33.7386 ns |   101.079 |    0.37 |   36 |      - |         - |          NA |
+ StronglyTypedId_Parse                     | .NET 8.0  | .NET 8.0  |  30.4813 ns | 0.0322 ns | 0.0301 ns |  30.4781 ns |    91.289 |    0.23 |   35 |      - |         - |          NA |
+ ValueOf_Parse                             | .NET 8.0  | .NET 8.0  |  33.5492 ns | 0.3374 ns | 0.3156 ns |  33.5789 ns |   100.477 |    0.94 |   36 | 0.0019 |      32 B |          NA |
+ Meziantou_Parse                           | .NET 8.0  | .NET 8.0  |  29.6510 ns | 0.0807 ns | 0.0674 ns |  29.6525 ns |    88.802 |    0.28 |   35 |      - |         - |          NA |
+ TinyTypes_Parse                           | .NET 8.0  | .NET 8.0  |  29.8316 ns | 0.0842 ns | 0.0788 ns |  29.8138 ns |    89.343 |    0.31 |   35 |      - |         - |          NA |
+ DomainPrimitives_EqualityCheck            | .NET 8.0  | .NET 8.0  |   0.7894 ns | 0.0036 ns | 0.0034 ns |   0.7899 ns |     2.364 |    0.01 |   11 |      - |         - |          NA |
+ RawGuid_ToString                          | .NET 8.0  | .NET 8.0  |  15.4885 ns | 0.3001 ns | 0.2807 ns |  15.4408 ns |    46.387 |    0.82 |   33 | 0.0057 |      96 B |          NA |
+ DomainPrimitives_ToString                 | .NET 8.0  | .NET 8.0  |  16.1813 ns | 0.3567 ns | 0.3337 ns |  16.2659 ns |    48.461 |    0.97 |   33 | 0.0057 |      96 B |          NA |
+ Vogen_ToString                            | .NET 8.0  | .NET 8.0  |  25.8932 ns | 0.5526 ns | 0.5169 ns |  26.1338 ns |    77.548 |    1.51 |   35 | 0.0057 |      96 B |          NA |
+ StronglyTypedId_ToString                  | .NET 8.0  | .NET 8.0  |  16.7727 ns | 0.4065 ns | 0.3802 ns |  16.7901 ns |    50.233 |    1.11 |   33 | 0.0057 |      96 B |          NA |
+ ValueOf_ToString                          | .NET 8.0  | .NET 8.0  |  25.8966 ns | 0.5869 ns | 0.6280 ns |  25.9388 ns |    77.558 |    1.84 |   35 | 0.0076 |     128 B |          NA |
+ Meziantou_ToString                        | .NET 8.0  | .NET 8.0  |  38.9151 ns | 0.7886 ns | 0.7377 ns |  38.8665 ns |   116.547 |    2.16 |   37 | 0.0148 |     248 B |          NA |
+ TinyTypes_ToString                        | .NET 8.0  | .NET 8.0  |   9.9297 ns | 0.1115 ns | 0.1043 ns |   9.9196 ns |    29.738 |    0.31 |   31 | 0.0019 |      32 B |          NA |
+ DomainPrimitives_TryParse                 | .NET 8.0  | .NET 8.0  |  26.5297 ns | 0.0573 ns | 0.0508 ns |  26.5252 ns |    79.454 |    0.23 |   35 |      - |         - |          NA |
+ DomainPrimitives_SpanParse                | .NET 8.0  | .NET 8.0  |  26.9554 ns | 0.0770 ns | 0.0683 ns |  26.9328 ns |    80.729 |    0.27 |   35 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanParse            | .NET 8.0  | .NET 8.0  |  60.8512 ns | 0.6536 ns | 0.6114 ns |  60.7831 ns |   182.244 |    1.82 |   39 | 0.0038 |      64 B |          NA |
+ DomainPrimitives_SpanFormat               | .NET 8.0  | .NET 8.0  |   4.9915 ns | 0.0061 ns | 0.0054 ns |   4.9896 ns |    14.949 |    0.04 |   26 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanFormat           | .NET 8.0  | .NET 8.0  |   4.1963 ns | 0.0030 ns | 0.0026 ns |   4.1965 ns |    12.568 |    0.03 |   24 |      - |         - |          NA |
+ StringPrimitive_Email_Create              | .NET 8.0  | .NET 8.0  | 329.5068 ns | 0.5430 ns | 0.5080 ns | 329.3832 ns |   986.843 |    2.71 |   51 |      - |         - |          NA |
+ StringPrimitive_Email_TryParse            | .NET 8.0  | .NET 8.0  | 324.1289 ns | 0.5166 ns | 0.4314 ns | 324.0670 ns |   970.737 |    2.56 |   51 |      - |         - |          NA |
+ NumericPrimitive_Money_Create             | .NET 8.0  | .NET 8.0  |   4.3752 ns | 0.0039 ns | 0.0030 ns |   4.3751 ns |    13.103 |    0.03 |   25 |      - |         - |          NA |
+ NumericPrimitive_Money_Add                | .NET 8.0  | .NET 8.0  |   9.4856 ns | 0.0102 ns | 0.0085 ns |   9.4846 ns |    28.408 |    0.07 |   30 |      - |         - |          NA |
+ ValueObject_Create                        | .NET 8.0  | .NET 8.0  |   0.0000 ns | 0.0000 ns | 0.0000 ns |   0.0000 ns |     0.000 |    0.00 |    1 |      - |         - |          NA |
+ SmartEnum_FromValue                       | .NET 8.0  | .NET 8.0  |  14.6519 ns | 0.1776 ns | 0.1574 ns |  14.6487 ns |    43.881 |    0.47 |   33 | 0.0019 |      32 B |          NA |
+ RawGuid_JsonSerialize                     | .NET 8.0  | .NET 8.0  | 122.1281 ns | 0.7569 ns | 0.6709 ns | 121.9909 ns |   365.763 |    2.12 |   43 | 0.0062 |     104 B |          NA |
+ RawGuid_JsonDeserialize                   | .NET 8.0  | .NET 8.0  | 151.9536 ns | 0.1109 ns | 0.0926 ns | 151.9169 ns |   455.087 |    1.08 |   45 |      - |         - |          NA |
+ DomainPrimitives_JsonSerialize            | .NET 8.0  | .NET 8.0  | 174.2424 ns | 0.5459 ns | 0.4558 ns | 174.3528 ns |   521.840 |    1.78 |   47 | 0.0062 |     104 B |          NA |
+ DomainPrimitives_JsonDeserialize          | .NET 8.0  | .NET 8.0  | 340.5736 ns | 0.5251 ns | 0.4655 ns | 340.4137 ns | 1,019.987 |    2.71 |   52 |      - |         - |          NA |
+ RawGuid_Create                            | .NET 9.0  | .NET 9.0  |   0.2330 ns | 0.0027 ns | 0.0025 ns |   0.2331 ns |     0.698 |    0.01 |    5 |      - |         - |          NA |
+ DomainPrimitives_Create                   | .NET 9.0  | .NET 9.0  |   0.9135 ns | 0.0140 ns | 0.0124 ns |   0.9178 ns |     2.736 |    0.04 |   12 |      - |         - |          NA |
+ Vogen_Create                              | .NET 9.0  | .NET 9.0  |   0.4781 ns | 0.0070 ns | 0.0066 ns |   0.4791 ns |     1.432 |    0.02 |    8 |      - |         - |          NA |
+ StronglyTypedId_Create                    | .NET 9.0  | .NET 9.0  |   0.1500 ns | 0.0065 ns | 0.0051 ns |   0.1498 ns |     0.449 |    0.01 |    3 |      - |         - |          NA |
+ ValueOf_Create                            | .NET 9.0  | .NET 9.0  |   8.5522 ns | 0.0397 ns | 0.0372 ns |   8.5586 ns |    25.613 |    0.12 |   29 | 0.0019 |      32 B |          NA |
+ Meziantou_Create                          | .NET 9.0  | .NET 9.0  |   0.2083 ns | 0.0039 ns | 0.0034 ns |   0.2090 ns |     0.624 |    0.01 |    4 |      - |         - |          NA |
+ TinyTypes_Create                          | .NET 9.0  | .NET 9.0  |   0.2122 ns | 0.0033 ns | 0.0031 ns |   0.2121 ns |     0.635 |    0.01 |    4 |      - |         - |          NA |
+ RawGuid_Parse                             | .NET 9.0  | .NET 9.0  |  28.9560 ns | 0.0591 ns | 0.0553 ns |  28.9408 ns |    86.721 |    0.26 |   35 |      - |         - |          NA |
+ DomainPrimitives_Parse                    | .NET 9.0  | .NET 9.0  |  29.6052 ns | 0.0785 ns | 0.0656 ns |  29.6002 ns |    88.665 |    0.28 |   35 |      - |         - |          NA |
+ Vogen_Parse                               | .NET 9.0  | .NET 9.0  |  29.8619 ns | 0.0571 ns | 0.0506 ns |  29.8416 ns |    89.434 |    0.25 |   35 |      - |         - |          NA |
+ StronglyTypedId_Parse                     | .NET 9.0  | .NET 9.0  |  28.8640 ns | 0.0432 ns | 0.0383 ns |  28.8639 ns |    86.445 |    0.23 |   35 |      - |         - |          NA |
+ ValueOf_Parse                             | .NET 9.0  | .NET 9.0  |  31.9177 ns | 0.1526 ns | 0.1427 ns |  31.9273 ns |    95.591 |    0.47 |   35 | 0.0019 |      32 B |          NA |
+ Meziantou_Parse                           | .NET 9.0  | .NET 9.0  |  28.9905 ns | 0.0941 ns | 0.0786 ns |  28.9737 ns |    86.824 |    0.30 |   35 |      - |         - |          NA |
+ TinyTypes_Parse                           | .NET 9.0  | .NET 9.0  |  28.9240 ns | 0.1353 ns | 0.1200 ns |  28.9027 ns |    86.625 |    0.40 |   35 |      - |         - |          NA |
+ DomainPrimitives_EqualityCheck            | .NET 9.0  | .NET 9.0  |   0.9567 ns | 0.0056 ns | 0.0050 ns |   0.9555 ns |     2.865 |    0.02 |   12 |      - |         - |          NA |
+ RawGuid_ToString                          | .NET 9.0  | .NET 9.0  |  14.3762 ns | 0.1353 ns | 0.1266 ns |  14.4125 ns |    43.055 |    0.38 |   33 | 0.0057 |      96 B |          NA |
+ DomainPrimitives_ToString                 | .NET 9.0  | .NET 9.0  |  15.6913 ns | 0.0585 ns | 0.0547 ns |  15.6847 ns |    46.994 |    0.19 |   33 | 0.0057 |      96 B |          NA |
+ Vogen_ToString                            | .NET 9.0  | .NET 9.0  |  15.6230 ns | 0.1827 ns | 0.1620 ns |  15.6307 ns |    46.789 |    0.48 |   33 | 0.0057 |      96 B |          NA |
+ StronglyTypedId_ToString                  | .NET 9.0  | .NET 9.0  |  15.2441 ns | 0.1901 ns | 0.1587 ns |  15.2533 ns |    45.655 |    0.47 |   33 | 0.0057 |      96 B |          NA |
+ ValueOf_ToString                          | .NET 9.0  | .NET 9.0  |  23.4602 ns | 0.5181 ns | 0.5544 ns |  23.4631 ns |    70.261 |    1.62 |   34 | 0.0076 |     128 B |          NA |
+ Meziantou_ToString                        | .NET 9.0  | .NET 9.0  |  36.6744 ns | 0.7929 ns | 0.8484 ns |  36.6226 ns |   109.837 |    2.49 |   37 | 0.0148 |     248 B |          NA |
+ TinyTypes_ToString                        | .NET 9.0  | .NET 9.0  |  10.0748 ns | 0.0461 ns | 0.0431 ns |  10.0859 ns |    30.173 |    0.14 |   31 | 0.0019 |      32 B |          NA |
+ DomainPrimitives_TryParse                 | .NET 9.0  | .NET 9.0  |  26.3024 ns | 0.0394 ns | 0.0349 ns |  26.2981 ns |    78.773 |    0.21 |   35 |      - |         - |          NA |
+ DomainPrimitives_SpanParse                | .NET 9.0  | .NET 9.0  |  26.1480 ns | 0.0389 ns | 0.0325 ns |  26.1477 ns |    78.311 |    0.20 |   35 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanParse            | .NET 9.0  | .NET 9.0  |  59.0352 ns | 0.1494 ns | 0.1247 ns |  59.0213 ns |   176.805 |    0.54 |   39 | 0.0038 |      64 B |          NA |
+ DomainPrimitives_SpanFormat               | .NET 9.0  | .NET 9.0  |   4.4709 ns | 0.0097 ns | 0.0081 ns |   4.4694 ns |    13.390 |    0.04 |   25 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanFormat           | .NET 9.0  | .NET 9.0  |   4.0569 ns | 0.0039 ns | 0.0032 ns |   4.0562 ns |    12.150 |    0.03 |   23 |      - |         - |          NA |
+ StringPrimitive_Email_Create              | .NET 9.0  | .NET 9.0  | 172.7353 ns | 0.2249 ns | 0.1994 ns | 172.6508 ns |   517.327 |    1.32 |   47 |      - |         - |          NA |
+ StringPrimitive_Email_TryParse            | .NET 9.0  | .NET 9.0  | 164.4944 ns | 0.2344 ns | 0.2078 ns | 164.4136 ns |   492.646 |    1.28 |   46 |      - |         - |          NA |
+ NumericPrimitive_Money_Create             | .NET 9.0  | .NET 9.0  |   4.3651 ns | 0.0047 ns | 0.0042 ns |   4.3635 ns |    13.073 |    0.03 |   25 |      - |         - |          NA |
+ NumericPrimitive_Money_Add                | .NET 9.0  | .NET 9.0  |   8.8290 ns | 0.0036 ns | 0.0028 ns |   8.8283 ns |    26.442 |    0.06 |   29 |      - |         - |          NA |
+ ValueObject_Create                        | .NET 9.0  | .NET 9.0  |   0.0005 ns | 0.0005 ns | 0.0004 ns |   0.0004 ns |     0.001 |    0.00 |    2 |      - |         - |          NA |
+ SmartEnum_FromValue                       | .NET 9.0  | .NET 9.0  |  14.1036 ns | 0.1296 ns | 0.1082 ns |  14.0692 ns |    42.239 |    0.33 |   33 | 0.0019 |      32 B |          NA |
+ RawGuid_JsonSerialize                     | .NET 9.0  | .NET 9.0  | 111.4632 ns | 0.1714 ns | 0.1520 ns | 111.4720 ns |   333.822 |    0.89 |   42 | 0.0062 |     104 B |          NA |
+ RawGuid_JsonDeserialize                   | .NET 9.0  | .NET 9.0  | 120.5171 ns | 0.0928 ns | 0.0823 ns | 120.5390 ns |   360.938 |    0.87 |   43 |      - |         - |          NA |
+ DomainPrimitives_JsonSerialize            | .NET 9.0  | .NET 9.0  | 151.5927 ns | 0.6981 ns | 0.6188 ns | 151.3428 ns |   454.006 |    2.07 |   45 | 0.0062 |     104 B |          NA |
+ DomainPrimitives_JsonDeserialize          | .NET 9.0  | .NET 9.0  | 247.5775 ns | 0.1545 ns | 0.1370 ns | 247.5878 ns |   741.472 |    1.75 |   49 |      - |         - |          NA |
+ RawGuid_Create                            | .NET 9.0  | .NET 9.0  |   0.1630 ns | 0.0053 ns | 0.0047 ns |   0.1630 ns |     0.488 |    0.01 |    3 |      - |         - |          NA |
+ DomainPrimitives_Create                   | .NET 9.0  | .NET 9.0  |   0.8397 ns | 0.0008 ns | 0.0007 ns |   0.8397 ns |     2.515 |    0.01 |   12 |      - |         - |          NA |
+ Vogen_Create                              | .NET 9.0  | .NET 9.0  |   0.5267 ns | 0.0008 ns | 0.0008 ns |   0.5266 ns |     1.577 |    0.00 |    9 |      - |         - |          NA |
+ StronglyTypedId_Create                    | .NET 9.0  | .NET 9.0  |   0.2908 ns | 0.0370 ns | 0.0455 ns |   0.3085 ns |     0.871 |    0.13 |    6 |      - |         - |          NA |
+ ValueOf_Create                            | .NET 9.0  | .NET 9.0  |   8.5348 ns | 0.0655 ns | 0.0613 ns |   8.5306 ns |    25.561 |    0.19 |   29 | 0.0019 |      32 B |          NA |
+ Meziantou_Create                          | .NET 9.0  | .NET 9.0  |   0.2032 ns | 0.0028 ns | 0.0025 ns |   0.2034 ns |     0.609 |    0.01 |    4 |      - |         - |          NA |
+ TinyTypes_Create                          | .NET 9.0  | .NET 9.0  |   0.1491 ns | 0.0026 ns | 0.0025 ns |   0.1495 ns |     0.447 |    0.01 |    3 |      - |         - |          NA |
+ RawGuid_Parse                             | .NET 9.0  | .NET 9.0  |  28.7061 ns | 0.0907 ns | 0.0757 ns |  28.6896 ns |    85.972 |    0.29 |   35 |      - |         - |          NA |
+ DomainPrimitives_Parse                    | .NET 9.0  | .NET 9.0  |  29.5771 ns | 0.0570 ns | 0.0533 ns |  29.5818 ns |    88.581 |    0.26 |   35 |      - |         - |          NA |
+ Vogen_Parse                               | .NET 9.0  | .NET 9.0  |  29.1565 ns | 0.0311 ns | 0.0260 ns |  29.1575 ns |    87.321 |    0.21 |   35 |      - |         - |          NA |
+ StronglyTypedId_Parse                     | .NET 9.0  | .NET 9.0  |  29.0452 ns | 0.1171 ns | 0.1038 ns |  29.0206 ns |    86.988 |    0.36 |   35 |      - |         - |          NA |
+ ValueOf_Parse                             | .NET 9.0  | .NET 9.0  |  31.1338 ns | 0.0726 ns | 0.0606 ns |  31.1203 ns |    93.243 |    0.28 |   35 | 0.0019 |      32 B |          NA |
+ Meziantou_Parse                           | .NET 9.0  | .NET 9.0  |  29.4346 ns | 0.1228 ns | 0.1148 ns |  29.4297 ns |    88.154 |    0.39 |   35 |      - |         - |          NA |
+ TinyTypes_Parse                           | .NET 9.0  | .NET 9.0  |  28.9978 ns | 0.0586 ns | 0.0489 ns |  29.0102 ns |    86.846 |    0.24 |   35 |      - |         - |          NA |
+ DomainPrimitives_EqualityCheck            | .NET 9.0  | .NET 9.0  |   0.9510 ns | 0.0039 ns | 0.0036 ns |   0.9497 ns |     2.848 |    0.01 |   12 |      - |         - |          NA |
+ RawGuid_ToString                          | .NET 9.0  | .NET 9.0  |  14.3788 ns | 0.1046 ns | 0.0978 ns |  14.3846 ns |    43.063 |    0.30 |   33 | 0.0057 |      96 B |          NA |
+ DomainPrimitives_ToString                 | .NET 9.0  | .NET 9.0  |  14.0492 ns | 0.1034 ns | 0.0967 ns |  14.0503 ns |    42.076 |    0.30 |   33 | 0.0057 |      96 B |          NA |
+ Vogen_ToString                            | .NET 9.0  | .NET 9.0  |  15.9860 ns | 0.3498 ns | 0.3272 ns |  15.7963 ns |    47.877 |    0.96 |   33 | 0.0057 |      96 B |          NA |
+ StronglyTypedId_ToString                  | .NET 9.0  | .NET 9.0  |  15.4098 ns | 0.0988 ns | 0.0875 ns |  15.3997 ns |    46.151 |    0.27 |   33 | 0.0057 |      96 B |          NA |
+ ValueOf_ToString                          | .NET 9.0  | .NET 9.0  |  22.6371 ns | 0.1706 ns | 0.1596 ns |  22.6233 ns |    67.796 |    0.49 |   34 | 0.0076 |     128 B |          NA |
+ Meziantou_ToString                        | .NET 9.0  | .NET 9.0  |  35.9632 ns | 0.2121 ns | 0.1771 ns |  35.9675 ns |   107.706 |    0.57 |   37 | 0.0148 |     248 B |          NA |
+ TinyTypes_ToString                        | .NET 9.0  | .NET 9.0  |  10.0754 ns | 0.0484 ns | 0.0429 ns |  10.0758 ns |    30.175 |    0.14 |   31 | 0.0019 |      32 B |          NA |
+ DomainPrimitives_TryParse                 | .NET 9.0  | .NET 9.0  |  26.3376 ns | 0.0426 ns | 0.0377 ns |  26.3317 ns |    78.879 |    0.21 |   35 |      - |         - |          NA |
+ DomainPrimitives_SpanParse                | .NET 9.0  | .NET 9.0  |  26.2032 ns | 0.0364 ns | 0.0340 ns |  26.2076 ns |    78.476 |    0.21 |   35 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanParse            | .NET 9.0  | .NET 9.0  |  58.7933 ns | 0.1752 ns | 0.1639 ns |  58.7975 ns |   176.080 |    0.62 |   39 | 0.0038 |      64 B |          NA |
+ DomainPrimitives_SpanFormat               | .NET 9.0  | .NET 9.0  |   4.4664 ns | 0.0038 ns | 0.0032 ns |   4.4656 ns |    13.377 |    0.03 |   25 |      - |         - |          NA |
+ DomainPrimitives_Utf8SpanFormat           | .NET 9.0  | .NET 9.0  |   3.7887 ns | 0.0060 ns | 0.0054 ns |   3.7863 ns |    11.347 |    0.03 |   22 |      - |         - |          NA |
+ StringPrimitive_Email_Create              | .NET 9.0  | .NET 9.0  | 168.2097 ns | 0.2692 ns | 0.2386 ns | 168.2604 ns |   503.773 |    1.35 |   46 |      - |         - |          NA |
+ StringPrimitive_Email_TryParse            | .NET 9.0  | .NET 9.0  | 164.4581 ns | 0.1218 ns | 0.1017 ns | 164.4747 ns |   492.537 |    1.17 |   46 |      - |         - |          NA |
+ NumericPrimitive_Money_Create             | .NET 9.0  | .NET 9.0  |   4.3639 ns | 0.0019 ns | 0.0016 ns |   4.3638 ns |    13.069 |    0.03 |   25 |      - |         - |          NA |
+ NumericPrimitive_Money_Add                | .NET 9.0  | .NET 9.0  |   8.7098 ns | 0.0241 ns | 0.0214 ns |   8.6987 ns |    26.085 |    0.09 |   29 |      - |         - |          NA |
+ ValueObject_Create                        | .NET 9.0  | .NET 9.0  |   0.0002 ns | 0.0006 ns | 0.0004 ns |   0.0000 ns |     0.001 |    0.00 |    1 |      - |         - |          NA |
+ SmartEnum_FromValue                       | .NET 9.0  | .NET 9.0  |  14.3397 ns | 0.2742 ns | 0.2565 ns |  14.2724 ns |    42.946 |    0.75 |   33 | 0.0019 |      32 B |          NA |
+ RawGuid_JsonSerialize                     | .NET 9.0  | .NET 9.0  | 110.8254 ns | 0.3536 ns | 0.2953 ns | 110.8895 ns |   331.912 |    1.14 |   42 | 0.0062 |     104 B |          NA |
+ RawGuid_JsonDeserialize                   | .NET 9.0  | .NET 9.0  | 120.8209 ns | 0.2397 ns | 0.2002 ns | 120.7548 ns |   361.848 |    1.01 |   43 |      - |         - |          NA |
+ DomainPrimitives_JsonSerialize            | .NET 9.0  | .NET 9.0  | 153.4379 ns | 0.7782 ns | 0.6498 ns | 153.2357 ns |   459.533 |    2.15 |   45 | 0.0062 |     104 B |          NA |
+ DomainPrimitives_JsonDeserialize          | .NET 9.0  | .NET 9.0  | 260.1760 ns | 0.1323 ns | 0.1173 ns | 260.1799 ns |   779.203 |    1.83 |   50 |      - |         - |          NA |
+ Dapper_TypeHandler_SetValue               | .NET 10.0 | .NET 10.0 |   0.3321 ns | 0.0015 ns | 0.0013 ns |   0.3320 ns |     0.995 |    0.00 |    7 |      - |         - |          NA |
+ Dapper_TypeHandler_Parse                  | .NET 10.0 | .NET 10.0 |   0.9175 ns | 0.0023 ns | 0.0022 ns |   0.9176 ns |     2.748 |    0.01 |   12 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertToProvider   | .NET 10.0 | .NET 10.0 |   1.4980 ns | 0.0062 ns | 0.0058 ns |   1.4971 ns |     4.486 |    0.02 |   16 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertFromProvider | .NET 10.0 | .NET 10.0 |   0.8795 ns | 0.0054 ns | 0.0048 ns |   0.8791 ns |     2.634 |    0.02 |   12 |      - |         - |          NA |
+ Dapper_TypeHandler_SetValue               | .NET 8.0  | .NET 8.0  |   7.5230 ns | 0.0373 ns | 0.0311 ns |   7.5203 ns |    22.531 |    0.10 |   27 | 0.0019 |      32 B |          NA |
+ Dapper_TypeHandler_Parse                  | .NET 8.0  | .NET 8.0  |   0.8984 ns | 0.0038 ns | 0.0032 ns |   0.8986 ns |     2.691 |    0.01 |   12 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertToProvider   | .NET 8.0  | .NET 8.0  |  10.7946 ns | 0.0041 ns | 0.0038 ns |  10.7957 ns |    32.329 |    0.08 |   32 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertFromProvider | .NET 8.0  | .NET 8.0  |   1.6666 ns | 0.0078 ns | 0.0065 ns |   1.6656 ns |     4.991 |    0.02 |   17 |      - |         - |          NA |
+ Dapper_TypeHandler_SetValue               | .NET 9.0  | .NET 9.0  |   1.9646 ns | 0.0024 ns | 0.0022 ns |   1.9642 ns |     5.884 |    0.02 |   18 |      - |         - |          NA |
+ Dapper_TypeHandler_Parse                  | .NET 9.0  | .NET 9.0  |   0.9165 ns | 0.0058 ns | 0.0046 ns |   0.9162 ns |     2.745 |    0.01 |   12 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertToProvider   | .NET 9.0  | .NET 9.0  |   1.1574 ns | 0.0051 ns | 0.0045 ns |   1.1593 ns |     3.466 |    0.02 |   15 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertFromProvider | .NET 9.0  | .NET 9.0  |   0.9159 ns | 0.0042 ns | 0.0039 ns |   0.9151 ns |     2.743 |    0.01 |   12 |      - |         - |          NA |
+ Dapper_TypeHandler_SetValue               | .NET 9.0  | .NET 9.0  |   1.0301 ns | 0.0019 ns | 0.0016 ns |   1.0301 ns |     3.085 |    0.01 |   13 |      - |         - |          NA |
+ Dapper_TypeHandler_Parse                  | .NET 9.0  | .NET 9.0  |   1.1017 ns | 0.0017 ns | 0.0014 ns |   1.1019 ns |     3.299 |    0.01 |   14 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertToProvider   | .NET 9.0  | .NET 9.0  |   1.1597 ns | 0.0021 ns | 0.0019 ns |   1.1597 ns |     3.473 |    0.01 |   15 |      - |         - |          NA |
+ EFCore_ValueConverter_ConvertFromProvider | .NET 9.0  | .NET 9.0  |   0.9177 ns | 0.0029 ns | 0.0027 ns |   0.9171 ns |     2.749 |    0.01 |   12 |      - |         - |          NA |

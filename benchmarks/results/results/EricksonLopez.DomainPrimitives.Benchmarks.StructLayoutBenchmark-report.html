@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>EricksonLopez.DomainPrimitives.Benchmarks.StructLayoutBenchmark-20260816-041356</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
+AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 10.0.400
+  [Host]    : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  .NET 10.0 : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  .NET 8.0  : .NET 8.0.30 (8.0.30, 8.0.3026.36720), X64 RyuJIT x86-64-v3
+  .NET 9.0  : .NET 9.0.19 (9.0.19, 9.0.1926.36724), X64 RyuJIT x86-64-v3
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method  </th><th>Job</th><th>Runtime</th><th>ArraySize</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>IterateDefault</td><td>.NET 10.0</td><td>.NET 10.0</td><td>10000</td><td>3.448 &mu;s</td><td>0.0039 &mu;s</td><td>0.0035 &mu;s</td><td>1.04</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 10.0</td><td>.NET 10.0</td><td>10000</td><td>3.311 &mu;s</td><td>0.0235 &mu;s</td><td>0.0220 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 8.0</td><td>.NET 8.0</td><td>10000</td><td>3.300 &mu;s</td><td>0.0107 &mu;s</td><td>0.0095 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 8.0</td><td>.NET 8.0</td><td>10000</td><td>3.293 &mu;s</td><td>0.0035 &mu;s</td><td>0.0029 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 9.0</td><td>.NET 9.0</td><td>10000</td><td>3.183 &mu;s</td><td>0.0037 &mu;s</td><td>0.0031 &mu;s</td><td>0.96</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 9.0</td><td>.NET 9.0</td><td>10000</td><td>3.187 &mu;s</td><td>0.0041 &mu;s</td><td>0.0038 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 10.0</td><td>.NET 10.0</td><td>100000</td><td>35.041 &mu;s</td><td>0.0429 &mu;s</td><td>0.0358 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 10.0</td><td>.NET 10.0</td><td>100000</td><td>35.827 &mu;s</td><td>0.0461 &mu;s</td><td>0.0432 &mu;s</td><td>0.99</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 8.0</td><td>.NET 8.0</td><td>100000</td><td>36.199 &mu;s</td><td>0.0825 &mu;s</td><td>0.0689 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 8.0</td><td>.NET 8.0</td><td>100000</td><td>37.080 &mu;s</td><td>0.0256 &mu;s</td><td>0.0227 &mu;s</td><td>1.02</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 9.0</td><td>.NET 9.0</td><td>100000</td><td>35.000 &mu;s</td><td>0.0463 &mu;s</td><td>0.0410 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 9.0</td><td>.NET 9.0</td><td>100000</td><td>36.218 &mu;s</td><td>0.0610 &mu;s</td><td>0.0541 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr></tbody></table>
+</body>
+</html>
