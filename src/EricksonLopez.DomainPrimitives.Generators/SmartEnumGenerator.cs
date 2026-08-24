@@ -1,13 +1,13 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using EricksonLopez.DomainPrimitives.Generators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
-using EricksonLopez.DomainPrimitives.Generators.Models;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
 
@@ -32,15 +32,11 @@ internal sealed class SmartEnumGenerator : IIncrementalGenerator
         });
     }
 
-    private static SmartEnumTypeInfo? ExtractTypeInfo(GeneratorSyntaxContext context, CancellationToken ct)
-        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
-
-    private static SmartEnumTypeInfo? ExtractTypeInfo(SemanticModel semanticModel, RecordDeclarationSyntax recordSyntax, CancellationToken ct)
+    internal static SmartEnumTypeInfo? ExtractTypeInfo(SemanticModel semanticModel, RecordDeclarationSyntax recordSyntax, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        if (semanticModel.GetDeclaredSymbol(recordSyntax, ct) is not INamedTypeSymbol typeSymbol)
-            return null;
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(recordSyntax, ct)!;
 
         AttributeData? smartEnumAttr = null;
         foreach (var attr in typeSymbol.GetAttributes())
@@ -65,7 +61,7 @@ internal sealed class SmartEnumGenerator : IIncrementalGenerator
         var members = new List<string>();
         foreach (var member in typeSymbol.GetMembers())
         {
-            if (member is IFieldSymbol { IsStatic: true, IsReadOnly: true } field &&
+            if (member is IFieldSymbol { IsStatic: true, IsReadOnly: true, IsImplicitlyDeclared: false } field &&
                 SymbolEqualityComparer.Default.Equals(field.Type, typeSymbol))
             {
                 members.Add(field.Name);
@@ -77,10 +73,11 @@ internal sealed class SmartEnumGenerator : IIncrementalGenerator
             }
         }
 
-        return new SmartEnumTypeInfo(ns, typeName, backingFullName, new EquatableArray<string>(members), isReferenceType);
+        var defaults = GeneratorHelpers.ExtractAssemblyDefaults(semanticModel.Compilation);
+        return new SmartEnumTypeInfo(ns, typeName, backingFullName, new EquatableArray<string>(members), isReferenceType, defaults.ExceptionTypeFullName);
     }
 
-    private static string GenerateSmartEnum(SmartEnumTypeInfo info)
+    internal static string GenerateSmartEnum(SmartEnumTypeInfo info)
     {
         var sb = new SourceBuilder();
 
@@ -194,7 +191,14 @@ internal sealed class SmartEnumGenerator : IIncrementalGenerator
         sb.AppendLine($"public static {info.TypeName} FromValue({info.BackingTypeName} value)");
         sb.OpenBrace();
         sb.AppendLine($"if (TryFromValue(value, out var result)) return result;");
-        sb.AppendLine($"throw new ArgumentException($\"No {info.TypeName} found with value {{value}}\", nameof(value));");
+        if (!string.IsNullOrEmpty(info.CustomExceptionType))
+        {
+            sb.AppendLine($"throw new {info.CustomExceptionType}($\"No {info.TypeName} found with value {{value}}\");");
+        }
+        else
+        {
+            sb.AppendLine($"throw new ArgumentException($\"No {info.TypeName} found with value {{value}}\", nameof(value));");
+        }
         sb.CloseBrace();
         sb.AppendLine();
 
@@ -231,10 +235,17 @@ internal sealed class SmartEnumGenerator : IIncrementalGenerator
         sb.CloseBrace();
         sb.AppendLine();
 
-        sb.AppendLine($"public static {info.TypeName} FromName(string name)");
+        sb.AppendLine($"public static {info.TypeName} FromName(string name, bool ignoreCase = false)");
         sb.OpenBrace();
-        sb.AppendLine($"if (TryFromName(name, out var result)) return result;");
-        sb.AppendLine($"throw new ArgumentException($\"No {info.TypeName} found with name {{name}}\", nameof(name));");
+        sb.AppendLine($"if (TryFromName(name, ignoreCase, out var result)) return result;");
+        if (!string.IsNullOrEmpty(info.CustomExceptionType))
+        {
+            sb.AppendLine($"throw new {info.CustomExceptionType}($\"No {info.TypeName} found with name '{{name}}'\");");
+        }
+        else
+        {
+            sb.AppendLine($"throw new ArgumentException($\"No {info.TypeName} found with name {{name}}\", nameof(name));");
+        }
         sb.CloseBrace();
         sb.AppendLine();
 
@@ -351,4 +362,7 @@ internal sealed class SmartEnumGenerator : IIncrementalGenerator
         return sb.ToString();
     }
 }
+
+
+
 

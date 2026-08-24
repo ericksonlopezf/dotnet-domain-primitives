@@ -1,11 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
 using EricksonLopez.DomainPrimitives.Generators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -51,7 +52,7 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
             merged = merged.Collect().Combine(additional.Collect())
                 .SelectMany(static (pair, _) =>
                 {
-                    var list = new System.Collections.Generic.List<DatePrimitiveTypeInfo?>(pair.Left.Length + pair.Right.Length);
+                    var list = new List<DatePrimitiveTypeInfo?>();
                     list.AddRange(pair.Left);
                     list.AddRange(pair.Right);
                     return list;
@@ -64,8 +65,8 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
             .Collect()
             .SelectMany(static (all, _) =>
             {
-                var seen = new System.Collections.Generic.HashSet<string>();
-                var result = new System.Collections.Generic.List<DatePrimitiveTypeInfo>();
+                var seen = new HashSet<string>();
+                var result = new List<DatePrimitiveTypeInfo>();
                 foreach (var info in all)
                     if (seen.Add($"{info.Namespace}.{info.TypeName}"))
                         result.Add(info);
@@ -79,21 +80,14 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
         });
     }
 
-    private static DatePrimitiveTypeInfo? ExtractTypeInfo(
-        GeneratorSyntaxContext context,
-        CancellationToken ct)
-        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
-
-    private static DatePrimitiveTypeInfo? ExtractTypeInfo(
+    internal static DatePrimitiveTypeInfo? ExtractTypeInfo(
         SemanticModel semanticModel,
         RecordDeclarationSyntax recordSyntax,
         CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(recordSyntax, ct) as INamedTypeSymbol;
-        if (typeSymbol is null)
-            return null;
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(recordSyntax, ct)!;
 
         var attributes = typeSymbol.GetAttributes();
 
@@ -170,7 +164,6 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
 
         var backingTypeName = kind switch
         {
-            "DateOnly" => "System.DateOnly",
             "DateTime" => "System.DateTime",
             "DateTimeOffset" => "System.DateTimeOffset",
             "TimeOnly" => "System.TimeOnly",
@@ -178,12 +171,14 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
         };
 
         var containingType = typeSymbol.ContainingType;
-        var containingList = new System.Collections.Generic.List<string>();
+        var containingList = new List<string>();
         while (containingType is not null)
         {
             containingList.Insert(0, containingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             containingType = containingType.ContainingType;
         }
+
+        var defaults = GeneratorHelpers.ExtractAssemblyDefaults(semanticModel.Compilation);
 
         return new DatePrimitiveTypeInfo(
             Namespace: typeSymbol.ContainingNamespace.ToDisplayString(),
@@ -191,7 +186,6 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
             BackingTypeName: backingTypeName,
             Accessibility: typeSymbol.DeclaredAccessibility switch
             {
-                Accessibility.Public => "public",
                 Accessibility.Internal => "internal",
                 Accessibility.Protected => "protected",
                 Accessibility.Private => "private",
@@ -204,10 +198,11 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
             PastOnly: pastOnly,
             FutureOnly: futureOnly,
             MaxAge: maxAge,
-            DomainShortcut: domainShortcut);
+            DomainShortcut: domainShortcut,
+            CustomExceptionType: defaults.ExceptionTypeFullName);
     }
 
-    private static string GenerateDatePrimitive(DatePrimitiveTypeInfo info)
+    internal static string GenerateDatePrimitive(DatePrimitiveTypeInfo info)
     {
         var sb = new SourceBuilder();
 
@@ -311,7 +306,14 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
         sb.AppendLine($"var error = TryValidate(value);");
         sb.AppendLine("if (error.IsError)");
         sb.OpenBrace();
-        sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        if (!string.IsNullOrEmpty(info.CustomExceptionType))
+        {
+            sb.AppendLine($"throw new {info.CustomExceptionType}(error.Message);");
+        }
+        else
+        {
+            sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        }
         sb.CloseBrace();
         sb.CloseBrace();
         sb.AppendLine();
@@ -325,7 +327,6 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
             var nowExpr = info.Kind switch
             {
                 "DateOnly" => "DateOnly.FromDateTime(DateTime.UtcNow)",
-                "DateTime" => "DateTime.UtcNow",
                 "DateTimeOffset" => "DateTimeOffset.UtcNow",
                 "TimeOnly" => "TimeOnly.FromDateTime(DateTime.UtcNow)",
                 _ => "DateTime.UtcNow"
@@ -610,6 +611,10 @@ internal sealed class DatePrimitiveGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 }
+
+
+
+
 
 
 

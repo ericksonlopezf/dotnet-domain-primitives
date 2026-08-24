@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
+using EricksonLopez.DomainPrimitives.Validation;
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Marker interface for strongly-typed identifiers.
+/// Defines the contract for strongly-typed identifiers.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -45,7 +41,7 @@ public interface IStrongId<TSelf, TValue> : IDomainPrimitive<TSelf, TValue>
 
 #if NET7_0_OR_GREATER
     /// <summary>
-    /// The empty/uninitialized sentinel value.
+    /// Gets the empty or uninitialized sentinel value for this identifier type.
     /// </summary>
     /// <remarks>
     /// Equivalent to <c>default</c> for the backing type, but explicitly named
@@ -54,3 +50,5 @@ public interface IStrongId<TSelf, TValue> : IDomainPrimitive<TSelf, TValue>
     static abstract TSelf Empty { get; }
 #endif
 }
+
+

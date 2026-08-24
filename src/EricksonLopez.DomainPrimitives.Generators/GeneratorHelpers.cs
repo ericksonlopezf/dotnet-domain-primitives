@@ -1,16 +1,16 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
 
-[ExcludeFromCodeCoverage]
 internal static class GeneratorHelpers
 {
     public static string ResolveSpecialType(ITypeSymbol type)
@@ -35,6 +35,37 @@ internal static class GeneratorHelpers
             _ => type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Replace("global::", "")
         };
     }
+
+    public static Models.AssemblyDefaultsInfo ExtractAssemblyDefaults(Compilation compilation)
+    {
+        bool trim = false;
+        bool notEmpty = false;
+        int? maxLength = null;
+        string? exceptionTypeFullName = null;
+
+        foreach (var attr in compilation.Assembly.GetAttributes())
+        {
+            var attrClass = attr.AttributeClass;
+            if (attrClass?.Name is "DomainPrimitivesDefaultsAttribute" or "DomainPrimitivesDefaults" &&
+                attrClass.ContainingNamespace?.ToDisplayString().StartsWith("EricksonLopez.DomainPrimitives", StringComparison.Ordinal) == true)
+            {
+                foreach (var named in attr.NamedArguments)
+                {
+                    if (named.Key == "Trim" && named.Value.Value is bool t)
+                        trim = t;
+                    else if (named.Key == "NotEmpty" && named.Value.Value is bool ne)
+                        notEmpty = ne;
+                    else if (named.Key == "MaxLength" && named.Value.Value is int ml)
+                        maxLength = ml;
+                    else if (named.Key == "ExceptionType" && named.Value.Value is INamedTypeSymbol excType)
+                        exceptionTypeFullName = excType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+            }
+        }
+
+        return new Models.AssemblyDefaultsInfo(trim, notEmpty, maxLength, exceptionTypeFullName);
+    }
+
     public static void GenerateJsonConverter(SourceBuilder sb, string typeName, string backingType)
     {
         sb.AppendLine("// ─── JSON Serialization ───────────────────────────────────────────────");
@@ -87,19 +118,19 @@ internal static class GeneratorHelpers
             sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
             sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
         }
-        else if (backingType == "System.Guid" || backingType == "global::System.Guid")
+        else if (backingType is "Guid" or "global::Guid" or "System.Guid" or "global::System.Guid")
         {
             sb.AppendLine($"if (!reader.TryGetGuid(out var value)) throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: expected Guid.\");");
             sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
             sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
         }
-        else if (backingType == "System.DateTime" || backingType == "global::System.DateTime")
+        else if (backingType is "DateTime" or "global::DateTime" or "System.DateTime" or "global::System.DateTime")
         {
             sb.AppendLine($"if (!reader.TryGetDateTime(out var value)) throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: expected DateTime.\");");
             sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
             sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
         }
-        else if (backingType == "System.DateTimeOffset" || backingType == "global::System.DateTimeOffset")
+        else if (backingType is "DateTimeOffset" or "global::DateTimeOffset" or "System.DateTimeOffset" or "global::System.DateTimeOffset")
         {
             sb.AppendLine($"if (!reader.TryGetDateTimeOffset(out var value)) throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: expected DateTimeOffset.\");");
             sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
@@ -141,4 +172,6 @@ internal static class GeneratorHelpers
         sb.AppendLine();
     }
 }
+
+
 

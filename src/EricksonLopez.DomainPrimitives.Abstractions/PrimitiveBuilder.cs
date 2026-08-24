@@ -1,7 +1,9 @@
-namespace EricksonLopez.DomainPrimitives.Advanced;
-
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+
+namespace EricksonLopez.DomainPrimitives.Advanced;
+
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using EricksonLopez.DomainPrimitives;
@@ -33,9 +35,9 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
     public static PrimitiveBuilder<TPrimitive, TValue> For() => new();
 
     /// <summary>
-    /// Sets the backing value for the primitive.
+    /// Sets the backing value for the primitive to build.
     /// </summary>
-    /// <param name="value">The raw value.</param>
+    /// <param name="value">The raw value to configure.</param>
     /// <returns>The builder instance for chaining.</returns>
     public PrimitiveBuilder<TPrimitive, TValue> WithValue(TValue value)
     {
@@ -44,11 +46,11 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
     }
 
     /// <summary>
-    /// Appends a custom rule predicate to the builder pipeline.
+    /// Appends a custom validation rule predicate to the builder pipeline.
     /// </summary>
-    /// <param name="predicate">Predicate function returning true if valid.</param>
-    /// <param name="errorCode">Error code if validation fails.</param>
-    /// <param name="errorMessage">Error message if validation fails.</param>
+    /// <param name="predicate">A predicate function returning <see langword="true"/> if the value is valid.</param>
+    /// <param name="errorCode">The error code identifying the failure when validation fails.</param>
+    /// <param name="errorMessage">The human-readable description of the error when validation fails.</param>
     /// <returns>The builder instance for chaining.</returns>
     public PrimitiveBuilder<TPrimitive, TValue> Must(Func<TValue, bool> predicate, string errorCode, string errorMessage)
     {
@@ -57,15 +59,14 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
     }
 
     /// <summary>
-    /// Validates and constructs the domain primitive instance. Throws <see cref="DomainPrimitiveValidationException"/> on failure.
+    /// Validates and constructs the domain primitive instance.
     /// </summary>
     /// <returns>A valid domain primitive instance.</returns>
-    /// <exception cref="DomainPrimitiveValidationException">Thrown when validation fails or value is missing.</exception>
+    /// <exception cref="DomainPrimitiveValidationException">Validation fails or the value was not provided</exception>
     public TPrimitive BuildOrThrow()
     {
         if (_value is null)
         {
-            // Stryker disable once String
             throw new DomainPrimitiveValidationException(new PrimitiveError("NULL_INPUT", "Value was not provided to PrimitiveBuilder."), "value");
         }
 
@@ -74,7 +75,6 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
             var err = rule(_value);
             if (err.IsError)
             {
-                // Stryker disable once String
                 throw new DomainPrimitiveValidationException(err, "value");
             }
         }
@@ -87,10 +87,10 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
     }
 
     /// <summary>
-    /// Validates and constructs the domain primitive instance.
+    /// Attempts to validate and construct the domain primitive instance without throwing exceptions.
     /// </summary>
-    /// <param name="result">The constructed instance if successful; <c>default</c> otherwise.</param>
-    /// <returns><c>true</c> if creation succeeded; otherwise <c>false</c>.</returns>
+    /// <param name="result">When this method returns <see langword="true"/>, contains the constructed domain primitive instance; otherwise, the default value for <typeparamref name="TPrimitive"/>.</param>
+    /// <returns><see langword="true"/> if creation succeeded; otherwise, <see langword="false"/>.</returns>
     public bool Build(out TPrimitive result)
     {
         if (_value is null)
@@ -115,30 +115,8 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
         throw new NotSupportedException("PrimitiveBuilder requires .NET 7.0 or greater for static abstract interface members.");
 #endif
     }
-
-    /// <summary>
-    /// Deprecated. Use <see cref="Build(out TPrimitive)"/> instead.
-    /// </summary>
-    /// <remarks>
-    /// <strong>DEPRECATED:</strong> <c>BuildResult()</c> has been removed because it depended on
-    /// <c>EricksonLopez.Result</c> which is no longer a dependency of this library.
-    /// Use <see cref="Build(out TPrimitive)"/> for a non-throwing creation path, or
-    /// <see cref="BuildOrThrow()"/> to throw on failure.
-    /// Will be removed in v3.0.
-    /// </remarks>
-    /// <returns>Nothing — always throws.</returns>
-    /// <exception cref="NotSupportedException">Always thrown — this method is a stub for binary compatibility only.</exception>
-    [Obsolete(
-        "BuildResult() is deprecated and no longer functional. The EricksonLopez.Result dependency was removed. " +
-        "Use Build(out TPrimitive result) for a non-throwing creation path, or BuildOrThrow() to throw on failure. " +
-        "Will be removed in v3.0. See BREAKING_CHANGES.md.",
-        error: false)]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [ExcludeFromCodeCoverage]
-    public object BuildResult()
-    {
-        throw new NotSupportedException(
-            "BuildResult() is deprecated and no longer functional. The EricksonLopez.Result dependency was removed. " +
-            "Use Build(out TPrimitive result) or BuildOrThrow() instead.");
-    }
 }
+
+
+
+

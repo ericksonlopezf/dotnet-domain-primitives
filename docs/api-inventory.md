@@ -98,13 +98,13 @@ This inventory was derived from `PublicAPI.Shipped.txt` and `PublicAPI.Unshipped
 
 | Attribute | Status | Replacement |
 |:----------|:-------|:------------|
-| `FluentValidationAttribute` | `[Obsolete]` — package removed per RFC-0004 | Use `TryCreate` at application boundary |
+| `FluentValidationAttribute` | `[Obsolete]` — package removed per rfc-0004 | Use `TryCreate` at application boundary |
 | `EFCoreAttribute` | `[Obsolete]` — auto-discovery replaces per-type attribute | Remove attribute; install EFCore package |
 | `DapperAttribute` | `[Obsolete]` — auto-discovery replaces per-type attribute | Remove attribute; install Dapper package |
 | `AspNetCoreAttribute` | `[Obsolete]` — auto-discovery replaces per-type attribute | Remove attribute; install AspNetCore package |
 | `OpenApiAttribute` | `[Obsolete]` — auto-discovery replaces per-type attribute | Remove attribute; install OpenApi package |
 | `MapsterAttribute` | `[Obsolete]` — auto-discovery replaces per-type attribute | Remove attribute; install Mapster package |
-| `JsonAttribute` | `[Obsolete]` — STJ converters are now inline-generated (ADR-011) | No replacement needed; converters auto-generated |
+| `JsonAttribute` | `[Obsolete]` — STJ converters are now inline-generated (adr-011) | No replacement needed; converters auto-generated |
 
 ## Interfaces — `EricksonLopez.DomainPrimitives` Namespace
 
@@ -117,22 +117,22 @@ This inventory was derived from `PublicAPI.Shipped.txt` and `PublicAPI.Unshipped
 
 ## Exceptions
 
-| Type | Assembly | Notes |
-|:-----|:---------|:------|
-| `DomainPrimitiveValidationException` | Core | Thrown by `Create()` on invalid input |
-| `DomainPrimitiveFormatException` | Core | ⚠️ Deprecated — `Parse()` now throws `System.FormatException` per RFC-0003 |
+| Type | Assembly | Namespace | Notes |
+|:-----|:---------|:----------|:------|
+| `DomainPrimitiveValidationException` | Core | `EricksonLopez.DomainPrimitives` | Thrown by `Create()`. Inherits `ArgumentException`. Access `.Error` (`PrimitiveError`) for structured error info. |
+| `DomainPrimitiveFormatException` | Core | `EricksonLopez.DomainPrimitives` | ⚠️ Deprecated — `Parse()` now throws `System.FormatException` per rfc-0003 |
 
 ## Enums
 
 | Type | Values | Notes |
 |:-----|:-------|:------|
-| `NumericOperations` | `None`, `Addition`, `Subtraction`, `Multiplication`, `Division` | Bitflags for generated arithmetic operators |
+| `NumericOperations` | `None`, `Addition`, `Subtraction`, `ScalarMultiplication`, `ScalarDivision`, `Negation`, `Additive`, `Multiplicative`, `All` | Bitflags for generated arithmetic operators |
 | `ArithmeticPolicy` | ⚠️ Deprecated alias for `NumericOperations` | Per AUDIT-CRIT-004 |
-| `DatePrimitiveKind` | `DateOnly`, `DateTime` | |
+| `DatePrimitiveKind` | `DateOnly`, `DateTime`, `DateTimeOffset`, `TimeOnly` | Backing type selector for `[DatePrimitive]` |
 
 ## Diagnostics — `EricksonLopez.DomainPrimitives.Diagnostics` Namespace
 
-> **Note:** These types moved from `Abstractions.dll` to `Core.dll` in v1.2.0 (binary-breaking — see BREAKING_CHANGES.md A-06).
+> **Note:** These types are provided by `EricksonLopez.DomainPrimitives` (Core package) since v1.0.0.
 
 | Type | Purpose |
 |:-----|:--------|
@@ -149,8 +149,7 @@ This inventory was derived from `PublicAPI.Shipped.txt` and `PublicAPI.Unshipped
 |:-----|:--------|
 | `ICustomValidator<T>` | Contract for custom validators used with `[CustomValidator<T>]` |
 | `CustomValidatorAttribute<TValidator>` | Applies a custom `ICustomValidator<T>` to a primitive |
-| `ValidationError` | Struct representing a single validation error |
-| `ValidationErrors` | Collection of `ValidationError` used in `ValueObject.Validate()` |
+| `PrimitiveError` | Zero-allocation `readonly record struct` representing a single validation error. Contains `Code`, `Message`, `IsError`, `None`, and `Create()` members. |
 
 ## Testing — `EricksonLopez.DomainPrimitives.Testing` Namespace
 
@@ -166,6 +165,6 @@ This inventory was derived from `PublicAPI.Shipped.txt` and `PublicAPI.Unshipped
 
 | Type | Namespace | Purpose |
 |:-----|:----------|:--------|
-| `PrimitiveBuilder<TPrimitive, TValue>` | `EricksonLopez.DomainPrimitives` | Fluent builder for test/sample construction |
+| `PrimitiveBuilder<TPrimitive, TValue>` | `EricksonLopez.DomainPrimitives.Advanced` | Fluent builder for test/sample construction |
 | `PrimitiveCollectionExtensions` | `EricksonLopez.DomainPrimitives` | LINQ extension methods for collections of domain primitives |
-| `PrimitiveError` | `EricksonLopez.DomainPrimitives` | Zero-allocation error struct for `TryCreate` out parameter |
+| `PrimitiveError` | `EricksonLopez.DomainPrimitives.Validation` | Zero-allocation error struct for `TryCreate` out parameter |

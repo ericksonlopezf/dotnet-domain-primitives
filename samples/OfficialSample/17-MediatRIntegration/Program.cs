@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 17: MEDIATR & CQRS INTEGRATION WITH RESULT<T>
 // ============================================================================
@@ -13,7 +10,11 @@ using System.Threading.Tasks;
 // 2. Elimination of try-catch around the MediatR invocation.
 // 3. Pipeline Behaviors: Intercept commands for pre-validation without interrupting with exceptions.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Chapter17;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
@@ -41,7 +42,7 @@ if (okResult.IsSuccess)
 
 Console.WriteLine("\n--- 🛑 AUTOMATIC VALIDATION IN PIPELINE BEHAVIOR ---");
 
-var invalidCommand = new CreateCustomerCommand("Ana", "email-invalido");
+var invalidCommand = new CreateCustomerCommand("Ana", "invalid-email");
 var errorResult = await pipeline.Handle(invalidCommand, () => handler.Handle(invalidCommand));
 
 if (errorResult.IsFailure)
@@ -97,5 +98,8 @@ namespace Chapter17
         }
     }
 }
+
+
+
 
 

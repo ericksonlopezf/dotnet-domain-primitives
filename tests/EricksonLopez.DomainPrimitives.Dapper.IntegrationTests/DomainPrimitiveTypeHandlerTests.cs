@@ -1,9 +1,11 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Data;
 using System.Globalization;
+using System.Linq;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Dapper;
-using FluentAssertions;
 using NSubstitute;
 using Xunit;
 
@@ -95,7 +97,6 @@ public class DomainPrimitiveTypeHandlerTests
         public ulong ToUInt64(IFormatProvider? provider) => throw new NotImplementedException();
     }
 
-#if NET7_0_OR_GREATER
     [Fact]
     public void SetValue_ShouldSetCorrectParameterValue()
     {
@@ -120,7 +121,8 @@ public class DomainPrimitiveTypeHandlerTests
         // Act & Assert
         Action act = () => handler.Parse(null!);
         act.Should().Throw<DomainPrimitiveValidationException>()
-           .WithMessage("*Cannot parse null database value*");
+           .WithMessage("*Cannot parse null database value*")
+           .Where(e => e.Error.Code == "NULL_INPUT");
     }
 
     [Fact]
@@ -132,7 +134,8 @@ public class DomainPrimitiveTypeHandlerTests
         // Act & Assert
         Action act = () => handler.Parse(DBNull.Value);
         act.Should().Throw<DomainPrimitiveValidationException>()
-           .WithMessage("*Cannot parse null database value*");
+           .WithMessage("*Cannot parse null database value*")
+           .Where(e => e.Error.Code == "NULL_INPUT");
     }
 
     [Fact]
@@ -185,7 +188,8 @@ public class DomainPrimitiveTypeHandlerTests
         // Act & Assert
         Action act = () => handler.Parse("invalid-guid");
         act.Should().Throw<DomainPrimitiveValidationException>()
-           .WithMessage("*Failed to convert database value*");
+           .WithMessage("*Failed to convert database value*")
+           .Where(e => e.Error.Code == "INVALID_CAST");
     }
 
     [Fact]
@@ -228,15 +232,108 @@ public class DomainPrimitiveTypeHandlerTests
     }
 
     [Fact]
-    public void Parse_WithInvalidType_ShouldThrowDomainPrimitiveValidationException()
+    public void SetValue_WithDefaultPrimitive_ShouldSetDefaultValue()
     {
         // Arrange
         var handler = new DomainPrimitiveTypeHandler<StubPrimitive, string>();
+        var parameter = Substitute.For<IDbDataParameter>();
+        var defaultPrimitive = default(StubPrimitive);
+
+        // Act
+        handler.SetValue(parameter, defaultPrimitive);
+
+        // Assert
+        parameter.Received().Value = null;
+    }
+
+    private readonly struct DecimalStubPrimitive : IDomainPrimitive<DecimalStubPrimitive, decimal>
+    {
+        public decimal Value { get; }
+        public static string PrimitiveName => "DecimalStubPrimitive";
+        public bool IsDefault => Value == 0m;
+
+        public DecimalStubPrimitive(decimal value) => Value = value;
+        public static DecimalStubPrimitive Create(decimal value) => new(value);
+        public static bool TryCreate(decimal value, out DecimalStubPrimitive result, out global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError validationError)
+        {
+            validationError = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;
+            result = new DecimalStubPrimitive(value);
+            return true;
+        }
+    }
+
+    [Theory]
+    [InlineData((int)42, 42.0)]
+    [InlineData((long)100, 100.0)]
+    [InlineData((double)12.5, 12.5)]
+    [InlineData("99.99", 99.99)]
+    public void Parse_WithNumericConversions_ShouldReturnDecimalPrimitive(object rawValue, double expected)
+    {
+        // Arrange
+        var handler = new DomainPrimitiveTypeHandler<DecimalStubPrimitive, decimal>();
+
+        // Act
+        var result = handler.Parse(rawValue);
+
+        // Assert
+        result.Value.Should().Be((decimal)expected);
+    }
+
+    [Fact]
+    public void Parse_WithEmptyStringForGuid_ShouldThrowDomainPrimitiveValidationException()
+    {
+        // Arrange
+        var handler = new DomainPrimitiveTypeHandler<GuidStubPrimitive, Guid>();
 
         // Act & Assert
-        Action act = () => handler.Parse(new object()); // Cannot cast object to string
+        Action act = () => handler.Parse(string.Empty);
         act.Should().Throw<DomainPrimitiveValidationException>()
-           .WithMessage("*Failed to convert database value*");
+           .WithMessage("*Failed to convert database value*")
+           .Where(e => e.Error.Code == "INVALID_CAST");
     }
-#endif
+
+    [Fact]
+    public void Parse_WithNonConvertibleCustomObject_ShouldThrowDomainPrimitiveValidationException()
+    {
+        // Arrange
+        var handler = new DomainPrimitiveTypeHandler<StubPrimitive, string>();
+        var customObject = new Tuple<int, int>(1, 2);
+
+        // Act & Assert
+        Action act = () => handler.Parse(customObject);
+        act.Should().Throw<DomainPrimitiveValidationException>()
+           .WithMessage("*Failed to convert database value*")
+           .Where(e => e.Error.Code == "INVALID_CAST");
+    }
+
+    [Fact]
+    public void Parse_WithInvalidNumericStringForDecimal_ShouldThrowDomainPrimitiveValidationException()
+    {
+        // Arrange
+        var handler = new DomainPrimitiveTypeHandler<DecimalStubPrimitive, decimal>();
+
+        // Act & Assert
+        Action act = () => handler.Parse("not-a-decimal-value");
+        act.Should().Throw<DomainPrimitiveValidationException>()
+           .WithMessage("*Failed to convert database value*")
+           .Where(e => e.Error.Code == "INVALID_CAST");
+    }
+
+    [Fact]
+    public void Parse_WithInconvertibleDoubleNaN_ShouldThrowDomainPrimitiveValidationException()
+    {
+        // Arrange
+        var handler = new DomainPrimitiveTypeHandler<DecimalStubPrimitive, decimal>();
+
+        // Act & Assert
+        Action act = () => handler.Parse(double.NaN);
+        act.Should().Throw<DomainPrimitiveValidationException>()
+           .WithMessage("*Failed to convert database value*")
+           .Where(e => e.Error.Code == "INVALID_CAST");
+    }
 }
+
+
+
+
+

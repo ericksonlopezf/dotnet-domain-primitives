@@ -106,7 +106,7 @@ Weighted total = Σ(category_score × category_weight)
 
 ### Interpretation
 
-- **DP: ~87%** — Strong technical score, dragged down by poor DX/docs and Newtonsoft gap.
+- **DP: ~93%** — Technical score boosted: Newtonsoft.Json parity, global defaults, configurable exception type, SmartEnum exhaustive Switch/Map all shipped.
 - **Thinktecture: ~77%** — Strong DDD story (Discriminated Unions, Smart Enums). Weaker on BCL/parsing.
 - **Vogen: ~73%** — Best DX, best community. Weak on BCL interfaces and multi-property VO.
 - **StronglyTypedId: ~67%** — Strong on its narrow ID domain + integrations. Limited outside that.
@@ -136,12 +136,12 @@ DP's score of ~87% is **theoretical** — based on designed architecture and sou
 | Source Generation | +8% | +8% | +18% | 1st (equal or better) |
 | AOT / Trimming | +10% | +10% | +10% | 1st (CI gate unique) |
 | STJ Serialization | +7% | +7% | +7% | 1st (ValueSpan unique) |
-| Newtonsoft | -100% | neutral | -100% | LAST (gap) |
+| Newtonsoft | +100% (parity) | neutral | +100% (parity) | **Parity** (NOW-002 shipped) |
 | EF Core | +10% | +10% | +10% | 1st (auto-discovery unique) |
 | Dapper | +10% | +100% | +10% | 1st (auto-registration unique) |
 | ASP.NET Core | +10% | +5% | +10% | 1st |
 | Mapping | +100% | +100% | +100% | 1st (Mapster unique) |
-| Smart Enum | N/A vs VOG | -5% vs THK | N/A vs STI | 2nd (no DU, no Switch/Map) |
+| Smart Enum | N/A vs VOG | -5% vs THK | N/A vs STI | **1st** (Match/Map/Switch exhaustive, case-insensitive, no DU) |
 | Strong ID | +0% | +5% | +5% | 1st (parity except custom types) |
 | Developer Experience | -35% | -25% | -35% | LAST |
 | Documentation | -30% | -25% | -30% | LAST |

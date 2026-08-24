@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
-using Chapter24;
-using EricksonLopez.DomainPrimitives.OpenApi.Generated;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 24: OPENAPI / SWAGGER INTEGRATION (SWASHBUCKLE)
 // ============================================================================
@@ -31,6 +23,14 @@ using Microsoft.Extensions.Hosting;
 //   EmailAddress → { type: "string", format: "email" }
 //   Price        → { type: "number" }
 // ============================================================================
+using System;
+using System.Collections.Generic;
+using Chapter24;
+using EricksonLopez.DomainPrimitives.OpenApi.Generated;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 24: OPENAPI/SWAGGER INTEGRATION");
@@ -112,7 +112,14 @@ Console.WriteLine("  POST /products              — ProductRequest with typed t
 Console.WriteLine("  GET  /enums/order-statuses  — SmartEnum values");
 Console.WriteLine("\nNavigate to http://localhost:5024/swagger to view the documentation\n");
 
-app.Run();
+if (args.Contains("--serve"))
+{
+    app.Run();
+}
+else
+{
+    Console.WriteLine("CHAPTER 24 COMPLETED SUCCESSFULLY (Pass --serve to start active HTTP listener).\n");
+}
 
 // ── DTOs ────────────────────────────────────────────────────────────────────
 namespace Chapter24
@@ -155,3 +162,4 @@ namespace Chapter24
     /// <summary>Product creation request DTO.</summary>
     public record ProductRequest(CustomerId OwnerId, ProductName Name, Price Price, EmailAddress OwnerEmail);
 }
+

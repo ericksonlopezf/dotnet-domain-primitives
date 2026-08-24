@@ -1,15 +1,7 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using EricksonLopez.DomainPrimitives;
 
-
-
-namespace EricksonLopez.DomainPrimitives.Tests.TestTypes;
+namespace EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
 
 /// <summary>
 /// Basic string primitive with trim + length validation.
@@ -79,3 +71,13 @@ public readonly partial record struct ApiSecret;
 [MinLength(1)]
 [MaxLength(254)]
 public readonly partial record struct LowercaseTag;
+
+/// <summary>
+/// Unconstrained string primitive with no explicit MaxLength to test the default 4096 security ceiling (SEC-001).
+/// </summary>
+#pragma warning disable DP0009
+[StringPrimitive]
+public readonly partial record struct UnconstrainedString;
+#pragma warning restore DP0009
+
+

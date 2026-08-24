@@ -64,12 +64,6 @@ coverage.json
 BenchmarkDotNet.Artifacts/
 benchmarks/history/current/
 
-# NuGet pack output
-nupkg/
-nupkg-compat-check/
-*.nupkg
-*.snupkg
-
 # Stryker output
 StrykerOutput/
 **/StrykerOutput/

@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 10: ROSLYN ANALYZERS & COMPILATION RULES (DOMAIN GUARDIANS)
 // ============================================================================
@@ -20,9 +17,13 @@ using System.Threading.Tasks;
 // DP0010: Direct comparison between raw string and domain primitive.
 // DP0012: Bypassing validations by declaring public constructors.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter10;
 using EricksonLopez.DomainPrimitives;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 10: ROSLYN ANALYZERS & DIAGNOSTICS DP0001-DP0012");
@@ -94,5 +95,7 @@ namespace Chapter10.Violations
     // public readonly partial record struct ErrorCasingConflict;
 }
 */
+
+
 
 

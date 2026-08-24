@@ -1,15 +1,16 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
@@ -31,7 +32,7 @@ namespace EricksonLopez.DomainPrimitives.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PublicConstructorBypassAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly string[] DomainPrimitiveAttributeNames =
+    internal static readonly string[] DomainPrimitiveAttributeNames =
     [
         "StrongIdAttribute", "StringPrimitiveAttribute", "NumericPrimitiveAttribute",
         "DatePrimitiveAttribute", "SmartEnumAttribute",
@@ -48,9 +49,11 @@ public sealed class PublicConstructorBypassAnalyzer : DiagnosticAnalyzer
         "DateRangeAttribute", "TimeRangeAttribute"
     ];
 
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticDescriptors.DP0012_PublicConstructorBypass);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -63,9 +66,8 @@ public sealed class PublicConstructorBypassAnalyzer : DiagnosticAnalyzer
     {
         var typeSymbol = (INamedTypeSymbol)context.Symbol;
 
-        // Must be a value type (struct) with partial declaration
-        if (!typeSymbol.IsValueType) return;
-        if (!typeSymbol.IsRecord) return; // We only care about record structs
+        // Must be a value type (struct) with record declaration
+        if (!typeSymbol.IsValueType || !typeSymbol.IsRecord) return;
 
         // Check if decorated with a domain primitive attribute
         var hasDomainPrimitiveAttribute = typeSymbol.GetAttributes().Any(attr =>
@@ -77,41 +79,32 @@ public sealed class PublicConstructorBypassAnalyzer : DiagnosticAnalyzer
         // Check for public constructors declared in source (not generated)
         foreach (var constructor in typeSymbol.Constructors)
         {
-            // Skip the compiler-generated copy constructor and parameterless default
-            if (constructor.IsImplicitlyDeclared) continue;
-            if (constructor.Parameters.Length == 0) continue; // default ctor is always implicit for struct
+            if (constructor.DeclaredAccessibility != Accessibility.Public || constructor.Parameters.Length == 0)
+                continue;
 
-            // Skip constructors marked as generated
-            if (IsInGeneratedCode(constructor)) continue;
-
-            if (constructor.DeclaredAccessibility == Accessibility.Public)
+            foreach (var location in constructor.Locations)
             {
-                // Find the location of the constructor declaration in source
-                var location = constructor.Locations.FirstOrDefault(l => l.IsInSource);
-                if (location == null) continue;
-
-                context.ReportDiagnostic(Diagnostic.Create(
-                    DiagnosticDescriptors.DP0012_PublicConstructorBypass,
-                    location,
-                    typeSymbol.Name));
+                if (location.IsInSource && !IsInGeneratedCode(location))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        DiagnosticDescriptors.DP0012_PublicConstructorBypass,
+                        location,
+                        typeSymbol.Name));
+                }
             }
         }
     }
 
-    private static bool IsInGeneratedCode(ISymbol symbol)
+    /// <summary>
+    /// Returns <see langword="true"/> when <paramref name="location"/> resides in a
+    /// source-generated file, identified by the <c>.g.cs</c> or <c>.generated.cs</c> suffix.
+    /// </summary>
+    /// <param name="location">The source location to inspect.</param>
+    internal static bool IsInGeneratedCode(Location location)
     {
-        foreach (var location in symbol.Locations)
-        {
-            if (!location.IsInSource) continue;
-
-            var syntaxTree = location.SourceTree;
-            if (syntaxTree == null) continue;
-
-            // Generated files typically contain ".g." in their path
-            var filePath = syntaxTree.FilePath;
-            if (filePath.Contains(".g.cs") || filePath.Contains(".generated.cs"))
-                return true;
-        }
-        return false;
+        var filePath = location.SourceTree?.FilePath;
+        return filePath != null && (filePath.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || filePath.EndsWith(".generated.cs", StringComparison.OrdinalIgnoreCase));
     }
 }
+
+

@@ -1,14 +1,11 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using EricksonLopez.DomainPrimitives.Tests.TestTypes;
-using FluentAssertions;
+using AwesomeAssertions;
+using EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
+using EricksonLopez.DomainPrimitives.Validation;
+using Xunit;
 
-namespace EricksonLopez.DomainPrimitives.Tests;
+namespace EricksonLopez.DomainPrimitives.UnitTests;
 
 public sealed class StringStrongIdTests
 {
@@ -22,9 +19,19 @@ public sealed class StringStrongIdTests
     [Fact]
     public void TryCreate_Returns_Success()
     {
-        var success = Sku.TryCreate("SKU-999", out var result, out _);
+        var success = Sku.TryCreate("SKU-999", out var result, out var error);
         success.Should().BeTrue();
         result.Value.Should().Be("SKU-999");
+        error.Should().Be(PrimitiveError.None);
+    }
+
+    [Fact]
+    public void TryCreate_Null_Returns_Failure()
+    {
+        var success = Sku.TryCreate(null!, out var result, out var error);
+        success.Should().BeFalse();
+        result.IsDefault.Should().BeTrue();
+        error.Code.Should().Be("NULL_INPUT");
     }
 
     [Fact]
@@ -64,6 +71,22 @@ public sealed class StringStrongIdTests
     }
 
     [Fact]
+    public void TryParse_Valid_Returns_True()
+    {
+        var success = Sku.TryParse("ABC", null, out var id);
+        success.Should().BeTrue();
+        id.Value.Should().Be("ABC");
+    }
+
+    [Fact]
+    public void TryParse_Null_Returns_False()
+    {
+        var success = Sku.TryParse((string?)null, null, out var id);
+        success.Should().BeFalse();
+        id.IsDefault.Should().BeTrue();
+    }
+
+    [Fact]
     public void ToString_Returns_Value()
     {
         var id = Sku.Create("SKU-001");
@@ -97,3 +120,7 @@ public sealed class StringStrongIdTests
         Sku.PrimitiveName.Should().Be("Sku");
     }
 }
+
+
+
+

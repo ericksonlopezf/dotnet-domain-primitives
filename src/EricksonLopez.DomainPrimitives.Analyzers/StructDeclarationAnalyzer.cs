@@ -1,22 +1,35 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
+/// <summary>
+/// Enforces structural declaration requirements on domain primitive types, ensuring that
+/// every decorated type is declared as a <c>readonly partial record struct</c>.
+/// </summary>
+/// <remarks>
+/// <para>Reports the following diagnostics:</para>
+/// <list type="bullet">
+///   <item><term>DP0001</term><description>Type is not <c>partial</c>.</description></item>
+///   <item><term>DP0002</term><description>Type is not <c>readonly</c>.</description></item>
+///   <item><term>DP0003</term><description>Type is not a <c>record struct</c>.</description></item>
+/// </list>
+/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly string[] TriggerAttributes =
+    internal static readonly string[] TriggerAttributes =
     {
         "StrongId", "StringPrimitive", "NumericPrimitive", "DatePrimitive", "ValueObject",
         "Email", "Phone", "Url", "Slug", "CountryCode", "LanguageCode", "CurrencyCode", "Username",
@@ -26,12 +39,14 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
         "BirthDate", "ExpirationDate", "BusinessDate", "FiscalYear", "Month", "Quarter", "Week", "DateRange", "TimeRange"
     };
 
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(
             DiagnosticDescriptors.DP0001_MustBePartial,
             DiagnosticDescriptors.DP0002_MustBeReadonly,
             DiagnosticDescriptors.DP0003_MustBeRecordStruct);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -44,29 +59,21 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
     {
         var typeDecl = (TypeDeclarationSyntax)context.Node;
         
-        bool hasDomainAttribute = false;
-        foreach (var attrList in typeDecl.AttributeLists)
-        {
-            foreach (var attr in attrList.Attributes)
+        bool hasDomainAttribute = typeDecl.AttributeLists
+            .SelectMany(l => l.Attributes)
+            .Any(attr =>
             {
                 var rawName = attr.Name switch
                 {
-                    QualifiedNameSyntax q => q.Right is GenericNameSyntax g ? g.Identifier.Text : q.Right.Identifier.Text,
-                    SimpleNameSyntax s => s.Identifier.Text,
-                    _ => attr.Name.ToString()
+                    QualifiedNameSyntax q => q.Right.Identifier.Text,
+                    AliasQualifiedNameSyntax a => a.Name.Identifier.Text,
+                    _ => ((SimpleNameSyntax)attr.Name).Identifier.Text
                 };
-                var stripped = rawName.EndsWith("Attribute", System.StringComparison.Ordinal)
+                var stripped = rawName.EndsWith("Attribute", StringComparison.Ordinal)
                     ? rawName.Substring(0, rawName.Length - 9)
                     : rawName;
-                
-                if (System.Array.IndexOf(TriggerAttributes, stripped) >= 0)
-                {
-                    hasDomainAttribute = true;
-                    break;
-                }
-            }
-            if (hasDomainAttribute) break;
-        }
+                return System.Array.IndexOf(TriggerAttributes, stripped) >= 0;
+            });
 
         if (!hasDomainAttribute) return;
 
@@ -104,3 +111,5 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
         }
     }
 }
+
+

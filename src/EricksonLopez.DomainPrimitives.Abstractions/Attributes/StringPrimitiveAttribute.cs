@@ -1,14 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Marks a <c>readonly partial record struct</c> as a string-backed domain primitive.
+/// Specifies that a struct is a string-backed domain primitive.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -38,3 +34,5 @@ namespace EricksonLopez.DomainPrimitives;
 public sealed class StringPrimitiveAttribute : Attribute
 {
 }
+
+

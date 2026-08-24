@@ -1,8 +1,9 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Linq;
 using System.Reflection;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
-using FluentAssertions;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
@@ -213,4 +214,90 @@ public class AttributesTests
         var attr = new StrongIdAttribute<Guid> { RejectEmpty = true };
         attr.RejectEmpty.Should().BeTrue();
     }
+
+    [Fact]
+    public void DomainPrimitivesDefaultsAttribute_Defaults_And_CustomValues()
+    {
+        var attr = new DomainPrimitivesDefaultsAttribute();
+        attr.Trim.Should().BeFalse();
+        attr.NotEmpty.Should().BeFalse();
+        attr.MaxLength.Should().Be(4096);
+        attr.ExceptionType.Should().BeNull();
+
+        attr.Trim = true;
+        attr.NotEmpty = true;
+        attr.MaxLength = 100;
+        attr.ExceptionType = typeof(ArgumentException);
+
+        attr.Trim.Should().BeTrue();
+        attr.NotEmpty.Should().BeTrue();
+        attr.MaxLength.Should().Be(100);
+        attr.ExceptionType.Should().Be<ArgumentException>();
+    }
+
+    [Fact]
+    public void MaxLengthAttribute_ShouldStoreLength()
+    {
+        var attr = new MaxLengthAttribute(50);
+        attr.Length.Should().Be(50);
+    }
+
+    [Fact]
+    public void MinLengthAttribute_ShouldStoreLength()
+    {
+        var attr = new MinLengthAttribute(5);
+        attr.Length.Should().Be(5);
+    }
+
+    [Fact]
+    public void RegexAttribute_ShouldStorePattern()
+    {
+        var pattern = "^[A-Z]+$";
+        var attr = new RegexAttribute(pattern);
+        attr.Pattern.Should().Be(pattern);
+    }
+
+    [Fact]
+    public void LengthAttribute_ShouldStoreMinAndMax()
+    {
+        var attr = new LengthAttribute(1, 10);
+        attr.Min.Should().Be(1);
+        attr.Max.Should().Be(10);
+    }
+
+    [Fact]
+    public void PrimitiveRangeAttribute_ShouldStoreBounds()
+    {
+        var attr = new PrimitiveRangeAttribute(1, 100);
+        attr.Min.Should().Be(1);
+        attr.Max.Should().Be(100);
+        attr.MinExclusive.Should().BeFalse();
+        attr.MaxExclusive.Should().BeFalse();
+
+        var exclusive = new PrimitiveRangeAttribute(1, 100) { MinExclusive = true, MaxExclusive = true };
+        exclusive.MinExclusive.Should().BeTrue();
+        exclusive.MaxExclusive.Should().BeTrue();
+    }
+
+    [Fact]
+    public void NormalizationAttributes_CanBeInstantiated()
+    {
+        var notEmpty = new NotEmptyAttribute();
+        notEmpty.Should().NotBeNull();
+
+        var lower = new LowerCaseAttribute();
+        lower.Should().NotBeNull();
+
+        var upper = new UpperCaseAttribute();
+        upper.Should().NotBeNull();
+
+        var trim = new TrimAttribute();
+        trim.Should().NotBeNull();
+
+        var normSpace = new NormalizeWhitespaceAttribute();
+        normSpace.Should().NotBeNull();
+    }
 }
+
+
+

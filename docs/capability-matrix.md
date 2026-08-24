@@ -77,8 +77,9 @@
 | EF Core | ✅ | ✅ | ✅ | ⚠️ | AC-SI-04 |
 | Dapper | ✅ | ✅ | ✅ | ✅ ([23-DapperIntegration](../samples/OfficialSample/23-DapperIntegration/)) | AC-SI-04 analogue |
 | ASP.NET Core | ✅ | ✅ | ✅ | ⚠️ | — |
-| Mapster | ✅ | ✅ | ✅ | ❌ (TD-015) | — |
+| Mapster / Mapperly | Native explicit operators | — | ✅ | — | [adr-017](adr/adr-017-mapster-integration-rationale.md) |
 | OpenAPI | ✅ | ✅ | ✅ | ✅ ([24-OpenApiIntegration](../samples/OfficialSample/24-OpenApiIntegration/)) | — |
+| Newtonsoft.Json | ✅ | — (runtime, not SourceGen) | ✅ | — | [adr-026](adr/adr-026-newtonsoft-json-gap-plan.md) |
 
 ## Security Gates
 
@@ -95,7 +96,11 @@
 
 | Capability | Status | Notes |
 |---|---|---|
-| Roslyn Analyzers (DP0001–DP0016) | ✅ | 16 diagnostics implemented |
+| Roslyn Analyzers (DP0001–DP0017) | ✅ | 17 diagnostics implemented (DP0001–DP0016 user-facing; DP0017 validates `ExceptionType` in `[assembly: DomainPrimitivesDefaults]`) |
+| `[assembly: DomainPrimitivesDefaults]` global configuration | ✅ | Supports `Trim`, `NotEmpty`, `MaxLength`, `ExceptionType`; all generators read assembly-level defaults; per-type takes precedence. [adr-033](adr/adr-033-global-assembly-configuration.md) |
+| Configurable `ExceptionType` + DP0017 | ✅ | Generator emits custom throw site; DP0017 enforces `System.Exception` derivation and `(string message)` constructor at compile time. [adr-034](adr/adr-034-configurable-exception-type.md) |
+| SmartEnum exhaustive `Switch`/`Map`/`Match` | ✅ | Generated `Match<TResult>`, `Map<TResult>`, `Switch` with one parameter per declared member. [adr-035](adr/adr-035-smartenum-exhaustive-switch-map.md) |
+| SmartEnum case-insensitive `TryFromName` / `FromName` | ✅ | `TryFromName(string, bool ignoreCase, out T)` and `FromName(string, bool ignoreCase)` overloads. [adr-036](adr/adr-036-smartenum-case-insensitive-parsing.md) |
 | Diagnostic ID collision avoidance | ✅ | TD-010 resolved |
 | Strong naming | ✅ | Conditional on .snk presence |
 | SourceLink | ✅ | Requires git remote |
@@ -117,7 +122,7 @@ This section audits every public claim in the README against implementation real
 | "Allocation-minimized hot paths" | ✅ ACCURATE (README rewritten 2026-08-10) | README now shows per-path allocation table: 0 allocs success (no normalization), 1 alloc success (NFC), 1 alloc failure, 1 alloc TryParse(span). JSON ValueSpan path VERIFIED (GeneratorHelpers.cs:45-51, NET8+). Old claim "zero-allocation" was inaccurate — removed. |
 | "NativeAOT-ready" | ✅ IMPLEMENTED | `IsAotCompatible=true`, `[DynamicDependency]` not used, zero reflection in generators. CI gate validates publish. |
 | "Zero reflection" | ✅ IMPLEMENTED | All generation is compile-time. No `Type.GetMethod()`, `Expression<>`, or Activator calls in hot paths. |
-| "BCL-conventional API" | ⚠️ PARTIALLY_IMPLEMENTED | FormatException standardization complete (RFC-0003). ValueObject interfaces added (CRIT-004). ValueObject still missing `IComparable<T>` — intentionally N/A for composites. |
+| "BCL-conventional API" | ⚠️ PARTIALLY_IMPLEMENTED | FormatException standardization complete (rfc-0003). ValueObject interfaces added (CRIT-004). ValueObject still missing `IComparable<T>` — intentionally N/A for composites. |
 | "Source-generated — no runtime overhead" | ✅ IMPLEMENTED | All types are generated at compile time with `IIncrementalGenerator`. |
 | "Roslyn Analyzers enforce correct usage" | ✅ IMPLEMENTED | DP0001–DP0016 active. DP0016 covers factory naming. |
 | "15-year design horizon (2026–2041)" | ⚠️ UNVERIFIED | Planning risks documented in `planning-risks.md`. Spec v4.0 is the governing document. No forward-compat tests yet beyond NET10. |

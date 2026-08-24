@@ -42,6 +42,7 @@ on:
 env:
   DOTNET_NOLOGO: true
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
   build-and-test:
@@ -50,6 +51,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -64,9 +67,6 @@ jobs:
             echo "$SNK_KEY" | tr -d '\n\r ' | base64 --decode > EricksonLopez.snk
           fi
 
-      - name: Restore
-        run: dotnet restore EricksonLopez.DomainPrimitives.slnx
-
       - name: Setup Java (for SonarScanner)
         uses: actions/setup-java@v4
         with:
@@ -80,29 +80,16 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: env.SONAR_TOKEN != ''
+        if: ${{ secrets.SONAR_TOKEN != '' }}
         run: |
-          dotnet sonarscanner begin /k:"EricksonLopez_${{ github.event.repository.name }}" /o:"ericksonlopez" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          dotnet sonarscanner begin /k:"ericksonlopezf_${{ github.event.repository.name }}" \
+            /o:"ericksonlopezf" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Build (Release)
-        run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
-
-      - name: API Compatibility Check (P1 Gate)
-        run: |
-          echo "Verifying multi-targeting API compatibility..."
-          dotnet pack EricksonLopez.DomainPrimitives.slnx --configuration Release --no-build --output ./nupkg-compat-check
-          echo "API compatibility check passed. No binary-breaking changes detected."
-
-      - name: API Surface Budget Gate (P2 Gate — TD-015)
-        run: |
-          echo "Running API Surface Budget tests (AUDIT.md §API SURFACE BUDGET POR CATEGORÍA)..."
-          dotnet test tests/EricksonLopez.DomainPrimitives.UnitTests \
-            --no-build \
-            --configuration Release \
-            --filter "Category=ApiSurfaceBudget" \
-            --verbosity normal \
-            --logger "console;verbosity=normal"
-          echo "API Surface Budget gate passed. All generated types within member count budgets."
+        run: dotnet build EricksonLopez.DomainPrimitives.slnx --configuration Release
 
       - name: Run tests
         run: >
@@ -113,17 +100,36 @@ jobs:
           --configuration Release
           ${{ inputs.test-filter != '' && format('--filter "{0}"', inputs.test-filter) || '' }}
           --verbosity normal
-          --logger "trx"
+          --logger "trx;LogFileName=test-results.trx"
           --results-directory ./test-results
           --collect:"XPlat Code Coverage"
-          -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude="[*Tests]*" DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute="GeneratedCodeAttribute"
+          --settings coverlet.runsettings
+          --
+          DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura
 
       - name: End Sonar Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: always() && env.SONAR_TOKEN != ''
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        if: always() && secrets.SONAR_TOKEN != ''
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+
+      - name: API Compatibility Check (P1 Gate)
+        run: |
+          echo "Verifying multi-targeting API compatibility..."
+          dotnet pack EricksonLopez.DomainPrimitives.slnx --configuration Release --no-build --output ./nupkg-compat-check
+          echo "API compatibility check passed. No binary-breaking changes detected."
+
+      - name: API Surface Budget Gate (P2 Gate — TD-015)
+        run: |
+          echo "Running API Surface Budget tests (AUDIT.md §API SURFACE BUDGET BY CATEGORY)..."
+          dotnet test tests/EricksonLopez.DomainPrimitives.UnitTests \
+            --no-build \
+            --configuration Release \
+            --filter "Category=ApiSurfaceBudget" \
+            --verbosity normal \
+            --logger "console;verbosity=normal"
+          echo "API Surface Budget gate passed. All generated types within member count budgets."
 
       - name: Upload test results
         if: always()

@@ -1,4 +1,5 @@
 <Solution>
+
   <Folder Name="/src/">
     <Project Path="src/EricksonLopez.DomainPrimitives.Abstractions/EricksonLopez.DomainPrimitives.Abstractions.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj" />
@@ -10,11 +11,10 @@
     <Project Path="src/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.EFCore/EricksonLopez.DomainPrimitives.EFCore.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.Generators/EricksonLopez.DomainPrimitives.Generators.csproj" />
-    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.csproj" />
-    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster/EricksonLopez.DomainPrimitives.Mapster.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi/EricksonLopez.DomainPrimitives.OpenApi.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.Testing/EricksonLopez.DomainPrimitives.Testing.csproj" />
+    <Project Path="src/EricksonLopez.DomainPrimitives.NewtonsoftJson/EricksonLopez.DomainPrimitives.NewtonsoftJson.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests/EricksonLopez.DomainPrimitives.Abstractions.UnitTests.csproj" />
@@ -27,10 +27,10 @@
     <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.IntegrationTests/EricksonLopez.DomainPrimitives.EFCore.IntegrationTests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.Tests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.EFCore.UnitTests/EricksonLopez.DomainPrimitives.EFCore.UnitTests.csproj" />
-    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.Tests.csproj" />
-    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.Tests/EricksonLopez.DomainPrimitives.Mapster.Tests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.Tests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.OpenApi.Tests/EricksonLopez.DomainPrimitives.OpenApi.Tests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.SourceGenerators.Tests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.Testing.UnitTests/EricksonLopez.DomainPrimitives.Testing.UnitTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.NewtonsoftJson.Tests/EricksonLopez.DomainPrimitives.NewtonsoftJson.Tests.csproj" />
   </Folder>
 </Solution>

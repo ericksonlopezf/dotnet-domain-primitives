@@ -1,6 +1,7 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives.Diagnostics;
-using FluentAssertions;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.UnitTests.Diagnostics;
@@ -24,3 +25,5 @@ public class ValidationFailureEventArgsTests
         args.ErrorMessage.Should().Be(errorMessage);
     }
 }
+
+

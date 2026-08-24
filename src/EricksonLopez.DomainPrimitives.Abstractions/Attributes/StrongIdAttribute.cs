@@ -1,15 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Marks a <c>readonly partial record struct</c> as a strongly-typed identifier
-/// wrapping <typeparamref name="TValue"/>.
+/// Specifies that a struct is a strongly-typed identifier wrapping <typeparamref name="TValue"/>.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -43,8 +38,10 @@ public sealed class StrongIdAttribute<TValue> : Attribute
     /// <summary>
     /// Gets or sets a value indicating whether empty backing values are rejected.
     /// When <see langword="true"/>, <c>Create()</c> throws and <c>TryCreate()</c> returns <see langword="false"/> for
-    /// empty values (e.g., <see cref="System.Guid.Empty"/>, <c>0</c>, or <c>""</c>).
+    /// empty values (e.g., <see cref="Guid.Empty"/>, <c>0</c>, or <c>""</c>).
     /// Defaults to <see langword="true"/>.
     /// </summary>
     public bool RejectEmpty { get; set; } = true;
 }
+
+

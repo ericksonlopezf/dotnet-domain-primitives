@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 
@@ -20,7 +19,7 @@
     
     <PackageId>EricksonLopez.DomainPrimitives.EFCore.SourceGenerators</PackageId>
     <Description>Source Generators for EF Core integration with EricksonLopez.DomainPrimitives.</Description>
-    <PackageTags>$(PackageTags);efcore;source-generators</PackageTags>
+    <PackageTags>$(CommonPackageTags);efcore;entity-framework-core;source-generator;source-generators;roslyn;value-converter;code-generation;orm</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 16: ENTITY FRAMEWORK CORE INTEGRATION (VALUE CONVERTERS & LINQ)
 // ============================================================================
@@ -13,10 +10,14 @@ using System.Threading.Tasks;
 // In the C# model, the property is a strongly typed `CustomerId` or `EmailAddress`.
 // LINQ queries (`.Where(c => c.Id == id)`) are natively translated to SQL.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter16;
 using EricksonLopez.DomainPrimitives;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 16: ENTITY FRAMEWORK CORE INTEGRATION");
@@ -112,5 +113,7 @@ namespace Chapter16
         }
     }
 }
+
+
 
 
