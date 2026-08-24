@@ -1,32 +1,42 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
-    <NoWarn>CA1805;CA1711;CA1000;CS1574;CS1591</NoWarn>
+    <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.0</TargetFrameworks>
+    <NoWarn>CA1805;CA1711;CA1000;CS1574</NoWarn>
     <AssemblyName>EricksonLopez.DomainPrimitives.Abstractions</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives</RootNamespace>
     <!-- NativeAOT and trimming compatibility -->
-    <NoWarn>$(NoWarn);RS0024</NoWarn>
-    <PackageTags>$(PackageTags);abstractions;attributes;interfaces</PackageTags>
+    <NoWarn>$(NoWarn);RS0016;RS0017;RS0024</NoWarn>
+    <PackageTags>$(CommonPackageTags);abstractions;attributes;contracts;value-objects;strongly-typed-id;smart-enum;validation;native-aot</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <IsTrimmable>true</IsTrimmable>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PublishAot>false</PublishAot>
+    <IsAotCompatible>false</IsAotCompatible>
+    <EnableAotAnalyzer>false</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+  </PropertyGroup>
+
+  <Target Name="_ResetPublishAotOnNetStandard" BeforeTargets="ProcessFrameworkReferences;_CheckForUnsupportedNETCoreVersion" Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PropertyGroup>
+      <PublishAot>false</PublishAot>
+      <PublishTrimmed>false</PublishTrimmed>
+      <IsAotCompatible>false</IsAotCompatible>
+      <IsTrimmable>false</IsTrimmable>
+    </PropertyGroup>
+  </Target>
   <PropertyGroup>
     <!-- NuGet packaging -->
     <IsPackable>true</IsPackable>
     <PackageId>EricksonLopez.DomainPrimitives.Abstractions</PackageId>
-    <Description>Core abstractions for domain primitives: marker interfaces, type declaration attributes, validation attributes, and normalization attributes. Zero dependencies â€” pure attributes and interfaces only. NativeAOT and trimming compatible.</Description>
-    
-    
+    <Description>Core abstractions for domain primitives: marker interfaces, type declaration attributes, validation attributes, and normalization attributes. Zero dependencies — pure attributes and interfaces only. NativeAOT and trimming compatible.</Description>
   </PropertyGroup>
-  <!-- MED-006: DiagnosticSource removed from Abstractions â€” Diagnostics types moved to Core per TD-009.
+  <!-- MED-006: DiagnosticSource removed from Abstractions — Diagnostics types moved to Core per TD-009.
        Abstractions now contains ONLY: attributes, marker interfaces, and PrimitiveError.
        No transitive dependencies on System.Diagnostics.DiagnosticSource or System.Diagnostics.Metrics. -->
   <ItemGroup>
       </ItemGroup>
     <!-- Removed EricksonLopez.Result dependency -->
 </Project>
-
-

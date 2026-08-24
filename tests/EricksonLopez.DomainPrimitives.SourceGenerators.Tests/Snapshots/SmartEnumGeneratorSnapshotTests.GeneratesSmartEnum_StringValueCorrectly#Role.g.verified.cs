@@ -105,9 +105,9 @@ readonly partial record struct Role :
         return false;
     }
 
-    public static Role FromName(string name)
+    public static Role FromName(string name, bool ignoreCase = false)
     {
-        if (TryFromName(name, out var result)) return result;
+        if (TryFromName(name, ignoreCase, out var result)) return result;
         throw new ArgumentException($"No Role found with name {name}", nameof(name));
     }
 

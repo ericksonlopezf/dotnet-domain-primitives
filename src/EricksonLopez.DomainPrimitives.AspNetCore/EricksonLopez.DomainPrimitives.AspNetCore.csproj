@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <AssemblyName>EricksonLopez.DomainPrimitives.AspNetCore</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives.AspNetCore</RootNamespace>
@@ -10,7 +9,9 @@
     <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
     <PackageId>EricksonLopez.DomainPrimitives.AspNetCore</PackageId>
     <Description>ASP.NET Core integration for EricksonLopez.DomainPrimitives. Automatically generates ModelBinders and Swagger/OpenAPI schemas for Domain Primitives.</Description>
-    <PackageTags>$(PackageTags);aspnetcore;model-binding;mvc</PackageTags>
+    <PackageTags>$(CommonPackageTags);aspnetcore;model-binding;minimal-apis;web-api;http;native-aot</PackageTags>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,13 +25,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" />
-  </ItemGroup>
-
-  <ItemGroup>
-    
-  </ItemGroup>
 </Project>
 
 

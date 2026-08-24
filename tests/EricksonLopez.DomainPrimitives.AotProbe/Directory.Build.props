@@ -2,3 +2,4 @@
   <!-- Disable global Directory.Build.props inheritance for this AOT probe.
        This is an isolated executable — it should not inherit test SDK references. -->
 </Project>
+

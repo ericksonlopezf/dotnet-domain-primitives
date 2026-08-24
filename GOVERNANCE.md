@@ -1,7 +1,7 @@
 # Governance
 
-> **Version:** 2.0  
-> **Last Updated:** 2026-08-10  
+> **Version:** 2.1  
+> **Last Updated:** 2026-08-23  
 > **Required by:** Engineering Specification v4.0 §11.3
 
 ---
@@ -13,7 +13,7 @@ maintaining the quality and direction of the `EricksonLopez.DomainPrimitives` li
 
 | Member | Role | Contact |
 |--------|------|---------|
-| Erickson Lopez | Lead Maintainer | @ericksonlopez |
+| Erickson Lopez | Lead Maintainer | [@ericksonlopezf](https://github.com/ericksonlopezf) ([ericksonlopezf@gmail.com](mailto:ericksonlopezf@gmail.com)) |
 
 > **Quorum requirement:** For a committee of 1, 1 approval is required for all decisions.
 > As the committee grows, the voting rules below apply.
@@ -72,7 +72,7 @@ A change is **trivial** if ALL of the following are true:
 4. **Wait for the Discussion Period**: minimum 48 hours, no maximum.
 5. **Collect votes** (see Voting Rules below).
 6. **Implement** only after RFC reaches `Approved` state.
-7. **Reference RFC in commit message**: `feat: implement RFC-0005 — NetworkPrimitive support`.
+7. **Reference RFC in commit message**: `feat: implement rfc-0005 — NetworkPrimitive support`.
 
 ### RFC Document Template
 
@@ -138,5 +138,6 @@ associates an RFC with its target milestone.
 
 | Date | Version | Change |
 |------|---------|--------|
+| 2026-08-23 | 2.1 | Fixed `roadmap.md` → `ROADMAP.md` reference (SCREAMING_CASE root convention). Documentation audit corrections. |
 | 2026-08-10 | 2.0 | Expanded from stub. Added committee, voting SLA, objective trivial criteria, breaking change lifecycle |
 | 2026-07-01 | 1.0 | Initial governance stub |

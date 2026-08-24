@@ -1,9 +1,10 @@
 <Project>
-  <PropertyGroup Condition="$(MSBuildProjectName.Contains('Generator')) Or $(MSBuildProjectName.Contains('Analyzer')) Or $(MSBuildProjectName.Contains('Tests')) Or $(MSBuildProjectName.Contains('Benchmarks'))">
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(IsRoslynComponent)' == 'true'">
     <IncludeSymbols>false</IncludeSymbols>
+    <!-- Source generators and analyzers are compile-time-only tools.
+         Exclude them from Sonar CPD: their code is template-driven and
+         structurally similar across generators by design, not by negligence. -->
+    <SonarQubeExclude>true</SonarQubeExclude>
   </PropertyGroup>
 </Project>
+

@@ -1,9 +1,12 @@
-using System.Linq;
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Chapter01;
 using EricksonLopez.DomainPrimitives;
+using Xunit;
 
 namespace OfficialSample.Tests;
 
@@ -55,5 +58,7 @@ public class Chapter01Tests
         Assert.False(isresultSuccess);
     }
 }
+
+
 
 

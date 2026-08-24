@@ -49,36 +49,36 @@ Priority:              P1 — Important
 ### GAP-002: Newtonsoft.Json Support
 
 ```
-Feature:               Newtonsoft.Json converters (generated)
+Feature:               Newtonsoft.Json converters (generated & runtime)
 Category:              Serialization
 Competitors:           Vogen (Conversions.NewtonsoftJson), StronglyTypedId (StronglyTypedIdConverter.NewtonsoftJson)
 Business value:        High — large enterprise codebase still on Newtonsoft
 DDD value:             None (infrastructure concern)
 Performance value:     Neutral
-Implementation:        Low — generator emits JsonConverter<T> for Newtonsoft
+Implementation:        Complete — EricksonLopez.DomainPrimitives.NewtonsoftJson package
 Priority:              P1 — Important
+Status:                ✅ IMPLEMENTED (adr-026)
 ```
 
-**Recommendation:** Add `EricksonLopez.DomainPrimitives.NewtonsoftJson` package. Generator discovers types and emits `Newtonsoft.Json.JsonConverter<T>` alongside the STJ converter. Mirror the Vogen `Conversions` flag pattern.
-
-**Note:** This is the **only integration gap** where both Vogen AND StronglyTypedId outperform DP. Not having it removes DP from consideration in enterprise projects with Newtonsoft dependencies.
+**Recommendation:** Add `EricksonLopez.DomainPrimitives.NewtonsoftJson` package. Provides strongly-typed converters, universal converter, `DomainPrimitivesContractResolver`, and `AddDomainPrimitives()` extensions.
 
 ---
 
-### GAP-003: Configurable Global Exception Type
+### GAP-003: Configurable Global Exception Type & Defaults
 
 ```
-Feature:               Assembly-level custom exception type for Create() failures
+Feature:               Assembly-level custom exception type & defaults for Create() failures
 Category:              Developer Experience / Validation
 Competitors:           Vogen (VogenDefaults with custom exception)
 Business value:        High — enterprise patterns require domain-specific exceptions
 DDD value:             High — DomainException hierarchy is standard DDD pattern
 Performance value:     None
-Implementation:        Low — assembly attribute; generator checks for override
+Implementation:        Complete — [assembly: DomainPrimitivesDefaults] & analyzer DP0017
 Priority:              P1 — Important
+Status:                ✅ IMPLEMENTED (adr-033, adr-034)
 ```
 
-**Recommendation:** Add `[assembly: DomainPrimitivesDefaults(ExceptionType = typeof(MyDomainException))]`. Generator uses this type instead of `DomainPrimitiveValidationException`. Requires the custom exception to inherit from `Exception`.
+**Recommendation:** Add `[assembly: DomainPrimitivesDefaults(ExceptionType = typeof(MyDomainException))]`. Generator uses this type instead of `DomainPrimitiveValidationException`. Requires the custom exception to inherit from `Exception` (enforced at compile-time by analyzer DP0017).
 
 ---
 
@@ -139,18 +139,12 @@ Competitors:           Thinktecture.Runtime.Extensions (only one)
 Business value:        High — eliminates missed enum cases at compile time
 DDD value:             High — exhaustive handling enforced by compiler
 Performance value:     Medium
-Implementation:        Medium — generator emits overloaded method with all cases as params
+Implementation:        Complete — Match<TResult>, Map<TResult>, and Switch
 Priority:              P2 — Useful
+Status:                ✅ IMPLEMENTED (adr-035)
 ```
 
-**Recommendation:** For `[SmartEnum<T>]`, generate:
-```csharp
-public TResult Switch<TResult>(
-    Func<OrderStatus, TResult> onPending,
-    Func<OrderStatus, TResult> onShipped,
-    Func<OrderStatus, TResult> onDelivered)
-```
-where all enum members are covered. Compiler error if a case is missing.
+**Recommendation:** For `[SmartEnum<T>]`, generate exhaustive `Match`, `Map`, and `Switch` overloads with zero allocations.
 
 ---
 
@@ -163,11 +157,12 @@ Competitors:           Ardalis.SmartEnum (explicit feature), THK (supported)
 Business value:        Medium — HTTP/JSON often sends lowercase or inconsistent casing
 DDD value:             Low
 Performance value:     Neutral
-Implementation:        Low — generate overload with StringComparison.OrdinalIgnoreCase
+Implementation:        Complete — TryFromName(name, ignoreCase, out result) and FromName(name, ignoreCase)
 Priority:              P2 — Useful
+Status:                ✅ IMPLEMENTED (adr-036)
 ```
 
-**Recommendation:** Add `TryFromName(string name, bool ignoreCase, out T result)` overload to SmartEnum generated code.
+**Recommendation:** Add `TryFromName(string name, bool ignoreCase, out T result)` and `FromName(string name, bool ignoreCase)` overloads to SmartEnum generated code.
 
 ---
 
@@ -197,17 +192,12 @@ Competitors:           Vogen (has benchmark table in README), others
 Business value:        Critical for adoption — developers won't trust "zero-allocation" without proof
 DDD value:             None
 Performance value:     N/A
-Implementation:        Low — run benchmark suite and commit results
+Implementation:        Complete — benchmark suite executed, committed to benchmarks/results/ and README
 Priority:              P0 — CRITICAL (for marketing validity)
+Status:                ✅ IMPLEMENTED — benchmarks/results/ exports committed; docs/benchmark-results.md and README updated
 ```
 
-**Recommendation:** Add a `benchmarks/results/` directory with:
-- `StringPrimitive_Create.md`
-- `StringPrimitive_TryParse.md`  
-- `StrongId_EFCore.md`
-- `SmartEnum_Lookup.md`
-
-Embed summary table in README. Without this, ALL performance claims are unsupported marketing.
+**Implemented:** `ComparativeBenchmarks.cs` (41 benchmarks) executed; BenchmarkDotNet markdown reports committed to `benchmarks/results/`; summary comparison and BCL zero-allocation tables embedded in `README.md` and `docs/benchmark-results.md`.
 
 ---
 
@@ -222,9 +212,10 @@ DDD value:             None
 Performance value:     None
 Implementation:        Low (documentation only)
 Priority:              P1 — Important
+Status:                ✅ IMPLEMENTED — docs/migration/from-vogen.md and docs/migration/from-stronglytypedid.md
 ```
 
-**Recommendation:** Create `docs/migration/from-vogen.md` and `docs/migration/from-stronglytypedid.md`. Include attribute equivalents table, API differences, and step-by-step walkthrough.
+**Implemented:** `docs/migration/from-vogen.md` and `docs/migration/from-stronglytypedid.md` contain attribute equivalence tables, API difference tables, step-by-step walkthroughs, and behavioral difference notes. Both linked from README.
 
 ---
 
@@ -239,9 +230,10 @@ DDD value:             None
 Performance value:     None
 Implementation:        Medium — generator reads assembly attributes
 Priority:              P2 — Useful
+Status:                ✅ IMPLEMENTED — [assembly: DomainPrimitivesDefaults] with Trim, NotEmpty, MaxLength, ExceptionType (adr-033, adr-034)
 ```
 
-**Recommendation:** `[assembly: DomainPrimitivesDefaults(Trim = true, NotEmpty = true, MaxLength = 256)]`. Sensible defaults override per-attribute. Per-type attribute takes precedence.
+**Implemented:** `[assembly: DomainPrimitivesDefaults(Trim = true, NotEmpty = true, MaxLength = 256, ExceptionType = typeof(OrderDomainException))]`. All 5 generators (StringPrimitive, NumericPrimitive, DatePrimitive, StrongId, SmartEnum) read assembly-level defaults. Per-type attribute takes precedence. Analyzer DP0017 validates ExceptionType.
 
 ---
 
@@ -364,6 +356,6 @@ These concerns belong in a separate library (MediatR, Wolverine, Duende) or fram
 6. 15 semantic string shortcuts + 15 numeric shortcuts
 7. Date primitive ([DatePrimitive])
 8. Auto-discovery integrations (EF Core, Dapper — no per-type config)
-9. Mapster source-generated integration
+9. Zero-overhead explicit cast operators for Mapster / Mapperly (no extra mapping packages required)
 10. Dedicated OpenAPI package
 11. Architecture Decision Records (docs/adr/)

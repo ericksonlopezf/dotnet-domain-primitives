@@ -1,6 +1,5 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Linq;
-using System.Reflection;
 using VerifyTests;
 
 namespace EricksonLopez.DomainPrimitives.Testing;
@@ -15,9 +14,14 @@ public static class DomainPrimitiveVerifyExtensions
 
     /// <summary>
     /// Configures Verify to serialize domain primitives using their underlying value
-    /// rather than as a complex object with a 'Value' property.
-    /// Call this once during test initialization (e.g., in a static constructor or [ModuleInitializer]).
+    /// rather than as a complex object with a <c>Value</c> property.
     /// </summary>
+    /// <remarks>
+    /// This method is idempotent — calling it more than once has no effect.
+    /// Invoke it once during test module initialization (e.g., in a
+    /// <c>static</c> constructor, a <c>[ModuleInitializer]</c>, or a test fixture's
+    /// <c>InitializeAsync</c> method) before any snapshot is generated.
+    /// </remarks>
     public static void Initialize()
     {
         if (_initialized) return;
@@ -28,37 +32,5 @@ public static class DomainPrimitiveVerifyExtensions
         });
 
         _initialized = true;
-    }
-}
-
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-internal sealed class DomainPrimitiveVerifyJsonConverter : Argon.JsonConverter
-{
-    public override bool CanConvert(Type objectType)
-    {
-        return objectType.IsValueType && 
-               objectType.GetInterfaces().Any(i => 
-                   i.IsGenericType && 
-                   i.GetGenericTypeDefinition() == typeof(IDomainPrimitive<,>));
-    }
-
-    public override void WriteJson(Argon.JsonWriter writer, object value, Argon.JsonSerializer serializer)
-    {
-        var type = value.GetType();
-        var prop = type.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
-        if (prop != null)
-        {
-            var innerValue = prop.GetValue(value);
-            serializer.Serialize(writer, innerValue);
-        }
-        else
-        {
-            writer.WriteNull();
-        }
-    }
-
-    public override object? ReadJson(Argon.JsonReader reader, Type objectType, object? existingValue, Argon.JsonSerializer serializer)
-    {
-        throw new NotImplementedException("Deserialization is not needed for Verify snapshot generation.");
     }
 }

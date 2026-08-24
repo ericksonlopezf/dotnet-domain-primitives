@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 
@@ -20,7 +19,7 @@
     
     <PackageId>EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators</PackageId>
     <Description>Source Generators for ASP.NET Core integration with EricksonLopez.DomainPrimitives.</Description>
-    <PackageTags>$(PackageTags);aspnetcore;source-generators</PackageTags>
+    <PackageTags>$(CommonPackageTags);aspnetcore;source-generator;source-generators;roslyn;model-binding;code-generation;minimal-apis</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

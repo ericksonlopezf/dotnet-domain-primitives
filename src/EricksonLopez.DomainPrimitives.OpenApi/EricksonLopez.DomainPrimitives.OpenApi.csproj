@@ -1,13 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <AssemblyName>EricksonLopez.DomainPrimitives.OpenApi</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives.OpenApi</RootNamespace>
     <IsPackable>true</IsPackable>
     <PackageId>EricksonLopez.DomainPrimitives.OpenApi</PackageId>
     <Description>OpenAPI/Swashbuckle integration for EricksonLopez.DomainPrimitives. Generates precise schema specifications for domain primitives.</Description>
-    <PackageTags>$(PackageTags);openapi;swagger;swashbuckle</PackageTags>
+    <PackageTags>$(CommonPackageTags);openapi;swagger;swashbuckle;schema-filter;api-documentation;rest-api</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

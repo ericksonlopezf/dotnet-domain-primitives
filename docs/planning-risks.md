@@ -63,7 +63,7 @@ Each risk must specify all §11.11 required fields:
 
 **Mitigation:** CI gate that executes `dotnet publish -p:PublishAot=true` against the full test suite on every PR. Any new dependency must pass AOT probe before merge.
 
-**Evidence of mitigation:** NativeAOT CI job added to `.github/workflows/ci.yml`. AOT probe app in `src/dotnet-primitive-core/EricksonLopez.DomainPrimitives.NativeAOT/` compiles and passes on every CI run.
+**Evidence of mitigation:** NativeAOT CI job added to `.github/workflows/aot-smoke-test.yml`. AOT probe app in `tests/EricksonLopez.DomainPrimitives.AotProbe/` compiles and passes on every CI run.
 
 ---
 
@@ -198,7 +198,7 @@ Each risk must specify all §11.11 required fields:
 
 **Description:** `SuperStrong.Types` is the only emerging library explicitly targeting
 `ISpanFormattable`, `IUtf8SpanFormattable`, `ISpanParsable<T>`, and `IUtf8SpanParsable<T>` —
-the same BCL interface story that is DP's Pillar 1 differentiator (ADR-028). If it achieves
+the same BCL interface story that is DP's Pillar 1 differentiator (adr-028). If it achieves
 feature parity and publishes credible benchmarks before DP does, the "unique BCL integration"
 claim is weakened.
 

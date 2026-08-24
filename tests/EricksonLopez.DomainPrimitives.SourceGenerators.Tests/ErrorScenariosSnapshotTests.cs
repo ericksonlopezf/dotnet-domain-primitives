@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,6 @@ using EricksonLopez.DomainPrimitives.Generators;
 
 namespace EricksonLopez.DomainPrimitives.Generators.Tests
 {
-    [UsesVerify]
     public class ErrorScenariosSnapshotTests
     {
         [Fact]
@@ -51,7 +51,7 @@ namespace EricksonLopez.DomainPrimitives.Normalization
 }
 ";
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -66,4 +66,5 @@ namespace EricksonLopez.DomainPrimitives.Normalization
         }
     }
 }
+
 

@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 20: UNIFIED END-TO-END APPLICATION (E-COMMERCE ORDER PROCESSING)
 // ============================================================================
@@ -18,14 +15,17 @@ using System.Threading.Tasks;
 // 6. Specification Pattern: High value orders filter (`HighValueOrderSpecification`).
 // 7. System.Text.Json Serialization: Unwrapped JSON API response.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
+using System.Threading;
 using Chapter20;
 using EricksonLopez.DomainPrimitives;
-
 using EricksonLopez.Result;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 Console.WriteLine("============================================================================");
 Console.WriteLine(" 🏆 CHAPTER 20: END-TO-END APPLICATION (COMPLETE E-COMMERCE SYSTEM)");
@@ -263,3 +263,5 @@ public abstract class AggregateRoot<TId>
     protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();
 }
+
+

@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,45 +6,24 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using EricksonLopez.DomainPrimitives.Analyzers;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
+using Xunit;
+
 using CSharpAnalyzerTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpAnalyzerTest<
     EricksonLopez.DomainPrimitives.Analyzers.MissingValidationAnalyzer,
-    Microsoft.CodeAnalysis.Testing.Verifiers.XUnitVerifier>;
+    Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 using CSharpCodeFixTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpCodeFixTest<
     EricksonLopez.DomainPrimitives.Analyzers.MissingValidationAnalyzer,
     EricksonLopez.DomainPrimitives.Analyzers.MissingValidationCodeFixProvider,
-    Microsoft.CodeAnalysis.Testing.Verifiers.XUnitVerifier>;
+    Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers.Tests;
 
 public class DP0009Tests
 {
-    private const string AttributeCode = @"
-using System;
-using EricksonLopez.DomainPrimitives;
-using EricksonLopez.DomainPrimitives.Validation;
-
-namespace EricksonLopez.DomainPrimitives
-{
-    public class StringPrimitiveAttribute : System.Attribute {}
-    public class NumericPrimitiveAttribute<T> : System.Attribute {}
-    public class DatePrimitiveAttribute : System.Attribute { 
-        public bool PastOnly { get; set; } 
-        public bool FutureOnly { get; set; }
-        public string Format { get; set; }
-    }
-    public class StrongIdAttribute<T> : System.Attribute {}
-    public class EmailAttribute : System.Attribute {}
-}
-
-namespace EricksonLopez.DomainPrimitives.Validation
-{
-    public class NotEmptyAttribute : System.Attribute {}
-    public class MinLengthAttribute : System.Attribute { public MinLengthAttribute(int length) {} }
-}
-";
+    private const string AttributeCode = RoslynTestSnippets.AllAttributes;
 
     [Fact]
     public async Task PrimitiveWithoutValidation_TriggersDP0009()
@@ -103,6 +83,21 @@ public readonly partial record struct {|DP0009:UserId|} { }
     }
 
     [Fact]
+    public async Task GenericNumericStringWithoutValidation_TriggersOnlyStandardDP0009()
+    {
+        var testCode = AttributeCode + @"
+[NumericPrimitive<string>]
+public readonly partial record struct {|#0:StrNum|} { }
+";
+        var test = new CSharpAnalyzerTest { TestCode = testCode };
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("DP0009", DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithArguments("StrNum"));
+        await test.RunAsync();
+    }
+
+    [Fact]
     public async Task PrimitiveWithShortcut_DoesNotTriggerDP0009()
     {
         var testCode = @"
@@ -124,7 +119,6 @@ public readonly partial record struct UserId { }
     public async Task PrimitiveWithoutValidation_AppliesCodeFix()
     {
         var testCode = @"
-using EricksonLopez.DomainPrimitives;
 
 " + AttributeCode + @"
 [StringPrimitive]
@@ -132,7 +126,6 @@ public readonly partial record struct {|DP0009:UserId|} { }
 ";
 
         var fixedCode = @"
-using EricksonLopez.DomainPrimitives;
 
 " + AttributeCode + @"
 [StringPrimitive]
@@ -174,9 +167,14 @@ public readonly partial record struct BirthDate { }
     {
         var testCode = AttributeCode + @"
 [StrongId<string>]
-public readonly partial record struct {|DP0009:UserId|} { }
+public readonly partial record struct {|#0:UserId|} { }
 ";
-        await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
+        var test = new CSharpAnalyzerTest { TestCode = testCode };
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("DP0009", DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithArguments("UserId (StrongId<string> without length or format constraints — add [MinLength], [MaxLength], or [Regex])"));
+        await test.RunAsync();
     }
 
     [Fact]
@@ -214,6 +212,7 @@ public readonly partial record struct UserId { }
     {
         var testCode = @"
 using System;
+
 [Serializable]
 public readonly partial record struct UserId { }
 ";
@@ -239,7 +238,7 @@ public readonly partial record struct UserId { }
     {
         var testCode = AttributeCode + @"
 [System.Serializable, StringPrimitive, NotEmpty]
-[System.Obsolete]
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 public readonly partial record struct UserId { }
 ";
         await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
@@ -248,7 +247,6 @@ public readonly partial record struct UserId { }
     public async Task DatePrimitive_NoValidation_TriggersDP0009()
     {
         var testCode = @"
-using EricksonLopez.DomainPrimitives;
 
 " + AttributeCode + @"
 [DatePrimitive]
@@ -284,6 +282,7 @@ public readonly partial record struct {|DP0009:Date7|} { }
     {
         var testCode = @"
 using System;
+
 public class StringPrimitiveAttribute : Attribute {}
 
 [StringPrimitive]
@@ -292,3 +291,8 @@ public readonly partial record struct Date1 { }
         await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
     }
 }
+
+
+
+
+

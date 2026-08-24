@@ -1,12 +1,13 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Composition;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
-using System.Composition;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -15,16 +16,24 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
+/// <summary>
+/// Provides code fixes for structural declaration diagnostics (DP0001, DP0002, DP0003)
+/// that automatically add the <c>partial</c>, <c>readonly</c>, or <c>record struct</c>
+/// modifiers to non-conforming domain primitive types.
+/// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(StructDeclarationCodeFixProvider)), Shared]
 public sealed class StructDeclarationCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc />
     public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
         DiagnosticDescriptors.DP0001_MustBePartial.Id, 
         DiagnosticDescriptors.DP0002_MustBeReadonly.Id, 
         DiagnosticDescriptors.DP0003_MustBeRecordStruct.Id);
 
+    /// <inheritdoc />
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
+    /// <inheritdoc />
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
@@ -83,18 +92,10 @@ public sealed class StructDeclarationCodeFixProvider : CodeFixProvider
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         
         // Add readonly before partial if partial exists, otherwise at the end
-        var modifiers = node.Modifiers;
-        int insertIndex = modifiers.Count;
-        for (int i = 0; i < modifiers.Count; i++)
-        {
-            if (modifiers[i].IsKind(SyntaxKind.PartialKeyword))
-            {
-                insertIndex = i;
-                break;
-            }
-        }
+        int partialIndex = node.Modifiers.IndexOf(SyntaxKind.PartialKeyword);
+        int insertIndex = partialIndex >= 0 ? partialIndex : node.Modifiers.Count;
 
-        var newModifiers = modifiers.Insert(insertIndex, SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
+        var newModifiers = node.Modifiers.Insert(insertIndex, SyntaxFactory.Token(SyntaxKind.ReadOnlyKeyword));
         var newNode = node.WithModifiers(newModifiers);
 
         var newRoot = root!.ReplaceNode(node, newNode);
@@ -138,3 +139,6 @@ public sealed class StructDeclarationCodeFixProvider : CodeFixProvider
         return document.WithSyntaxRoot(newRoot);
     }
 }
+
+
+

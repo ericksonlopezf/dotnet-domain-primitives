@@ -1,3 +1,5 @@
+// Copyright © Erickson Lopez. MIT License.
+// TD-001: NativeAOT trimming probe for EricksonLopez.DomainPrimitives.Abstractions
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,7 +7,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-// TD-001: NativeAOT trimming probe for EricksonLopez.DomainPrimitives.Abstractions
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Validation;
 
@@ -18,7 +19,10 @@ var noError = PrimitiveError.None;
 Console.WriteLine($"None.IsError: {noError.IsError}");
 
 var stringAttr = typeof(StringPrimitiveAttribute);
-var strongIdAttr = typeof(StrongIdAttribute<System.Guid>);
+var strongIdAttr = typeof(StrongIdAttribute<Guid>);
 Console.WriteLine($"Attributes: {stringAttr.Name}, {strongIdAttr.Name}");
 
 Console.WriteLine("NativeAOT probe completed.");
+
+
+

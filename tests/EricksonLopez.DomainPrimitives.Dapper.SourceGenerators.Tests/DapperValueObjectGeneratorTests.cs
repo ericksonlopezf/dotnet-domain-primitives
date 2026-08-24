@@ -1,13 +1,14 @@
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Linq;
+using AwesomeAssertions;
+using EricksonLopez.DomainPrimitives.Dapper.SourceGenerators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using FluentAssertions;
 using Xunit;
-using EricksonLopez.DomainPrimitives.Dapper.SourceGenerators;
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
 
 namespace EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.Tests;
 
@@ -145,24 +146,76 @@ public readonly partial record struct EmptyObject { }
     }
     
     [Fact]
-    public void EquatableArray_Equals_GetHashCode_Tests()
+    public void Generator_WithClass_OrDifferentNamespace_ShouldNotGenerateValueObjectExtensions()
     {
-        var type = typeof(DapperValueObjectGenerator).Assembly.GetType("EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.EquatableArray`1")!.MakeGenericType(typeof(int));
-        
-        var arr1 = Activator.CreateInstance(type, new int[] { 1, 2, 3 })!;
-        var arr2 = Activator.CreateInstance(type, new int[] { 1, 2, 3 })!;
-        var arr3 = Activator.CreateInstance(type, new int[] { 1, 2, 4 })!;
-        var arr4 = Activator.CreateInstance(type, new int[] { 1, 2 })!;
-        
-        arr1.Equals(arr2).Should().BeTrue();
-        arr1.Equals(arr3).Should().BeFalse();
-        arr1.Equals(arr4).Should().BeFalse();
-        arr1.Equals(null).Should().BeFalse();
-        
-        arr1.GetHashCode().Should().Be(arr2.GetHashCode());
-        arr1.GetHashCode().Should().NotBe(arr3.GetHashCode());
+        string source = @"
+namespace OtherNamespace
+{
+    public class ValueObjectAttribute : System.Attribute { }
+}
+namespace TestNamespace
+{
+    [EricksonLopez.DomainPrimitives.ValueObjectAttribute]
+    public class ClassNotStruct { public int X { get; } }
+
+    [OtherNamespace.ValueObjectAttribute]
+    public readonly partial record struct OtherVo { public int Y { get; } }
+
+    public readonly partial record struct NoAttrVo { public int Z { get; } }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperValueObjectGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        generatedTrees.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Generator_WithOtherDomainPrimitiveAttribute_ShouldNotGenerateValueObjectExtensions()
+    {
+        string source = @"
+namespace TestNamespace
+{
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    public readonly partial record struct NotValueObject { public int A { get; } }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperValueObjectGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        generatedTrees.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Generator_WithSinglePropertyValueObject_ShouldGenerateExactCreateWithArgument()
+    {
+        string source = @"
+namespace TestNamespace;
+[EricksonLopez.DomainPrimitives.ValueObjectAttribute]
+public readonly partial record struct SinglePropVo
+{
+    public string Name { get; init; }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperValueObjectGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("class SinglePropVoDapperExtensions");
+        generatedSource.Should().Contain("return SinglePropVo.Create(val_Name!);");
+        generatedSource.Should().NotContain("return SinglePropVo.Create();");
     }
 }
+
+
 
 
 

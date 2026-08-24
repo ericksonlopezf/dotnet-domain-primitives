@@ -1,18 +1,21 @@
+// Copyright © Erickson Lopez. MIT License.
+using System;
+using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using EricksonLopez.DomainPrimitives.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
+using Xunit;
+
 using CSharpCodeFixTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpCodeFixTest<
     EricksonLopez.DomainPrimitives.Analyzers.StructDeclarationAnalyzer,
     EricksonLopez.DomainPrimitives.Analyzers.StructDeclarationCodeFixProvider,
-    Microsoft.CodeAnalysis.Testing.Verifiers.XUnitVerifier>;
+    Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers.Tests;
 
 public class StructDeclarationCodeFixTests
 {
     private const string AttributeStubs = @"
-using System;
 namespace EricksonLopez.DomainPrimitives
 {
     public class StrongIdAttribute<T> : System.Attribute {}
@@ -25,6 +28,7 @@ namespace EricksonLopez.DomainPrimitives
         var testCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public readonly record struct {|DP0001:MyId|} { }
 }";
@@ -32,6 +36,7 @@ namespace TestNamespace
         var fixedCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public partial readonly record struct MyId { }
 }";
@@ -42,6 +47,7 @@ namespace TestNamespace
         fixedCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public readonly partial record struct MyId { }
 }";
@@ -62,6 +68,7 @@ namespace TestNamespace
         var testCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public partial record struct {|DP0002:MyId|} { }
 }";
@@ -69,6 +76,7 @@ namespace TestNamespace
         var fixedCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public readonly partial record struct MyId { }
 }";
@@ -89,6 +97,7 @@ namespace TestNamespace
         var testCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public readonly partial struct {|DP0003:MyId|} { }
 }";
@@ -96,6 +105,7 @@ namespace TestNamespace
         var fixedCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public readonly partial record struct MyId { }
 }";
@@ -116,6 +126,7 @@ namespace TestNamespace
         var testCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     public struct {|DP0003:MyId|} { }
 }";
@@ -123,6 +134,7 @@ namespace TestNamespace
         var fixedCode = AttributeStubs + @"
 namespace TestNamespace
 {
+    using System;
     [EricksonLopez.DomainPrimitives.StrongId<Guid>]
     readonly public partial record struct MyId { }
 }";
@@ -138,3 +150,8 @@ namespace TestNamespace
         await test.RunAsync();
     }
 }
+
+
+
+
+

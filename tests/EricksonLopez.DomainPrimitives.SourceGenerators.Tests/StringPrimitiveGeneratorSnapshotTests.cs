@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+// Copyright © Erickson Lopez. MIT License.
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +9,6 @@ using EricksonLopez.DomainPrimitives.Generators;
 
 namespace EricksonLopez.DomainPrimitives.Generators.Tests
 {
-    [UsesVerify]
     public class StringPrimitiveGeneratorSnapshotTests
     {
         [Fact]
@@ -50,7 +45,7 @@ namespace EricksonLopez.DomainPrimitives.Normalization
 }
 ";
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -117,7 +112,7 @@ namespace EricksonLopez.DomainPrimitives
 }
 ";
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -175,7 +170,7 @@ namespace EricksonLopez.DomainPrimitives.Normalization
 public class MyValidator {}
 ";
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -218,7 +213,7 @@ namespace EricksonLopez.DomainPrimitives
     public class UsernameAttribute : StringPrimitiveAttribute { public int MinLength { get; set; } public int MaxLength { get; set; } }
 }
 ";
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -257,7 +252,7 @@ namespace EricksonLopez.DomainPrimitives
     public class StringPrimitiveAttribute : System.Attribute {}
 }
 ";
-            var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("Tests", new[] { syntaxTree }, Basic.Reference.Assemblies.Net80.References.All, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
             var generator = new EricksonLopez.DomainPrimitives.Generators.StringPrimitiveGenerator();
             Microsoft.CodeAnalysis.GeneratorDriver driver = Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver.Create(generator);
@@ -270,6 +265,7 @@ namespace EricksonLopez.DomainPrimitives
         }
     }
 }
+
 
 
 

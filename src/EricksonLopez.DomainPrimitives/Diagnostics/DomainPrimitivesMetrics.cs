@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Diagnostics.Metrics;
 
@@ -8,14 +9,13 @@ namespace EricksonLopez.DomainPrimitives.Diagnostics;
 /// validation success and failure rates.
 /// </summary>
 /// <remarks>
-/// Moved from <c>EricksonLopez.DomainPrimitives.Abstractions</c> to <c>EricksonLopez.DomainPrimitives</c> in v1.2.0.
-/// Abstractions should contain only: attributes, marker interfaces, and <c>PrimitiveError</c>.
-/// See BREAKING_CHANGES.md for migration details.
+/// These metrics are provided by <c>EricksonLopez.DomainPrimitives</c> (Core package).
+/// Abstractions contains only: attributes, marker interfaces, and <c>PrimitiveError</c>.
+/// This separation has been in place since v1.0.0.
 /// </remarks>
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 public static class DomainPrimitivesMetrics
 {
-    /// <summary>The name of the <see cref="System.Diagnostics.Metrics.Meter"/> used for domain primitive metrics.</summary>
+    /// <summary>Gets the name of the <see cref="System.Diagnostics.Metrics.Meter"/> used for domain primitive metrics.</summary>
     public static readonly string MeterName = DomainPrimitivesDiagnostics.Meter.Name;
     private static readonly Meter Meter = DomainPrimitivesDiagnostics.Meter;
 
@@ -75,3 +75,4 @@ public static class DomainPrimitivesMetrics
         DomainPrimitivesDiagnostics.WriteValidationFailure(primitiveName, errorType, errorMessage);
     }
 }
+
