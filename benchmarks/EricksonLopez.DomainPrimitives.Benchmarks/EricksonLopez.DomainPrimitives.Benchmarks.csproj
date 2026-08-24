@@ -12,6 +12,8 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
     <PackageReference Include="Meziantou.Framework.StronglyTypedId" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="StronglyTypedId" />
     <PackageReference Include="ValueOf" />
