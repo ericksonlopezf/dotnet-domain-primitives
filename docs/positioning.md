@@ -35,11 +35,11 @@
 ### Where DP trails:
 
 1. **Documentation and community** — Vogen has years of blog posts, Stack Overflow answers, GitHub discussions.
-2. **Discriminated Unions** — Thinktecture has this; DP does not.
-3. **Newtonsoft.Json** — Vogen and StronglyTypedId support it; DP does not.
-4. **Public benchmarks** — Vogen has a benchmark table in its README; DP does not.
+2. **Discriminated Unions** — Thinktecture has this; DP does not (deferred v2.x — adr-029).
+3. ~~**Newtonsoft.Json**~~ — **Resolved.** `EricksonLopez.DomainPrimitives.NewtonsoftJson` now ships `DomainPrimitiveNewtonsoftJsonConverter<TPrimitive, TValue>`, `DomainPrimitivesContractResolver`, and `settings.AddDomainPrimitives()`. (NOW-002 / adr-026)
+4. **Public benchmarks** — `docs/benchmark-results.md` has partial data. Full comparative suite (41 benchmarks vs Vogen/STI) not yet published. (NOW-001 — only remaining NOW item)
 5. **Class support** — Vogen and Thinktecture support class-based VOs; DP is struct-only.
-6. **Global configuration** — Vogen has VogenDefaults; DP has none.
+6. ~~**Global configuration**~~ — **Resolved.** `[assembly: DomainPrimitivesDefaults(Trim, NotEmpty, MaxLength, ExceptionType)]` implemented. (NEXT-001 / adr-033)
 
 ---
 
@@ -121,7 +121,7 @@
 | Dapper | 90% | 80% (Vogen) | **1st** |
 | ASP.NET Core | 85% | 80% | **1st** |
 | Mapping | 90% | 0% | **1st (unique)** |
-| Newtonsoft.Json | 0% | 90% (Vogen) | **Last** |
+| Newtonsoft.Json | **100%** (parity with Vogen/STI) | 90% (Vogen) | **Parity** |
 | Smart Enums | 75% | 90% (THK) | **2nd** |
 | Developer Experience | 50% | 85% (Vogen) | **Last** |
 | Documentation | 45% | 80% (Vogen/THK) | **Last** |
@@ -138,7 +138,7 @@ The gap between technical quality and perceived quality is DP's primary business
 
 ## Roadmap Recommendation
 
-> **The authoritative roadmap is now [`docs/ROADMAP.md`](ROADMAP.md).**
+> **The authoritative roadmap is now [`docs/roadmap.md`](roadmap.md).**
 > This section is a summary view. For full initiative details, pre-conditions, and dependency
 > tracking, refer to the roadmap document.
 
@@ -147,27 +147,27 @@ The gap between technical quality and perceived quality is DP's primary business
 | # | Item | Status | Roadmap ref |
 |---|------|--------|------------|
 | 1 | ✅ Complete audit | ✅ Done (2026-08-10) | — |
-| 2 | ⬜ Publish BenchmarkDotNet results vs Vogen (GAP-009) | Open | [NOW-001](ROADMAP.md) |
+| 2 | ⬜ Publish BenchmarkDotNet results vs Vogen (GAP-009) | **Open** | [NOW-001](roadmap.md) |
 | 3 | ✅ Write migration guides (from-vogen.md, from-stronglytypedid.md) | ✅ Done | — |
 | 4 | ✅ Verified JSON converter uses ValueSpan (GeneratorHelpers.cs:45-51) | ✅ Done | — |
-| 5 | ⬜ Newtonsoft.Json package (GAP-002) | Open | [NOW-002](ROADMAP.md) / [ADR-026](adr/ADR-026-newtonsoft-json-gap-plan.md) |
-| 6 | ⬜ Verify + promote migration guides visibility | Open | [NOW-003](ROADMAP.md) |
+| 5 | ✅ Newtonsoft.Json package (GAP-002) | ✅ Done (2026-08-15) | [NOW-002](roadmap.md) / [adr-026](adr/adr-026-newtonsoft-json-gap-plan.md) |
+| 6 | ✅ Verify + promote migration guides visibility | ✅ Done — links in README | [NOW-003](roadmap.md) |
 
 ### Phase 2 — NEXT (3–6 months): Parity + Amplification
 
 | # | Item | Status | Roadmap ref |
 |---|------|--------|------------|
-| 1 | ⬜ Global configuration (`DomainPrimitivesDefaults`) (GAP-011) | Open | [NEXT-001](ROADMAP.md) |
-| 2 | ⬜ Configurable exception type (GAP-003) | Open | [NEXT-002](ROADMAP.md) |
-| 3 | ⬜ SmartEnum Switch/Map exhaustiveness (GAP-006) | Open | [NEXT-003](ROADMAP.md) |
-| 4 | ⬜ Case-insensitive SmartEnum parsing (GAP-007) | Open | [NEXT-004](ROADMAP.md) |
-| 5 | ⬜ Security story — content and documentation | Open | [NEXT-005](ROADMAP.md) |
+| 1 | ✅ Global configuration (`DomainPrimitivesDefaults`) (GAP-011) | ✅ Done (2026-08-15) | [NEXT-001](roadmap.md) / [adr-033](adr/adr-033-global-assembly-configuration.md) |
+| 2 | ✅ Configurable exception type + DP0017 (GAP-003) | ✅ Done (2026-08-15) | [NEXT-002](roadmap.md) / [adr-034](adr/adr-034-configurable-exception-type.md) |
+| 3 | ✅ SmartEnum Switch/Map exhaustiveness (GAP-006) | ✅ Done (2026-08-15) | [NEXT-003](roadmap.md) / [adr-035](adr/adr-035-smartenum-exhaustive-switch-map.md) |
+| 4 | ✅ Case-insensitive SmartEnum parsing (GAP-007) | ✅ Done (2026-08-15) | [NEXT-004](roadmap.md) / [adr-036](adr/adr-036-smartenum-case-insensitive-parsing.md) |
+| 5 | ⬜ Security story — content and documentation | Open | [NEXT-005](roadmap.md) |
 
 ### Phase 3 — LATER (6–12 months): Differentiation
 
 | # | Item | Status | Roadmap ref |
 |---|------|--------|------------|
-| 1 | ⬜ Discriminated Unions (GAP-001) | Deferred — [ADR-029](adr/ADR-029-defer-discriminated-unions.md) | [LATER-001](ROADMAP.md) |
-| 2 | ⬜ INumber\<T\> for NumericPrimitive (GAP-004) | Open | [LATER-002](ROADMAP.md) |
-| 3 | ⬜ Community infrastructure | Open | [LATER-003](ROADMAP.md) |
-| 4 | ⬜ SuperStrong.Types competitive analysis update (R08) | Quarterly | [LATER-005](ROADMAP.md) |
+| 1 | ⬜ Discriminated Unions (GAP-001) | Deferred — [adr-029](adr/adr-029-defer-discriminated-unions.md) | [LATER-001](roadmap.md) |
+| 2 | ⬜ INumber\<T\> for NumericPrimitive (GAP-004) | Open | [LATER-002](roadmap.md) |
+| 3 | ⬜ Community infrastructure | Open | [LATER-003](roadmap.md) |
+| 4 | ⬜ SuperStrong.Types competitive analysis update (R08) | Quarterly | [LATER-005](roadmap.md) |

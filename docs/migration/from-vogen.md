@@ -17,7 +17,6 @@
 - Auto-discovered EF Core / Dapper registrations without per-type annotations
 
 ### Keep Vogen if you need:
-- Newtonsoft.Json converters (not yet in DomainPrimitives)
 - Class-based value objects (DomainPrimitives is struct-only)
 - Custom underlying types beyond `string/int/long/Guid` (Vogen supports `[ValueObject<T>]` with any T)
 - A large community and extensive examples
@@ -33,7 +32,7 @@
 | `[ValueObject<string>]` | `[StringPrimitive]` | Adds normalization + validation pipeline |
 | `[ValueObject<Guid>]` | `[StrongId<Guid>]` | Use `[StrongId]` for IDs |
 | `[ValueObject<int>]` (for IDs) | `[StrongId<int>]` | |
-| `VogenDefaults` | N/A | Global config not yet available (on roadmap) |
+| `VogenDefaults` | `[assembly: DomainPrimitivesDefaults]` | Supports `Trim`, `NotEmpty`, `MaxLength`, and `ExceptionType` — see [adr-033](../adr/adr-033-global-assembly-configuration.md) |
 | `[Instance("Name", value)]` | Field declaration | `public static readonly MyEnum Member = new(...);` |
 | `[Validate]` static method | Partial method | `private static PrimitiveError? CustomValidate(string value)` |
 
@@ -241,7 +240,7 @@ Run these in order:
 | Behavior | Vogen | DomainPrimitives |
 |:---|:---|:---|
 | Error model | `ValueObjectOrError<T>` (heap) | `out PrimitiveError` (struct, stack) |
-| Newtonsoft.Json | ✅ | ❌ (not yet supported) |
+| Newtonsoft.Json | ✅ | ✅ (via `EricksonLopez.DomainPrimitives.NewtonsoftJson`) |
 | Class-based VOs | ✅ | ❌ (struct only) |
 | String normalization | Manual in Validate() | Declarative [Trim], [LowerCase], etc. |
 | Regex | Manual | Declarative [Regex("pattern")] |

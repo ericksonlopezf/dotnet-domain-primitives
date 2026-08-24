@@ -10,7 +10,7 @@ The pipeline follows a **reusable-workflow pattern**: the entry-point orchestrat
 
 ```mermaid
 flowchart TD
-    PR["Push / PR\n(main, develop)"] --> CI["ci.yml\n(orchestrator)"]
+    PR["Push / PR\n(main, develop)"] --> CI["ci.yml\n(PR Orchestrator - Fast CI)"]
     CI --> BT["dotnet-build-test.yml\n(reusable)"]
     CI --> AOT["aot-smoke-test.yml\n(reusable)"]
 
@@ -20,17 +20,17 @@ flowchart TD
     TAG["Push tag v*.*.*"] --> PUB
 
     DISPATCH_PUB["workflow_dispatch"] --> PUB
-    DISPATCH_MUT["workflow_dispatch\nor Monday 4:00 UTC"] --> MUT["mutation-testing.yml"]
+    DISPATCH_MUT["workflow_dispatch\nor Monday 4:00 UTC"] --> MUT["mutation-testing.yml\n(Stryker.NET Quality Gate)"]
     DISPATCH_BENCH["workflow_dispatch\nor tag v*"] --> BENCH["benchmarks.yml"]
     CRON_WEEK["Sunday 2:00 UTC"] --> WBENCH["weekly-benchmarks.yml"]
 
     BT --> Results["test-results artifact\nCodecov upload\nSonarCloud analysis"]
     AOT --> AOTResult["NativeAOT binary\n(verified at runtime)"]
-    PUB --> NuGet["NuGet.org\n(15 packages)"]
+    MUT --> MutReport["StrykerOutput/ci/\nHTML + JSON artifacts\nstryker/mutation-gate status"]
+    PUB -->|"Validate Stryker Gate\n(Score >= 95% for commit SHA)"| NuGet["NuGet.org\n(14 packages)"]
     PUB --> GHRelease["GitHub Release"]
     PUB --> Attest["Sigstore Attestation"]
     BENCH --> BenchResults["benchmarks/results/\ncommitted to branch"]
-    MUT --> MutReport["StrykerOutput/ci/\nuploaded artifact"]
 ```
 
 ---
@@ -92,8 +92,8 @@ This is a thin orchestrator. It calls two reusable workflows in parallel and pas
 | 6 | Install SonarScanner | `dotnet tool install --global dotnet-sonarscanner` |
 | 7 | Begin Sonar Analysis | `dotnet sonarscanner begin` (guarded: skipped if `SONAR_TOKEN` is empty) |
 | 8 | **Build (Release)** | `dotnet build --no-restore --configuration Release` |
-| 9 | **API Compatibility Check** | `dotnet pack -p:PackageValidationBaselineVersion=1.1.0` — detects binary-breaking changes (P1 Gate) |
-| 10 | **API Surface Budget Gate** | `dotnet test --filter "Category=ApiSurfaceBudget"` — enforces member count budgets (P2 Gate) |
+| 9 | **API Compatibility Check** | `dotnet pack EricksonLopez.DomainPrimitives.slnx --no-build --configuration Release` — detects multi-targeting package errors (P1 Gate) |
+| 10 | **API Surface Budget Gate** | `dotnet test tests/EricksonLopez.DomainPrimitives.UnitTests --filter "Category=ApiSurfaceBudget"` — enforces member count budgets (P2 Gate) |
 | 11 | **Run Tests** | `dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"` — opencover + cobertura formats |
 | 12 | End Sonar Analysis | `dotnet sonarscanner end` (guarded: skipped if `SONAR_TOKEN` is empty) |
 | 13 | Upload test results | `actions/upload-artifact@v4` → `{artifact-name}` |
@@ -118,7 +118,7 @@ This is a thin orchestrator. It calls two reusable workflows in parallel and pas
 | **Runner** | `ubuntu-latest` |
 | **Timeout** | 20 minutes |
 
-Installs NativeAOT prerequisites (`clang`, `lld`, `zlib1g-dev`), builds the solution, publishes the `AotProbe` project (`-p:PublishAot=true --runtime linux-x64 --self-contained`), and executes the resulting native binary to verify zero-allocation correctness at runtime.
+Installs NativeAOT prerequisites (`clang`, `lld`, `zlib1g-dev`), builds the solution, publishes the `AotProbe` project (`--runtime linux-x64 --self-contained`), and executes the resulting native binary to verify zero-allocation correctness at runtime.
 
 | Secret | Required |
 |--------|----------|
@@ -135,7 +135,7 @@ On failure, the AOT output directory is uploaded as a diagnostic artifact (7-day
 | **File** | [`.github/workflows/publish.yml`](../.github/workflows/publish.yml) |
 | **Trigger** | `push` of tags matching `v*.*.*`; `workflow_dispatch` with optional `version` input |
 | **Runner** | `ubuntu-latest` |
-| **Permissions** | `id-token: write`, `contents: write`, `attestations: write` |
+| **Permissions** | `id-token: write`, `contents: write`, `attestations: write`, `statuses: read`, `actions: read` |
 
 #### Version Resolution (in order of precedence)
 
@@ -148,18 +148,20 @@ On failure, the AOT output directory is uploaded as a diagnostic artifact (7-day
 | # | Step | Purpose |
 |---|------|---------|
 | 1 | Checkout (full history) | `fetch-depth: 0` for tag access |
-| 2 | Resolve version | Sets `VERSION` output from tag / input / props |
-| 3 | Setup .NET | `10.0.x` |
-| 4 | Restore Strong Name key | Decodes `SNK_KEY` → `EricksonLopez.snk` |
-| 5 | Restore | `dotnet restore` |
-| 6 | Build (Release) | `dotnet build --configuration Release` |
-| 7 | **Run tests** | Full test suite before any packing |
-| 8 | Upload coverage to Codecov | Publish-gate coverage snapshot |
-| 9 | **Pack All 15 Packages** | `dotnet pack` with `VersionPrefix=$VERSION` for each package |
-| 10 | **Sigstore Attestation** | `actions/attest-build-provenance@v2` — attestation for all `.nupkg` files |
-| 11 | NuGet login (OIDC) | `NuGet/login@v1` — no static API key |
-| 12 | Push to NuGet.org | `dotnet nuget push --skip-duplicate` |
-| 13 | Create GitHub Release | `softprops/action-gh-release@v2` (tag-triggered only); `prerelease=true` if version contains `-` |
+| 2 | Setup Python | `actions/setup-python@v5` (for release mutation gate verification script) |
+| 3 | Resolve version | Sets `VERSION` output from tag / input / props |
+| 4 | **Validate Stryker Gate** | `validate-release-mutation-gate.py` verifies commit SHA has score ≥ 95% |
+| 5 | Setup .NET | `10.0.x` |
+| 6 | Restore Strong Name key | Decodes `SNK_KEY` → `EricksonLopez.snk` |
+| 7 | Restore | `dotnet restore EricksonLopez.DomainPrimitives.slnx` |
+| 8 | Build (Release) | `dotnet build --configuration Release` |
+| 9 | **Run tests** | Full test suite before any packing |
+| 10 | Upload coverage to Codecov | Publish-gate coverage snapshot |
+| 11 | **Pack All 14 Packages** | `dotnet pack` with `VersionPrefix=$VERSION` for each package |
+| 12 | **Sigstore Attestation** | `actions/attest-build-provenance@v2` — attestation for all `.nupkg` files |
+| 13 | NuGet login (OIDC) | `NuGet/login@v1` — no static API key |
+| 14 | Push to NuGet.org | `dotnet nuget push --skip-duplicate` |
+| 15 | Create GitHub Release | `softprops/action-gh-release@v2` (tag-triggered only); `prerelease=true` if version contains `-` |
 
 #### Secrets
 
@@ -167,7 +169,7 @@ On failure, the AOT output directory is uploaded as a diagnostic artifact (7-day
 |--------|----------|---------|
 | `SNK_KEY` | Optional | Strong-name signing |
 | `CODECOV_TOKEN` | Optional | Coverage upload |
-| `GITHUB_TOKEN` | Auto | Release creation |
+| `GITHUB_TOKEN` | Auto | Release creation and commit status inspection |
 
 ---
 
@@ -183,41 +185,37 @@ Uses [`googleapis/release-please-action@v4`](https://github.com/googleapis/relea
 
 When a release is created (`release_created=true`), a `trigger-publish` job dispatches `publish.yml` via the GitHub API, passing the resolved `major.minor.patch` version. This creates a clean two-stage pipeline: merge → release PR → tag → publish.
 
-#### Release-please Configuration
-
-- **Release type:** `simple` (version file only — `Directory.Build.props VersionPrefix`)
-- **Changelog sections:** feat, fix, perf, security, breaking, docs, refactor, test (chore/build/ci are hidden)
-- **Tag format:** `v{major}.{minor}.{patch}` (no component prefix)
-
 ---
 
-### `mutation-testing.yml` — Stryker Mutation Testing
+### `mutation-testing.yml` — Stryker Mutation Testing (Deferred Quality Gate)
 
 | Property | Value |
 |----------|-------|
 | **File** | [`.github/workflows/mutation-testing.yml`](../.github/workflows/mutation-testing.yml) |
 | **Trigger** | `workflow_dispatch`; `schedule: cron: "0 4 * * 1"` (Mondays at 4:00 UTC) |
 | **Runner** | `ubuntu-latest` |
-| **Timeout** | 60 minutes |
+| **Timeout** | 150 minutes (2.5 hours) |
+| **Concurrency** | `group: mutation-testing-${{ github.ref }}`, `cancel-in-progress: true` |
+| **Permissions** | `contents: read`, `statuses: write`, `actions: read` |
 
-#### Inputs (workflow_dispatch only)
-
-| Input | Options | Default |
-|-------|---------|---------|
-| `mutation-level` | `Basic`, `Standard`, `Advanced` | `Standard` |
-
-Installs `dotnet-stryker` globally, runs against the core package (`EricksonLopez.DomainPrimitives`) using the unit test project. Uploads the HTML + JSON report as a 30-day artifact. A Python script parses the JSON report and writes a structured summary to the GitHub Step Summary.
+#### Architectural Design: Deferred Quality Gate
+- **Decoupled from PRs & Pushes:** Pull requests and standard pushes execute fast CI (restore, build, unit tests, coverage, linters) without waiting for Stryker.
+- **Scheduled & On-Demand Gate:** Runs on weekly schedule (Mondays 4:00 UTC) or manual dispatch before releases.
+- **Timeout Rationale (150m):** Exhaustive mutation analysis across the ecosystem test projects can exceed 60 minutes on standard GitHub-hosted runners; a 150-minute threshold prevents premature cancellation of valid runs while guarding against hangs.
+- **Artifacts & Persistence:** Uploads HTML and JSON reports (30-day retention), generates `stryker-metadata.json`, and records the GitHub Commit Status `stryker/mutation-gate` on the evaluated commit SHA.
+- **Zero Drift Configuration:** Step summary reporting and release gate validators dynamically read thresholds directly from [`stryker-config.json`](../stryker-config.json).
 
 #### Quality Thresholds (from `stryker-config.json`)
 
-| Level | Threshold |
-|-------|-----------|
-| High | ≥ 100% |
-| Low | ≥ 98% |
-| **Break** | **≥ 95%** — CI fails below this |
+| Level | Threshold | Status | Action |
+|-------|-----------|--------|--------|
+| High | ≥ 100% | `✅ HIGH` | Pass |
+| Low | ≥ 98% | `🟡 LOW` | Pass |
+| Warning | ≥ 95% && < 98% | `🟠 WARNING` | Pass (Approaching break threshold) |
+| **Break** | **< 95%** | `❌ FAILED` | **Hard Gate Fail** (blocks CI & releases) |
 
 > [!NOTE]
-> `stryker-config.json` uses `Stryker.slnx` (not the main solution) and targets `net8.0` with 5 test projects: `Abstractions.UnitTests`, `UnitTests`, `Testing.UnitTests`, `Mapster.Tests`, and `Dapper.IntegrationTests`.
+> `stryker-config.json` uses `Stryker.slnx` (not the main solution) and targets `net8.0` with 8 test projects: `Abstractions.UnitTests`, `UnitTests`, `Testing.UnitTests`, `Dapper.IntegrationTests`, `EFCore.UnitTests`, `AspNetCore.UnitTests`, `OpenApi.Tests`, and `NewtonsoftJson.Tests`. Source generator AST internal transformations are intentionally excluded per [adr-032](adr/adr-032-exclude-source-generators-mutation-testing.md).
 
 ---
 
@@ -230,13 +228,6 @@ Installs `dotnet-stryker` globally, runs against the core package (`EricksonLope
 | **Runner** | `ubuntu-latest` |
 | **Timeout** | 60 minutes |
 | **Permissions** | `contents: write` (to commit results) |
-
-#### Inputs (workflow_dispatch only)
-
-| Input | Default | Description |
-|-------|---------|-------------|
-| `benchmark-filter` | `*` | BenchmarkDotNet filter glob |
-| `commit-results` | `true` | Commit results to branch after run |
 
 Installs .NET **8.0.x**, **9.0.x**, and **10.0.x** simultaneously. Runs benchmarks against all three runtimes (`--runtimes net8.0 net9.0 net10.0`) with `--job short`. Results are exported as JSON and Markdown to `benchmarks/results/`. If `commit-results=true`, the results are committed back to the triggering branch with `[skip ci]`.
 
@@ -252,7 +243,7 @@ Installs .NET **8.0.x**, **9.0.x**, and **10.0.x** simultaneously. Runs benchmar
 | **Timeout** | 300 minutes (5 hours) |
 | **Permissions** | `contents: write` |
 
-Identical to `benchmarks.yml` but without `--job short` — runs the full benchmark suite for a comprehensive deep review. Results are always committed back to the branch if the run succeeds.
+Runs the full benchmark suite for a comprehensive deep review without `--job short`. Results are committed back to the branch if the run succeeds.
 
 ---
 
@@ -277,12 +268,12 @@ Identical to `benchmarks.yml` but without `--job short` — runs the full benchm
 
 ### Static Analysis (SonarCloud)
 
-Enabled only when `SONAR_TOKEN` secret is configured. Analysis wraps the build + test steps in begin/end mode. Coverage forwarded via `sonar.cs.opencover.reportsPaths`.
+Enabled when `SONAR_TOKEN` secret is configured. Analysis wraps the build + test steps in begin/end mode. Coverage forwarded via `sonar.cs.opencover.reportsPaths`.
 
 | Property | Value |
 |----------|-------|
-| Organization | `ericksonlopez` |
-| Project key | `EricksonLopez_{repository.name}` |
+| Organization | `ericksonlopezf` |
+| Project key | `ericksonlopezf_{repository.name}` |
 | Host | `https://sonarcloud.io` |
 
 ### API Compatibility (Package Validation)
@@ -290,29 +281,23 @@ Enabled only when `SONAR_TOKEN` secret is configured. Analysis wraps the build +
 | Setting | Value |
 |---------|-------|
 | `EnablePackageValidation` | `true` for all packable projects |
-| Baseline version (CI) | `1.1.0` (hardcoded in `dotnet-build-test.yml` step) |
-| Baseline version (props) | `1.2.0` (in `Directory.Build.props`) |
 | Failure mode | CI fails if binary-breaking change detected vs baseline |
-
-> [!WARNING]
-> **v1.0.0 is the first release.** Both the CI-hardcoded baseline (`1.1.0`) and the props baseline (`1.2.0`) reference versions that have never been published. The `EnablePackageValidation` baseline check will produce an error or be skipped on the first publish until a real baseline package exists on NuGet. This is tracked as **NEW-TD-B** in [`tech-debt.md`](tech-debt.md). The baseline values should be removed or set to the version just below the first release once 1.0.0 is published.
 
 ### API Surface Budget Gate
 
-Tests filtered by `[Trait("Category", "ApiSurfaceBudget")]` are run as a dedicated CI step. These tests verify that no generated struct exceeds the member count budget (≤ 25 members by design principle; ≤ 37 for DatePrimitive per actual measurement).
+Tests filtered by `[Trait("Category", "ApiSurfaceBudget")]` are run as a dedicated CI step. These tests verify that no generated struct exceeds the member count budget (≤ 35 members for StringPrimitive, ≤ 38 for NumericPrimitive, ≤ 40 for StrongId, ≤ 37 for DatePrimitive).
 
 ### Mutation Testing (Stryker.NET)
 
-| Threshold | Value |
-|-----------|-------|
-| High | ≥ 100% |
-| Low | ≥ 98% |
-| **Break (CI gate)** | **≥ 95%** |
-| Coverage analysis | Off |
-| Concurrency | 4 |
-| Target framework | `net8.0` |
-
-Runs weekly (Monday 4:00 UTC) and on `workflow_dispatch`. Not part of the standard PR pipeline (too slow for per-PR execution).
+| Threshold | Value | Status |
+|-----------|-------|--------|
+| High | ≥ 100% | `✅ HIGH` |
+| Low | ≥ 98% | `🟡 LOW` |
+| Warning | ≥ 95% | `🟠 WARNING` |
+| **Break (Quality Gate)** | **< 95%** | `❌ FAILED` |
+| Coverage analysis | Off | |
+| Concurrency | 2 | |
+| Target framework | `net8.0` | |
 
 ---
 
@@ -339,9 +324,6 @@ Branches observed in CI trigger configurations:
 | `main` | Protected; merge triggers `release-please.yml`; PRs and direct pushes run `ci.yml` |
 | `develop` | Integration branch; PRs and direct pushes run `ci.yml` |
 
-> [!NOTE]
-> The CI configuration shows `main` and `develop` branches only. There is no evidence of `release/*` or `hotfix/*` branch patterns in any workflow trigger. Branch strategy is linear: feature → `develop` → `main`.
-
 ---
 
 ## Secrets Reference
@@ -351,4 +333,4 @@ Branches observed in CI trigger configurations:
 | `SNK_KEY` | All build workflows | Optional | Base64-encoded `EricksonLopez.snk` strong-name key |
 | `CODECOV_TOKEN` | `dotnet-build-test.yml`, `publish.yml` | Optional | Codecov upload authentication |
 | `SONAR_TOKEN` | `dotnet-build-test.yml` | Optional | SonarCloud analysis (steps guarded) |
-| `GITHUB_TOKEN` | `publish.yml`, `release-please.yml` | Auto-injected | Release creation, PR management |
+| `GITHUB_TOKEN` | `publish.yml`, `release-please.yml`, `mutation-testing.yml` | Auto-injected | Release creation, commit status, PR management |

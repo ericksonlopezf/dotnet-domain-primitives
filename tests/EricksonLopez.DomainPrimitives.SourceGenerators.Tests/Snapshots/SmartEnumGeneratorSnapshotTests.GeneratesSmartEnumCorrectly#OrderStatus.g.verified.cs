@@ -105,9 +105,9 @@ readonly partial record struct OrderStatus :
         return false;
     }
 
-    public static OrderStatus FromName(string name)
+    public static OrderStatus FromName(string name, bool ignoreCase = false)
     {
-        if (TryFromName(name, out var result)) return result;
+        if (TryFromName(name, ignoreCase, out var result)) return result;
         throw new ArgumentException($"No OrderStatus found with name {name}", nameof(name));
     }
 

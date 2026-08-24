@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 08: SERIALIZATION AND MAPPING (JSON & MAPSTER)
 // ============================================================================
@@ -16,14 +13,18 @@ using System.Threading.Tasks;
 // Automatic converters serialize the primitive as a flat value (unwrap):
 // `{ "customerId": "a1b2c3d4-..." }` ✅
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using Chapter08;
 using EricksonLopez.DomainPrimitives;
-
-using EricksonLopez.DomainPrimitives.Mapster;
+using EricksonLopez.DomainPrimitives.NewtonsoftJson;
 using EricksonLopez.Result;
 using Mapster;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 08: SERIALIZATION AND MAPPING (JSON & MAPSTER)");
@@ -32,7 +33,7 @@ Console.WriteLine("=========================================================\n")
 // ----------------------------------------------------------------------------
 // 1. JSON SERIALIZATION (SYSTEM.TEXT.JSON)
 // ----------------------------------------------------------------------------
-Console.WriteLine("--- 📄 JSON SERIALIZATION (TRANSPARENT / UNWRAPPED) ---");
+Console.WriteLine("--- 📄 JSON SERIALIZATION (SYSTEM.TEXT.JSON TRANSPARENT / UNWRAPPED) ---");
 
 var customerDto = new CustomerResponseDto
 {
@@ -47,26 +48,60 @@ var jsonOptions = new JsonSerializerOptions
     WriteIndented = true
 };
 
-string jsonResult = JsonSerializer.Serialize(customerDto, jsonOptions);
+string jsonResult = System.Text.Json.JsonSerializer.Serialize(customerDto, jsonOptions);
 Console.WriteLine("Generated JSON (Flat Values):");
 Console.WriteLine(jsonResult);
 
 // Automatic deserialization from flat JSON
-var deserializedDto = JsonSerializer.Deserialize<CustomerResponseDto>(jsonResult, jsonOptions);
+var deserializedDto = System.Text.Json.JsonSerializer.Deserialize<CustomerResponseDto>(jsonResult, jsonOptions);
 Console.WriteLine($"Successfully deserialized: {deserializedDto?.Email} (Amount: {deserializedDto?.CreditAmount})");
 
 Console.WriteLine();
 
 // ----------------------------------------------------------------------------
-// 2. MAPPING DTOS TO DOMAIN MODELS WITH MAPSTER
+// 2. NEWTONSOFT.JSON INTEGRATION (ERICKSONLOPEZ.DOMAINPRIMITIVES.NEWTONSOFTJSON)
+// ----------------------------------------------------------------------------
+Console.WriteLine("--- 📦 NEWTONSOFT.JSON SERIALIZATION ---");
+
+// Overload A: AddDomainPrimitives(JsonSerializerSettings) — used with JsonConvert.SerializeObject
+var newtonsoftSettings = new JsonSerializerSettings();
+newtonsoftSettings.AddDomainPrimitives();
+
+string newtonsoftJson = JsonConvert.SerializeObject(customerDto, Formatting.Indented, newtonsoftSettings);
+Console.WriteLine("Newtonsoft.Json serialized flat value (via JsonSerializerSettings.AddDomainPrimitives()):");
+Console.WriteLine(newtonsoftJson);
+
+var deserializedNewtonsoft = JsonConvert.DeserializeObject<CustomerResponseDto>(newtonsoftJson, newtonsoftSettings);
+Console.WriteLine($"Newtonsoft successfully deserialized: {deserializedNewtonsoft?.Email}");
+
+Console.WriteLine();
+
+// Overload B: AddDomainPrimitives(JsonSerializer) — used with JsonSerializer instance directly
+Console.WriteLine("--- 📦 NEWTONSOFT.JSON (JsonSerializer instance overload) ---");
+var jsonSerializer = new Newtonsoft.Json.JsonSerializer();
+jsonSerializer.AddDomainPrimitives(); // Registers DomainPrimitiveUniversalNewtonsoftJsonConverter
+
+using var sw2 = new System.IO.StringWriter();
+using var jw = new Newtonsoft.Json.JsonTextWriter(sw2) { Formatting = Formatting.Indented };
+jsonSerializer.Serialize(jw, customerDto);
+string newtonsoftJson2 = sw2.ToString();
+Console.WriteLine("JsonSerializer instance serialized flat value (via JsonSerializer.AddDomainPrimitives()):");
+Console.WriteLine(newtonsoftJson2);
+Console.WriteLine();
+
+
+// ----------------------------------------------------------------------------
+// 3. MAPPING DTOS TO DOMAIN MODELS WITH MAPSTER
 // ----------------------------------------------------------------------------
 Console.WriteLine("--- 🔄 MAPPING WITH MAPSTER (CONVERTING PRIMITIVES TO DTOS) ---");
 
 // Register Mapster configurations
-TypeAdapterConfig.GlobalSettings
-    .AddDomainPrimitiveMapping<CustomerId, Guid>(id => CustomerId.Create(id), customerId => customerId.Value)
-    .AddDomainPrimitiveMapping<EmailAddress, string>(s => EmailAddress.Create(s), email => email.Value)
-    .AddDomainPrimitiveMapping<Money, decimal>(m => Money.Create(m), money => money.Value);
+TypeAdapterConfig<CustomerId, Guid>.NewConfig().MapWith(id => id.Value);
+TypeAdapterConfig<Guid, CustomerId>.NewConfig().MapWith(guid => CustomerId.Create(guid));
+TypeAdapterConfig<EmailAddress, string>.NewConfig().MapWith(e => e.Value);
+TypeAdapterConfig<string, EmailAddress>.NewConfig().MapWith(s => EmailAddress.Create(s));
+TypeAdapterConfig<Money, decimal>.NewConfig().MapWith(m => m.Value);
+TypeAdapterConfig<decimal, Money>.NewConfig().MapWith(d => Money.Create(d));
 
 var requestInput = new CreateCustomerRequest("Maria Lopez", "maria.lopez@company.com", 2500.00m);
 
@@ -128,5 +163,7 @@ namespace Chapter08
     [Money(Min = 0)]
     public readonly partial record struct Money;
 }
+
+
 
 

@@ -1,12 +1,16 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
-// CHAPTER 13: DOMAIN COLLECTIONS (LIST ENCAPSULATION)
+// CHAPTER 13: DOMAIN COLLECTIONS (LIST ENCAPSULATION + COLLECTION EXTENSIONS)
 // ============================================================================
 // In this chapter you will learn to protect internal collections within
-// Aggregate Roots and Domain Entities.
+// Aggregate Roots and Domain Entities, and also how to convert raw sequences
+// of values into validated collections of domain primitives.
+//
+// COVERED APIS:
+// 1. Encapsulated domain collections in Aggregate Roots (DDD pattern).
+// 2. PrimitiveCollectionExtensions.ToDomainPrimitiveList<>()   — IEnumerable → List<T>
+// 3. PrimitiveCollectionExtensions.ToDomainPrimitiveArray<>()  — IEnumerable → T[]
+// 4. PrimitiveCollectionExtensions.ToDomainPrimitiveArray<>()  — ReadOnlySpan<T> → T[]
 //
 // COMMON ERRORS IN TRADITIONAL ARCHITECTURES:
 // Exposing `public List<Item> Items { get; set; }` allows external layers to:
@@ -18,10 +22,14 @@ using System.Threading.Tasks;
 // Expose only read-only views (`IReadOnlyCollection<T>`) and force all
 // additions or removals to go through methods with business intent.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter13;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 13: DOMAIN COLLECTIONS AND ENCAPSULATION");
@@ -56,6 +64,45 @@ if (exceedsLimitRes.IsFailure)
 Console.WriteLine("\n--- 🛡️ EXTERNAL IMMUTABILITY VERIFICATION ---");
 Console.WriteLine($"The 'Items' property exposes IReadOnlyCollection<{nameof(CartItem)}>.");
 Console.WriteLine($"It is not possible to do `cart.Items.Add(...)` or `cart.Items.Clear()` from the outside.");
+
+// ─────────────────────────────────────────────────────────────────────────
+// SECTION 2: PrimitiveCollectionExtensions
+// ─────────────────────────────────────────────────────────────────────────
+Console.WriteLine("\n--- 📚 SECTION 2: PrimitiveCollectionExtensions ---");
+Console.WriteLine("Convert raw sequences of values into validated lists/arrays of domain primitives.\n");
+
+// 2a. ToDomainPrimitiveList<>() — IEnumerable<TValue> → List<TPrimitive>
+Console.WriteLine("[2a] ToDomainPrimitiveList<ProductId, int>() — IEnumerable<int> → List<ProductId>");
+var rawProductIds = new[] { 101, 202, 303, 404 };
+var productIdList = rawProductIds.ToDomainPrimitiveList<ProductId, int>();
+Console.WriteLine($"  Input:  [{string.Join(", ", rawProductIds)}]");
+Console.WriteLine($"  Output: [{string.Join(", ", productIdList)}] (List<ProductId>, Count={productIdList.Count})");
+
+// 2b. ToDomainPrimitiveArray<>() — IEnumerable<TValue> → TPrimitive[]
+Console.WriteLine("\n[2b] ToDomainPrimitiveArray<ProductId, int>() — IEnumerable<int> → ProductId[]");
+var productIdArray = rawProductIds.ToDomainPrimitiveArray<ProductId, int>();
+Console.WriteLine($"  Output: [{string.Join(", ", productIdArray)}] (ProductId[], Length={productIdArray.Length})");
+
+// 2c. ToDomainPrimitiveArray<>() — ReadOnlySpan<TValue> → TPrimitive[]
+// This overload is only available on .NET 7+ and avoids enumeration overhead.
+Console.WriteLine("\n[2c] ToDomainPrimitiveArray<ProductId, int>() — ReadOnlySpan<int> → ProductId[]");
+ReadOnlySpan<int> spanIds = stackalloc int[] { 500, 600, 700 };
+var spanResult = spanIds.ToDomainPrimitiveArray<ProductId, int>();
+Console.WriteLine($"  Input span: [500, 600, 700]");
+Console.WriteLine($"  Output: [{string.Join(", ", spanResult)}] (ProductId[], Length={spanResult.Length})");
+
+// 2d. Error propagation — if any element is invalid, DomainPrimitiveValidationException is thrown
+Console.WriteLine("\n[2d] ToDomainPrimitiveList — error on invalid element");
+try
+{
+    var invalidRawMoney = new[] { 100.00m, -5.00m, 200.00m }; // -5 fails [Money] validation
+    invalidRawMoney.ToDomainPrimitiveList<Money, decimal>();
+    Console.WriteLine("  Unexpected success — should have thrown");
+}
+catch (DomainPrimitiveValidationException ex)
+{
+    Console.WriteLine($"  ❌ Correctly threw DomainPrimitiveValidationException: [{ex.Error.Code}] {ex.Error.Message}");
+}
 
 Console.WriteLine("\nCHAPTER 13 COMPLETED SUCCESSFULLY.\n");
 
@@ -132,8 +179,10 @@ public abstract class Entity<TId>
 
 public abstract class AggregateRoot<TId> : Entity<TId>
 {
-    private readonly System.Collections.Generic.List<IDomainEvent> _domainEvents = new();
-    public System.Collections.Generic.IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    private readonly List<IDomainEvent> _domainEvents = new();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();
 }
+
+

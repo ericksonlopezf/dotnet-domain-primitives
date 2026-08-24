@@ -6,24 +6,31 @@ If you need help with `EricksonLopez.DomainPrimitives`, here are the available c
 
 ### Documentation
 
-- [Quick Start](docs/QuickStart.md) — Installation and first steps
+- [Quick Start](docs/quickstart.md) — Installation and first steps
 - [API Reference](docs/api-reference.md) — Interfaces, exceptions, and factory methods
 - [Cookbook](docs/cookbook.md) — Common problems solved with DomainPrimitives
 - [Security Gates](docs/security.md) — SEC-001 through SEC-006 explained
+- [Architecture & Design Philosophy](docs/architecture.md) — Design priorities and patterns
+- [Abstractions Boundary Specification](docs/boundary.md) — Package contract and API rules
 - [Migration from Vogen](docs/migration/from-vogen.md) — Step-by-step migration guide
 - [Migration from StronglyTypedId](docs/migration/from-stronglytypedid.md) — Step-by-step migration guide
+- [Packages Overview](docs/packages.md) — All 14 packages, target frameworks, and dependency graph
 
 ### GitHub Issues
 
 For **bug reports** and **feature requests**, please use [GitHub Issues](https://github.com/ericksonlopezf/dotnet-domain-primitives/issues) with the appropriate template:
 
-- [Bug Report](https://github.com/ericksonlopezf/dotnet-domain-primitives/issues/new?template=bug_report.yml) — For reproducible bugs or generator issues
-- [Feature Request](https://github.com/ericksonlopezf/dotnet-domain-primitives/issues/new?template=feature_request.yml) — For new feature proposals
+- [Bug Report](https://github.com/ericksonlopezf/dotnet-domain-primitives/issues/new?template=bug-report.yml) — For reproducible bugs or generator issues
+- [Feature Request](https://github.com/ericksonlopezf/dotnet-domain-primitives/issues/new?template=feature-request.yml) — For new feature proposals
 - [API Review](https://github.com/ericksonlopezf/dotnet-domain-primitives/issues/new?template=api-review.yml) — For public API additions
 
 ### Security Issues
 
-Please **do not** open a public issue for security vulnerabilities. See [SECURITY.md](SECURITY.md) for reporting instructions.
+Please **do not** open a public issue for security vulnerabilities. See [SECURITY.md](SECURITY.md) for reporting instructions via [ericksonlopezf@gmail.com](mailto:ericksonlopezf@gmail.com).
+
+### Direct Support
+
+For non-public inquiries or direct support from the maintainer, contact [ericksonlopezf@gmail.com](mailto:ericksonlopezf@gmail.com).
 
 ## Contributing
 

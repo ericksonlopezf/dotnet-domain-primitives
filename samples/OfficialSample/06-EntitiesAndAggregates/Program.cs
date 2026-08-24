@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 06: ENTITIES AND AGGREGATE ROOTS IN DDD
 // ============================================================================
@@ -14,10 +11,14 @@ using System.Threading.Tasks;
 // 3. ENCAPSULATION: Aggregate Roots do not allow mutating their state directly.
 //    They only expose methods with business intent (e.g. `AddItem()`, `Cancel()`).
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter06;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 06: ENTITIES AND AGGREGATE ROOTS");
@@ -171,8 +172,10 @@ public abstract class Entity<TId>
 
 public abstract class AggregateRoot<TId> : Entity<TId>
 {
-    private readonly System.Collections.Generic.List<IDomainEvent> _domainEvents = new();
-    public System.Collections.Generic.IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    private readonly List<IDomainEvent> _domainEvents = new();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
     protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();
 }
+
+

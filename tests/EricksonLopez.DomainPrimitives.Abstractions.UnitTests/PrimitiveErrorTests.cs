@@ -1,5 +1,6 @@
+// Copyright © Erickson Lopez. MIT License.
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives.Validation;
-using FluentAssertions;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
@@ -24,3 +25,7 @@ public class PrimitiveErrorTests
         error.IsError.Should().BeFalse();
     }
 }
+
+
+
+

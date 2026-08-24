@@ -33,6 +33,10 @@ Desktop.ini
 
 # Test results
 TestResults/
+test-results/
+[Tt]est[Rr]esults*/
+[Tt]est-[Rr]esults*/
+*.trx
 *.coverage
 *.coveragexml
 
@@ -63,12 +67,6 @@ coverage.json
 # BenchmarkDotNet artifacts
 BenchmarkDotNet.Artifacts/
 benchmarks/history/current/
-
-# NuGet pack output
-nupkg/
-nupkg-compat-check/
-*.nupkg
-*.snupkg
 
 # Stryker output
 StrykerOutput/

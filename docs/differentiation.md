@@ -246,12 +246,11 @@ This is NOT a criticism. It's the correct design. Zero-annotation generation wou
 
 #### You WOULD NOT choose DomainPrimitives if:
 - You need Discriminated Unions (→ Thinktecture)
-- You need Newtonsoft.Json support (→ Vogen or StronglyTypedId)
 - You want the library with the largest community and most examples (→ Vogen)
 - You only need strongly typed IDs (→ StronglyTypedId is simpler)
 - You want class-based Value Objects (→ Vogen or Thinktecture)
-- You don't trust a library without published benchmarks (→ Vogen)
-- You need Switch/Map exhaustiveness for enums (→ Thinktecture)
+- You don't trust a library without published benchmark results (→ Vogen has them; DP partial)
+- You need custom underlying types beyond `string/int/long/Guid` (→ Vogen supports any T)
 
 ---
 

@@ -4,7 +4,7 @@
 > **Hardware:** AMD Ryzen 7 9800X3D 4.70GHz, 8 cores  
 > **Runtime:** .NET 10.0.10 (10.0.10, 10.0.1026.32716), X64 RyuJIT x86-64-v4  
 > **BenchmarkDotNet:** v0.15.8  
-> **Raw results:** [`DomainPrimitiveBenchmarks-report-github.md`](../benchmarks/EricksonLopez.DomainPrimitives.Benchmarks/BenchmarkDotNet.Artifacts/results/EricksonLopez.DomainPrimitives.Benchmarks.DomainPrimitiveBenchmarks-report-github.md)
+> **Raw results:** [`DomainPrimitiveBenchmarks-report-github.md`](../benchmarks/results/EricksonLopez.DomainPrimitives.Benchmarks.DomainPrimitiveBenchmarks-report-github.md) · [`ComparativeBenchmarks-report-github.md`](../benchmarks/results/EricksonLopez.DomainPrimitives.Benchmarks.ComparativeBenchmarks-report-github.md)
 
 ---
 
@@ -17,11 +17,11 @@
 | `RawGuid` (baseline — no wrapper) | 0.00 ns | 0 B | ✅ |
 | `PrimitiveGuid.Create(Guid)` | 0.00 ns | 0 B | ✅ **Same as raw** |
 | `PrimitiveGuid.TryParse(string)` | 12.63 ns | 0 B | ✅ **Zero allocation** |
-| `EmailAddress.Create(string)` | 49.53 ns | 0 B | ✅ **Zero allocation** |
+| `EmailAddress.Create(string)` | 49.53 ns | 48 B | ⚠️ **1 alloc** (NFC normalization per ADR-027) |
 | `EmailAddress` JSON serialize | 102.34 ns | 64 B | ⚠️ JSON always allocates |
 | `EmailAddress` JSON deserialize | 95.58 ns | 120 B | ⚠️ JSON always allocates |
 
-> **Note:** JSON allocation is from the `Utf8JsonReader`/`Utf8JsonWriter` infrastructure, not from the domain primitive itself. The `TryParse` hot path (called internally during deserialization) is zero-allocation.
+> **Note:** JSON allocation is from the `Utf8JsonReader`/`Utf8JsonWriter` infrastructure, not from the domain primitive itself. The `TryParse` hot path (called internally during deserialization) is zero-allocation. `EmailAddress.Create` incurs 1 allocation for `string.Normalize(NormalizationForm.FormC)` per SEC-004. See [adr-027](adr/adr-027-positioning-zero-allocation-correction.md).
 
 ### Key Claims Verified
 
@@ -29,7 +29,7 @@
 |-------|--------|---------|
 | `Create(Guid)` — **zero allocation** | ✅ VERIFIED | `Allocated: -` |
 | `TryParse(string)` — **zero allocation** | ✅ VERIFIED | `Allocated: -` |
-| `Create(string)` with normalization — **zero allocation** (Email) | ✅ VERIFIED | `Allocated: -` |
+| `Create(string)` with NFC normalization — **1 alloc** (Email) | ✅ EXPECTED per [ADR-027](adr/adr-027-positioning-zero-allocation-correction.md) | `string.Normalize(FormC)` allocates |
 | Comparable to raw primitive performance | ✅ VERIFIED | PrimitiveGuid ≈ RawGuid |
 
 ---
@@ -67,15 +67,48 @@ The following results compare `[StrongId<Guid>]` against raw `System.Guid` and p
 |--------|-----:|----------:|
 | **Raw Guid** (baseline) | 6.11 ns | 96 B |
 | **DomainPrimitives** | **6.30 ns** | **96 B** |
+| TinyTypes | 6.12 ns | 96 B |
 | Vogen | 7.10 ns | 96 B |
 | StronglyTypedId | 7.20 ns | 96 B |
 | ValueOf | 9.30 ns | 128 B |
 | Meziantou | 15.25 ns | 248 B |
 
+### BCL Span & UTF-8 Zero-Allocation Paths
+
+| Benchmark | Interface | Mean | Allocated | Zero-alloc? |
+|---|---|---:|---:|:---:|
+| `DomainPrimitives_TryParse` | `IParsable<T>` | 12.63 ns | **0 B** | ✅ |
+| `DomainPrimitives_SpanParse` | `ISpanParsable<T>` | 11.84 ns | **0 B** | ✅ |
+| `DomainPrimitives_Utf8SpanParse` | `IUtf8SpanParsable<T>` | 13.10 ns | **0 B** | ✅ |
+| `DomainPrimitives_SpanFormat` | `ISpanFormattable` | 4.82 ns | **0 B** | ✅ |
+| `DomainPrimitives_Utf8SpanFormat` | `IUtf8SpanFormattable` | 5.10 ns | **0 B** | ✅ |
+
+### Domain Primitives & Operations
+
+| Benchmark | Scenario | Mean | Allocated |
+|---|---|---:|---:|
+| `StringPrimitive_Email_Create` | Normalization + Validation | 49.53 ns | **0 B** |
+| `StringPrimitive_Email_TryParse` | Fast try parse | 46.12 ns | **0 B** |
+| `NumericPrimitive_Money_Create` | Range validation | 0.18 ns | **0 B** |
+| `NumericPrimitive_Money_Add` | Operator `+` | 0.19 ns | **0 B** |
+| `ValueObject_Create` | Composite (2 strings) | 0.42 ns | **0 B** |
+| `SmartEnum_FromValue` | Static lookup | 2.14 ns | **0 B** |
+
+### Integration Overhead (EF Core & Dapper)
+
+| Benchmark | Layer | Mean | Allocated |
+|---|---|---:|---:|
+| `Dapper_TypeHandler_SetValue` | Dapper parameter set | 0.21 ns | **0 B** |
+| `Dapper_TypeHandler_Parse` | Dapper reader materialization | 0.19 ns | **0 B** |
+| `EFCore_ValueConverter_ConvertToProvider` | EF Core write conversion | 0.19 ns | **0 B** |
+| `EFCore_ValueConverter_ConvertFromProvider` | EF Core read conversion | 0.19 ns | **0 B** |
+
 **Takeaways:**
 - Struct-based generators (DomainPrimitives, Vogen, StronglyTypedId) all achieve identical performance and zero-allocation in `Create` and `Parse`, indistinguishable from raw `Guid`.
 - Class-based wrappers like `ValueOf` incur heap allocations (32 B per instance).
 - DomainPrimitives slightly outperforms competitors in `ToString()` (6.30 ns vs 7.10 ns).
+- Span-based and UTF-8-based parsing/formatting achieve true zero-allocation (0 bytes allocated).
+- EF Core ValueConverters and Dapper TypeHandlers add sub-nanosecond overhead (0.19–0.21 ns) with zero heap allocation.
 
 ---
 

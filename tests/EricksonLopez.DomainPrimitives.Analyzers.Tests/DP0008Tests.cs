@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,31 +6,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using EricksonLopez.DomainPrimitives.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
+using Xunit;
+
 using CSharpAnalyzerTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpAnalyzerTest<
     EricksonLopez.DomainPrimitives.Analyzers.ValueObjectAnalyzer,
-    Microsoft.CodeAnalysis.Testing.Verifiers.XUnitVerifier>;
+    Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers.Tests;
 
 public class DP0008Tests
 {
-    private const string AttributeCode = @"
-using System;
-using EricksonLopez.DomainPrimitives;
-
-namespace EricksonLopez.DomainPrimitives
-{
-    public class ValueObjectAttribute : System.Attribute {}
-    public class DatePrimitiveAttribute : System.Attribute {
-        public bool PastOnly { get; set; }
-        public bool FutureOnly { get; set; }
-        public string Format { get; set; }
-    }
-}
-";
+    private const string AttributeCode = RoslynTestSnippets.BaseAttributes;
 
     [Fact]
     public async Task ValueObject_WithoutInitOnlyProperties_TriggersDP0008()
@@ -136,4 +125,36 @@ public partial record struct Address
 ";
         await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
     }
+
+    [Fact]
+    public async Task NonValueObject_RecordStruct_WithSet_IsIgnored()
+    {
+        var testCode = @"
+" + AttributeCode + @"
+public partial record struct NonVoAddress 
+{
+    public string Street { get; set; }
 }
+";
+        await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
+    }
+
+    [Fact]
+    public async Task ValueObjectAttribute_WithSuffix_TriggersDP0008()
+    {
+        var testCode = @"
+" + AttributeCode + @"
+[ValueObjectAttribute]
+public partial record struct AddressWithSuffix 
+{
+    public string {|DP0008:Street|} { get; set; }
+}
+";
+        await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
+    }
+}
+
+
+
+
+

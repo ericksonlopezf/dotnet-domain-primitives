@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 04: VALUE OBJECTS AND STRUCTURAL EQUALITY
 // ============================================================================
@@ -14,11 +11,14 @@ using System.Threading.Tasks;
 // 3. Self-validation: A Value Object cannot exist in an invalid state.
 // 4. Replacement: Modifications generate a new instance instead of mutating the existing one.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter04;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Validation;
-
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 04: VALUE OBJECTS (STRUCTURAL EQUALITY)");
@@ -111,5 +111,7 @@ namespace Chapter04
         }
     }
 }
+
+
 
 

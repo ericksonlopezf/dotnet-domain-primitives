@@ -1,22 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 using Microsoft.CodeAnalysis;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
-
-internal static class DiagnosticCategories
-{
-    public const string Correctness = "Correctness";
-    public const string Design = "Design";
-    public const string Performance = "Performance";
-    public const string Migration = "Migration";
-    public const string ApiReview = "ApiReview";
-}
 
 internal static class DiagnosticDescriptors
 {
@@ -35,7 +20,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Domain primitive types must be declared as 'partial' so the source generator can add the required implementation.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0001.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0001.md");
 
     public static readonly DiagnosticDescriptor DP0002_MustBeReadonly = new(
         id: "DP0002",
@@ -45,7 +30,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Domain primitive types must be immutable. Mark the struct as 'readonly'.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0002.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0002.md");
 
     public static readonly DiagnosticDescriptor DP0003_MustBeRecordStruct = new(
         id: "DP0003",
@@ -55,7 +40,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Domain primitives rely on zero-boxing, structural equality provided natively by 'record struct' in C# 10+.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0003.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0003.md");
 
     public static readonly DiagnosticDescriptor DP0004_InvalidRegex = new(
         id: "DP0004",
@@ -65,7 +50,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Ensure the regular expression is syntactically valid.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0004.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0004.md");
 
     public static readonly DiagnosticDescriptor DP0005_ConflictingNormalization = new(
         id: "DP0005",
@@ -75,7 +60,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Remove one of the conflicting casing normalizations.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0005.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0005.md");
 
     public static readonly DiagnosticDescriptor DP0006_InvalidConstraintBounds = new(
         id: "DP0006",
@@ -85,7 +70,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "Fix the minimum and maximum values in the constraint attribute.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0006.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0006.md");
 
     public static readonly DiagnosticDescriptor DP0007_AvoidDefaultConstructor = new(
         id: "DP0007",
@@ -95,7 +80,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Domain primitives should be instantiated via their Create() factory to ensure validation rules are executed.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0007.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0007.md");
 
     public static readonly DiagnosticDescriptor DP0008_ValueObjectRequiresInit = new(
         id: "DP0008",
@@ -105,7 +90,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "All properties of a [ValueObject] must use 'get; init;' (and 'required' if C# 11+) to guarantee immutability.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0008.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0008.md");
 
     public static readonly DiagnosticDescriptor DP0009_MissingValidation = new(
         id: "DP0009",
@@ -115,7 +100,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Domain primitives should enforce validation rules to guarantee domain invariants.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0009.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0009.md");
 
     public static readonly DiagnosticDescriptor DP0010_StringComparedWithPrimitive = new(
         id: "DP0010",
@@ -125,7 +110,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Domain primitives should not be compared directly to raw strings. Comparing a string to a domain primitive bypasses the type system and can mask bugs. Parse the string into the primitive type before comparison.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0010.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0010.md");
 
     public static readonly DiagnosticDescriptor DP0011_StringAssignedFromPrimitive = new(
         id: "DP0011",
@@ -135,7 +120,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Assigning a domain primitive directly to a 'string' variable defeats the purpose of the strong type. Access the '.Value' property explicitly to make the conversion intentional.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0011.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0011.md");
 
     public static readonly DiagnosticDescriptor DP0012_PublicConstructorBypass = new(
         id: "DP0012",
@@ -145,7 +130,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Domain primitives rely on a controlled creation path (Create/TryCreate) to guarantee invariants. Declaring a public constructor allows creating invalid instances, bypassing all validation.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0012.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0012.md");
 
     public static readonly DiagnosticDescriptor DP0013_PossibleDuplicatePrimitiveLogic = new(
         id: "DP0013",
@@ -156,7 +141,7 @@ internal static class DiagnosticDescriptors
         isEnabledByDefault: true,
         description: "Two or more domain primitives in the same compilation share the same attribute type and configuration. This may indicate copy-paste duplication. Verify that each primitive models a distinct domain concept.",
         customTags: new[] { WellKnownDiagnosticTags.CompilationEnd },
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0013.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0013.md");
 
     public static readonly DiagnosticDescriptor DP0014_ApiSurfaceBudgetExceeded = new(
         id: "DP0014",
@@ -166,7 +151,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Domain primitives should be lightweight and focused. Exceeding the API surface budget indicates the primitive might be taking on too many responsibilities.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0014.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0014.md");
 
     public static readonly DiagnosticDescriptor DP0015_MissingXmlDocumentation = new(
         id: "DP0015",
@@ -176,7 +161,7 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Public members on domain primitives must have XML documentation to ensure high-quality developer experience.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0015.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0015.md");
 
     public static readonly DiagnosticDescriptor DP0016_InvalidFactoryMethodName = new(
         id: "DP0016",
@@ -186,5 +171,16 @@ internal static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Custom factory methods on domain primitives must follow the standard naming convention to maintain consistency.",
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP0016.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0016.md");
+
+    public static readonly DiagnosticDescriptor DP0017_InvalidExceptionType = new(
+        id: "DP0017",
+        title: "Invalid DomainPrimitivesDefaults ExceptionType",
+        messageFormat: "Exception type '{0}' specified in [DomainPrimitivesDefaults] must inherit from Exception and declare a public constructor accepting a string message parameter",
+        category: DiagnosticCategories.Correctness,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Custom validation exception types specified in [assembly: DomainPrimitivesDefaults] must derive from Exception and have a constructor taking a single string argument.",
+        customTags: new[] { WellKnownDiagnosticTags.CompilationEnd },
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0017.md");
 }

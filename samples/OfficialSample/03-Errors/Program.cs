@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 03: STRUCTURED ERROR HANDLING WITH ERROR
 // ============================================================================
@@ -13,10 +10,14 @@ using System.Threading.Tasks;
 // 2. HTTP Mapping: Error types (`NotFound`, `Validation`, `Conflict`) translate 1 to 1 to HTTP codes (404, 400, 409).
 // 3. Metadata: Allows attaching key context (e.g. `Timestamp`, `AttemptCount`, `Property`) without breaking the error contract.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter03;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 03: STRUCTURED AND CATALOGED ERRORS");
@@ -129,5 +130,7 @@ namespace Chapter03
     [StrongId<Guid>]
     public readonly partial record struct CustomerId;
 }
+
+
 
 

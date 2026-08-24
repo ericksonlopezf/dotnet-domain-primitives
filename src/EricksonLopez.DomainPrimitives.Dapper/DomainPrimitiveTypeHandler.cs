@@ -1,6 +1,8 @@
+// Copyright © Erickson Lopez. MIT License.
+using System;
+
 namespace EricksonLopez.DomainPrimitives.Dapper;
 
-using System;
 using System.Data;
 
 /// <summary>
@@ -33,7 +35,6 @@ public class DomainPrimitiveTypeHandler<TPrimitive, TValue> : global::Dapper.Sql
 #if NET7_0_OR_GREATER
         if (value is null or DBNull)
         {
-            // Stryker disable once String
             throw new DomainPrimitiveValidationException(new EricksonLopez.DomainPrimitives.Validation.PrimitiveError("NULL_INPUT", $"Cannot parse null database value into primitive '{typeof(TPrimitive).Name}'."));
         }
 
@@ -58,7 +59,6 @@ public class DomainPrimitiveTypeHandler<TPrimitive, TValue> : global::Dapper.Sql
         }
         catch (Exception ex) when (ex is not DomainPrimitiveValidationException)
         {
-            // Stryker disable once String
             throw new DomainPrimitiveValidationException(new EricksonLopez.DomainPrimitives.Validation.PrimitiveError("INVALID_CAST", $"Failed to convert database value '{value}' of type '{value.GetType().Name}' to {typeof(TValue).Name} for primitive '{TPrimitive.PrimitiveName}'."));
         }
 #else
@@ -66,3 +66,5 @@ public class DomainPrimitiveTypeHandler<TPrimitive, TValue> : global::Dapper.Sql
 #endif
     }
 }
+
+

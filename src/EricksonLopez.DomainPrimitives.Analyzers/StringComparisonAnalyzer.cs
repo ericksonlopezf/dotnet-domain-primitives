@@ -1,15 +1,16 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
@@ -29,11 +30,13 @@ namespace EricksonLopez.DomainPrimitives.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class StringComparisonAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(
             DiagnosticDescriptors.DP0010_StringComparedWithPrimitive,
             DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -51,11 +54,8 @@ public sealed class StringComparisonAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeBinaryExpression(SyntaxNodeAnalysisContext context)
     {
         var binaryExpr = (BinaryExpressionSyntax)context.Node;
-
         var leftType = context.SemanticModel.GetTypeInfo(binaryExpr.Left, context.CancellationToken).Type;
         var rightType = context.SemanticModel.GetTypeInfo(binaryExpr.Right, context.CancellationToken).Type;
-
-        if (leftType == null || rightType == null) return;
 
         // Case 1: string == primitive  or  string != primitive
         if (IsStringType(leftType) && IsDomainPrimitive(rightType))
@@ -63,17 +63,15 @@ public sealed class StringComparisonAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.DP0010_StringComparedWithPrimitive,
                 binaryExpr.GetLocation(),
-                rightType.Name));
-            return;
+                rightType!.Name));
         }
-
         // Case 2: primitive == string  or  primitive != string
-        if (IsDomainPrimitive(leftType) && IsStringType(rightType))
+        else if (IsDomainPrimitive(leftType) && IsStringType(rightType))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.DP0010_StringComparedWithPrimitive,
                 binaryExpr.GetLocation(),
-                leftType.Name));
+                leftType!.Name));
         }
     }
 
@@ -82,35 +80,30 @@ public sealed class StringComparisonAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeAssignment(SyntaxNodeAnalysisContext context)
     {
         var assignment = (AssignmentExpressionSyntax)context.Node;
-
         var leftType = context.SemanticModel.GetTypeInfo(assignment.Left, context.CancellationToken).Type;
         var rightType = context.SemanticModel.GetTypeInfo(assignment.Right, context.CancellationToken).Type;
-
-        if (leftType == null || rightType == null) return;
 
         if (IsStringType(leftType) && IsDomainPrimitive(rightType))
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive,
                 assignment.GetLocation(),
-                rightType.Name));
+                rightType!.Name));
         }
     }
 
     private static void AnalyzeLocalDeclaration(SyntaxNodeAnalysisContext context)
     {
         var localDecl = (LocalDeclarationStatementSyntax)context.Node;
+        var declaredType = context.SemanticModel.GetTypeInfo(localDecl.Declaration.Type, context.CancellationToken).Type;
+        if (!IsStringType(declaredType))
+            return;
 
         foreach (var variable in localDecl.Declaration.Variables)
         {
-            if (variable.Initializer == null) continue;
-
-            var declaredType = context.SemanticModel.GetTypeInfo(localDecl.Declaration.Type, context.CancellationToken).Type;
-            var initType = context.SemanticModel.GetTypeInfo(variable.Initializer.Value, context.CancellationToken).Type;
-
-            if (declaredType == null || initType == null) continue;
-
-            if (IsStringType(declaredType) && IsDomainPrimitive(initType))
+            if (variable.Initializer is not null &&
+                IsDomainPrimitive(context.SemanticModel.GetTypeInfo(variable.Initializer.Value, context.CancellationToken).Type) is true &&
+                context.SemanticModel.GetTypeInfo(variable.Initializer.Value, context.CancellationToken).Type is { } initType)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive,
@@ -123,17 +116,15 @@ public sealed class StringComparisonAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeFieldDeclaration(SyntaxNodeAnalysisContext context)
     {
         var fieldDecl = (FieldDeclarationSyntax)context.Node;
+        var declaredType = context.SemanticModel.GetTypeInfo(fieldDecl.Declaration.Type, context.CancellationToken).Type;
+        if (!IsStringType(declaredType))
+            return;
 
         foreach (var variable in fieldDecl.Declaration.Variables)
         {
-            if (variable.Initializer == null) continue;
-
-            var declaredType = context.SemanticModel.GetTypeInfo(fieldDecl.Declaration.Type, context.CancellationToken).Type;
-            var initType = context.SemanticModel.GetTypeInfo(variable.Initializer.Value, context.CancellationToken).Type;
-
-            if (declaredType == null || initType == null) continue;
-
-            if (IsStringType(declaredType) && IsDomainPrimitive(initType))
+            if (variable.Initializer is not null &&
+                IsDomainPrimitive(context.SemanticModel.GetTypeInfo(variable.Initializer.Value, context.CancellationToken).Type) is true &&
+                context.SemanticModel.GetTypeInfo(variable.Initializer.Value, context.CancellationToken).Type is { } initType)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
                     DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive,
@@ -147,52 +138,36 @@ public sealed class StringComparisonAnalyzer : DiagnosticAnalyzer
     {
         var argument = (ArgumentSyntax)context.Node;
         
-        // Find the parameter this argument corresponds to
         if (argument.Parent is ArgumentListSyntax argList &&
-            argList.Parent is InvocationExpressionSyntax invocation)
+            argList.Parent is InvocationExpressionSyntax invocation &&
+            context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol is IMethodSymbol symbol)
         {
-            var symbol = context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol as IMethodSymbol;
-            if (symbol == null) return;
-            
-            // Find the index of the argument
-            int index = -1;
-            for (int i = 0; i < argList.Arguments.Count; i++)
+            int index = argList.Arguments.IndexOf(argument);
+            if (index < symbol.Parameters.Length)
             {
-                if (argList.Arguments[i] == argument)
+                var paramType = symbol.Parameters[index].Type;
+                var argType = context.SemanticModel.GetTypeInfo(argument.Expression, context.CancellationToken).Type;
+                if (IsStringType(paramType) && IsDomainPrimitive(argType))
                 {
-                    index = i;
-                    break;
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive,
+                        argument.GetLocation(),
+                        argType!.Name));
                 }
-            }
-            
-            if (index == -1 || index >= symbol.Parameters.Length) return;
-            
-            var paramType = symbol.Parameters[index].Type;
-            var argType = context.SemanticModel.GetTypeInfo(argument.Expression, context.CancellationToken).Type;
-            
-            if (paramType == null || argType == null) return;
-            
-            if (IsStringType(paramType) && IsDomainPrimitive(argType))
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive,
-                    argument.GetLocation(),
-                    argType.Name));
             }
         }
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private static bool IsStringType(ITypeSymbol type) =>
-        type.SpecialType == SpecialType.System_String;
+    private static bool IsStringType(ITypeSymbol? type) =>
+        type is not null && type.SpecialType == SpecialType.System_String;
 
-    private static bool IsDomainPrimitive(ITypeSymbol type)
-    {
-        if (type is not INamedTypeSymbol namedType) return false;
-
-        return namedType.AllInterfaces.Any(i =>
-            i.OriginalDefinition.ContainingNamespace.ToDisplayString() == "EricksonLopez.DomainPrimitives" &&
-            (i.OriginalDefinition.Name == "IDomainPrimitive" || i.OriginalDefinition.Name == "IStrongId"));
-    }
+    private static bool IsDomainPrimitive(ITypeSymbol? type) =>
+        type is INamedTypeSymbol namedType &&
+        namedType.AllInterfaces.Any(i =>
+            i.OriginalDefinition.ContainingNamespace?.ToDisplayString() == "EricksonLopez.DomainPrimitives" &&
+            i.OriginalDefinition.Name is "IDomainPrimitive" or "IStrongId");
 }
+
+

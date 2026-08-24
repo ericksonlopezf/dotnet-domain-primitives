@@ -1,4 +1,4 @@
-# Onboarding Evidence
+﻿# Onboarding Evidence
 
 > **Version:** 1.0  
 > **Date:** 2026-08-10  
@@ -53,7 +53,7 @@ register EF Core converters, and use them in a DbContext.
 | T+1:45 | **T1 reached** — both types compile, IntelliSense shows `Create()`, `TryCreate()`, `Value` | **T1 = 1:45 (spec: ≤ 3:00)** ✅ |
 | T+2:30 | Try `var id = new CustomerId(Guid.NewGuid())` → compiler error (no public ctor) | Expected. Pivots to `CustomerId.Create(...)`. ✅ |
 | T+3:00 | `dotnet add package EricksonLopez.DomainPrimitives.EFCore` | Success. ✅ |
-| T+3:30 | Add `.AddDomainPrimitivesConverters()` to DbContext OnModelCreating | **1 question:** "Where is AddDomainPrimitivesConverters?" — found in QuickStart.md. ❓ |
+| T+3:30 | Add `.AddDomainPrimitivesConverters()` to DbContext OnModelCreating | **1 question:** "Where is AddDomainPrimitivesConverters?" — found in quickstart.md. ❓ |
 | T+5:00 | EF Core context configured, test query executes | Success. ✅ |
 | T+5:30 | **T2 reached** — EF Core integration complete | **T2 = 5:30 (spec: ≤ 10:00)** ✅ |
 
@@ -65,14 +65,14 @@ register EF Core converters, and use them in a DbContext.
 | Time-to-first-EF integration | 5m 30s | ≤ 10 min | ✅ PASS |
 | Questions before productive | 1 (EFCore method location) | ≤ 2 | ✅ PASS |
 | WTF moments | 0 | = 0 | ✅ PASS |
-| Docs pages before productive | 1 (QuickStart.md) | ≤ 2 | ✅ PASS |
+| Docs pages before productive | 1 (quickstart.md) | ≤ 2 | ✅ PASS |
 
 **WTF moment detail:** None encountered. The no-public-constructor behavior was expected and the
 error message was clear ("private constructor means use Create()").
 
 **Question detail:** "Where is `AddDomainPrimitivesConverters()`?" — the README lists packages
 but doesn't show the EFCore registration snippet in the main Quick Start section. Fixed: the
-`QuickStart.md` is sufficient once found, but the README should have a 3-line EFCore snippet
+`quickstart.md` is sufficient once found, but the README should have a 3-line EFCore snippet
 in the integration section.
 
 **Improvement identified from session:** Add a 3-line EFCore registration snippet to the

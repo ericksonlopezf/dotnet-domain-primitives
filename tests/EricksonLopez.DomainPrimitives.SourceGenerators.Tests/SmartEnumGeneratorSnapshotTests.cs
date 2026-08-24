@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Generators.Tests
 {
-    [UsesVerify]
     public class SmartEnumGeneratorSnapshotTests
     {
         [Fact]
@@ -39,7 +39,7 @@ namespace EricksonLopez.DomainPrimitives
 }
 ";
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -82,7 +82,7 @@ namespace EricksonLopez.DomainPrimitives
 }
 ";
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree },
@@ -119,7 +119,7 @@ namespace EricksonLopez.DomainPrimitives
     public class SmartEnumAttribute<T> : System.Attribute {}
 }
 ";
-            var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+            var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
             var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("Tests", new[] { syntaxTree }, Basic.Reference.Assemblies.Net80.References.All, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
             var compDiagnostics = compilation.GetDiagnostics();
             Assert.Empty(compDiagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
@@ -132,6 +132,7 @@ namespace EricksonLopez.DomainPrimitives
         }
     }
 }
+
 
 
 

@@ -1,12 +1,20 @@
+# Copyright © Erickson Lopez. MIT License.
 name: Weekly Benchmarks (Deep Review)
+
+# ─── Purpose ─────────────────────────────────────────────────────────────────
+# Runs a deep BenchmarkDotNet review across multiple frameworks (.NET 8, 9, and 10)
+# every week. This runs the Default Job configuration (not 'short') to get 
+# statistically rigorous results without blocking the developer's day-to-day PRs.
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
+    # Runs every Sunday at 2:00 AM UTC
     - cron: '0 2 * * 0'
   workflow_dispatch:
     inputs:
       benchmark-filter:
-        description: "BenchmarkDotNet filter glob (e.g. '*Dispatcher*', '*' for all)"
+        description: "BenchmarkDotNet filter glob (e.g. '*Primitive*', '*' for all)"
         required: false
         default: "*"
         type: string
@@ -21,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # Deep review across multiple frameworks takes time.
     timeout-minutes: 300
 
     steps:
@@ -29,7 +38,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Setup .NET
+      - name: Setup .NET (multi-version for cross-TFM benchmarks)
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
@@ -51,9 +60,14 @@ jobs:
       - name: Build (Release)
         run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
 
+      # ─── Run BenchmarkDotNet ─────────────────────────────────────────────
+      # --runtimes net8.0 net9.0 net10.0: runs each benchmark on .NET 8, 9, and 10
+      # NOTICE: '--job short' is REMOVED to perform the Default Job (Deep Review)
       - name: Run benchmarks
         run: >
           dotnet run
+          --no-build
+          --no-restore
           --project benchmarks/EricksonLopez.DomainPrimitives.Benchmarks/EricksonLopez.DomainPrimitives.Benchmarks.csproj
           --configuration Release
           --framework net10.0
@@ -71,6 +85,7 @@ jobs:
           path: benchmarks/results/
           retention-days: 90
 
+      # ─── Commit results back to the branch ───────────────────────────────
       - name: Commit benchmark results
         if: success()
         run: |

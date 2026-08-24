@@ -1,9 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Linq;
 using System.Diagnostics.CodeAnalysis;
-using FluentAssertions;
-using FluentAssertions.Primitives;
-using FluentAssertions.Specialized;
+using System.Linq;
+using AwesomeAssertions;
+using AwesomeAssertions.Primitives;
+using AwesomeAssertions.Specialized;
 
 namespace EricksonLopez.DomainPrimitives.Testing;
 
@@ -142,6 +143,8 @@ public static class DomainPrimitiveAssertionsExtensions
         return new AndConstraint<ObjectAssertions>(assertions);
     }
 }
+
+
 
 
 

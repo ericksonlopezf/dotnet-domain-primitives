@@ -1,4 +1,6 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
+
 namespace EricksonLopez.DomainPrimitives;
 
 
@@ -21,4 +23,5 @@ namespace EricksonLopez.DomainPrimitives;
 /// </code>
 /// </remarks>
 public abstract record class ValueObject;
+
 

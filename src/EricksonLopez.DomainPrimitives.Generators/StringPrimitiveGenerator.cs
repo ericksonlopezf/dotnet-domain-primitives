@@ -1,11 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
 using EricksonLopez.DomainPrimitives.Generators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -68,7 +69,7 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
             merged = merged.Collect().Combine(additional.Collect())
                 .SelectMany(static (pair, _) =>
                 {
-                    var list = new System.Collections.Generic.List<StringPrimitiveTypeInfo?>(pair.Left.Length + pair.Right.Length);
+                    var list = new List<StringPrimitiveTypeInfo?>(pair.Left.Length + pair.Right.Length);
                     list.AddRange(pair.Left);
                     list.AddRange(pair.Right);
                     return list;
@@ -82,8 +83,8 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
             .Collect()
             .SelectMany(static (all, _) =>
             {
-                var seen = new System.Collections.Generic.HashSet<string>();
-                var result = new System.Collections.Generic.List<StringPrimitiveTypeInfo>();
+                var seen = new HashSet<string>();
+                var result = new List<StringPrimitiveTypeInfo>();
                 foreach (var info in all)
                 {
                     if (seen.Add($"{info.Namespace}.{info.TypeName}"))
@@ -104,22 +105,14 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
 
     // ─── Type Info Extraction ────────────────────────────────────────────────
 
-    private static StringPrimitiveTypeInfo? ExtractTypeInfo(
-        GeneratorSyntaxContext context,
-        CancellationToken ct)
-        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
-
-    private static StringPrimitiveTypeInfo? ExtractTypeInfo(
+    internal static StringPrimitiveTypeInfo? ExtractTypeInfo(
         SemanticModel semanticModel,
         RecordDeclarationSyntax recordSyntax,
         CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(recordSyntax, ct) as INamedTypeSymbol;
-        if (typeSymbol is null)
-            return null;
-
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(recordSyntax, ct)!;
         var attributes = typeSymbol.GetAttributes();
 
         // Determine if this is a [StringPrimitive] or a domain shortcut
@@ -128,14 +121,11 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
 
         foreach (var attr in attributes)
         {
-            var attrClass = attr.AttributeClass;
-            if (attrClass is null) continue;
-
-            var ns = attrClass.ContainingNamespace.ToDisplayString();
-            if (!ns.StartsWith("EricksonLopez.DomainPrimitives", System.StringComparison.Ordinal))
+            var ns = attr.AttributeClass?.ContainingNamespace?.ToDisplayString();
+            if (ns is null || !ns.StartsWith("EricksonLopez.DomainPrimitives", StringComparison.Ordinal))
                 continue;
 
-            var attrName = attrClass.Name;
+            var attrName = attr.AttributeClass!.Name;
             if (attrName == "StringPrimitiveAttribute") hasStringPrimitive = true;
             else if (attrName == "EmailAttribute") domainShortcut = "Email";
             else if (attrName == "PhoneAttribute") domainShortcut = "Phone";
@@ -167,23 +157,18 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
 
         foreach (var attr in attributes)
         {
-            // HIGH-006: Guard normalization/validation attributes by namespace.
-            // Without this guard, a user-defined TrimAttribute or LowerCaseAttribute
-            // in their own project would accidentally trigger the generator's normalization.
-            var attrNs = attr.AttributeClass?.ContainingNamespace?.ToDisplayString() ?? string.Empty;
-            bool isOurNamespace = attrNs.StartsWith("EricksonLopez.DomainPrimitives", System.StringComparison.Ordinal);
+            var attrNs = attr.AttributeClass?.ContainingNamespace?.ToDisplayString();
+            if (attrNs is null || !attrNs.StartsWith("EricksonLopez.DomainPrimitives", StringComparison.Ordinal))
+                continue;
 
             // Check for CustomValidatorAttribute<T> (in EricksonLopez.DomainPrimitives.Validation)
             if (attr.AttributeClass is { IsGenericType: true } customAc &&
-                customAc.OriginalDefinition.Name == "CustomValidatorAttribute" &&
-                customAc.ContainingNamespace.ToDisplayString().StartsWith("EricksonLopez.DomainPrimitives", System.StringComparison.Ordinal))
+                customAc.OriginalDefinition.Name == "CustomValidatorAttribute")
             {
                 hasCustomValidator = true;
             }
 
-            if (!isOurNamespace) continue;
-
-            var attrName = attr.AttributeClass?.Name;
+            var attrName = attr.AttributeClass!.Name;
             switch (attrName)
             {
                 case "TrimAttribute": trim = true; break;
@@ -218,6 +203,8 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
                     if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string pattern)
                     {
                         string? errorMessage = null;
+                        if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is string ctorMsg)
+                            errorMessage = ctorMsg;
                         foreach (var named in attr.NamedArguments)
                         {
                             if (named.Key == "ErrorMessage" && named.Value.Value is string msg)
@@ -236,6 +223,12 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
             ref trim, ref lowerCase, ref upperCase, ref normalizeWhitespace,
             ref notEmpty, ref minLength, ref maxLength, regexPatterns, allowedSchemes);
 
+        // Apply assembly-level defaults if not explicitly configured (adr-033, adr-034)
+        var defaults = GeneratorHelpers.ExtractAssemblyDefaults(semanticModel.Compilation);
+        if (!trim && defaults.Trim) trim = true;
+        if (!notEmpty && defaults.NotEmpty) notEmpty = true;
+        if (maxLength is null && exactLength is null && defaults.MaxLength.HasValue) maxLength = defaults.MaxLength.Value;
+
         // Extract containing types for nested type support
         var containingType = typeSymbol.ContainingType;
         var containingList = ImmutableArray.CreateBuilder<string>();
@@ -250,11 +243,10 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
             TypeName: typeSymbol.Name,
             Accessibility: typeSymbol.DeclaredAccessibility switch
             {
-                Accessibility.Public => "public",
                 Accessibility.Internal => "internal",
                 Accessibility.Private => "private",
                 Accessibility.ProtectedOrInternal => "protected internal",
-                _ => "internal"
+                _ => "public"
             },
             ContainingTypes: new EquatableArray<string>(containingList.ToImmutable()),
             Trim: trim,
@@ -270,7 +262,8 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
             RegexPatterns: new EquatableArray<RegexInfo>(regexPatterns.ToImmutableArray()),
             DomainShortcut: domainShortcut,
             HasCustomValidator: hasCustomValidator,
-            AllowedSchemes: new EquatableArray<string>(allowedSchemes.ToImmutableArray()));
+            AllowedSchemes: new EquatableArray<string>(allowedSchemes.ToImmutableArray()),
+            CustomExceptionType: defaults.ExceptionTypeFullName);
     }
 
     private static void ApplyDomainShortcutDefaults(
@@ -282,8 +275,6 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
         System.Collections.Immutable.ImmutableArray<RegexInfo>.Builder regexPatterns,
         System.Collections.Immutable.ImmutableArray<string>.Builder allowedSchemes)
     {
-        if (shortcut is null) return;
-
         switch (shortcut)
         {
             case "Email":
@@ -468,7 +459,7 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
 
     // ─── Code Generation ─────────────────────────────────────────────────────
 
-    private static string GenerateStringPrimitive(StringPrimitiveTypeInfo info)
+    internal static string GenerateStringPrimitive(StringPrimitiveTypeInfo info)
     {
         var sb = new SourceBuilder();
 
@@ -629,6 +620,10 @@ internal sealed partial class StringPrimitiveGenerator : IIncrementalGenerator
     private static string EscapeVerbatimString(string s) => s.Replace("\"", "\"\"");
     private static string EscapeString(string s) => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
 }
+
+
+
+
 
 
 

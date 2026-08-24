@@ -1,14 +1,15 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Testing;
-using FluentAssertions;
 using VerifyXunit;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Testing.UnitTests;
 
-[UsesVerify]
 public class DomainPrimitiveVerifyExtensionsTests
 {
     private readonly record struct VerifyTestPrimitive(string Value) : IDomainPrimitive<VerifyTestPrimitive, string>
@@ -43,4 +44,10 @@ public class DomainPrimitiveVerifyExtensionsTests
         action.Should().NotThrow();
     }
 }
+
+
+
+
+
+
 

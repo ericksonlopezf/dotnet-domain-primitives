@@ -1,9 +1,11 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
+using System.Linq;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Advanced;
-using FluentAssertions;
-using Xunit;
 using EricksonLopez.DomainPrimitives.Validation;
+using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
 
@@ -47,7 +49,6 @@ public class PrimitiveBuilderTests
 
     }
 
-#if NET7_0_OR_GREATER
     [Fact]
     public void Build_WithValidValueAndNoRules_ShouldReturnPrimitive()
     {
@@ -80,7 +81,7 @@ public class PrimitiveBuilderTests
 
         act.Should().Throw<DomainPrimitiveValidationException>()
            .WithMessage("[TooShort] Value must be greater than 2.*")
-           .And.ParamName.Should().Be("value");
+           .Where(e => e.ParamName == "value" && e.Error.Code == "TooShort" && e.Error.Message == "Value must be greater than 2.");
     }
 
     [Fact]
@@ -92,7 +93,7 @@ public class PrimitiveBuilderTests
 
         act.Should().Throw<DomainPrimitiveValidationException>()
            .WithMessage("[NULL_INPUT] Value was not provided to PrimitiveBuilder.*")
-           .And.ParamName.Should().Be("value");
+           .Where(e => e.ParamName == "value" && e.Error.Code == "NULL_INPUT" && e.Error.Message == "Value was not provided to PrimitiveBuilder.");
     }
 
     [Fact]
@@ -131,5 +132,9 @@ public class PrimitiveBuilderTests
         success.Should().BeFalse();
         result.IsDefault.Should().BeTrue();
     }
-#endif
 }
+
+
+
+
+

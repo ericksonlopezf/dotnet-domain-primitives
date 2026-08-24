@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 using Microsoft.CodeAnalysis;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
@@ -23,7 +17,7 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP1001.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp1001.md");
 
     public static readonly DiagnosticDescriptor TypeMustBeReadonlyRecordStruct = new(
         id: "DP1002",
@@ -32,7 +26,7 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP1002.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp1002.md");
 
     public static readonly DiagnosticDescriptor UnsupportedBackingType = new(
         id: "DP1003",
@@ -41,7 +35,7 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP1003.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp1003.md");
 
     public static readonly DiagnosticDescriptor ConflictingAttributes = new(
         id: "DP1004",
@@ -50,7 +44,7 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP1004.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp1004.md");
 
     public static readonly DiagnosticDescriptor InvalidAttributeParameter = new(
         id: "DP1005",
@@ -59,6 +53,5 @@ internal static class DiagnosticDescriptors
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        helpLinkUri: "https://github.com/ericksonlopez/dotnet-domain-primitives/blob/main/docs/rules/DP1005.md");
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp1005.md");
 }
-

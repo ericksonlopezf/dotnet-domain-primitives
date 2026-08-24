@@ -1,11 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
 using EricksonLopez.DomainPrimitives.Generators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -41,21 +42,14 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
         });
     }
 
-    private static StrongIdTypeInfo? ExtractTypeInfo(
-        GeneratorSyntaxContext context,
-        CancellationToken ct)
-        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
-
-    private static StrongIdTypeInfo? ExtractTypeInfo(
+    internal static StrongIdTypeInfo? ExtractTypeInfo(
         SemanticModel semanticModel,
         RecordDeclarationSyntax recordSyntax,
         CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(recordSyntax, ct) as INamedTypeSymbol;
-        if (typeSymbol is null)
-            return null;
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(recordSyntax, ct)!;
 
         // Find the StrongIdAttribute<T>
         AttributeData? strongIdAttr = null;
@@ -78,19 +72,19 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
         // Validate and resolve backing type using GeneratorHelpers
         string? backingFullName = GeneratorHelpers.ResolveSpecialType(backingType);
         
-        if (backingFullName != "int" && backingFullName != "long" && backingFullName != "string" && backingFullName != "System.Guid")
+        if (backingFullName != "int" && backingFullName != "long" && backingFullName != "string" && backingFullName != "Guid" && backingFullName != "System.Guid")
             return null;
 
         // Extract containing types for nested type support
         var containingType = typeSymbol.ContainingType;
-        var containingList = new System.Collections.Generic.List<string>();
+        var containingList = new List<string>();
         while (containingType is not null)
         {
             containingList.Insert(0, containingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             containingType = containingType.ContainingType;
         }
 
-        // RFC-0002: RejectEmpty defaults to true (matching StrongIdAttribute.RejectEmpty = true).
+        // rfc-0002: RejectEmpty defaults to true (matching StrongIdAttribute.RejectEmpty = true).
         // We only override if the user explicitly sets RejectEmpty = false.
         bool rejectEmpty = true;
         if (strongIdAttr != null)
@@ -102,6 +96,8 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
             }
         }
 
+        var defaults = GeneratorHelpers.ExtractAssemblyDefaults(semanticModel.Compilation);
+
         return new StrongIdTypeInfo(
             Namespace: typeSymbol.ContainingNamespace.ToDisplayString(),
             TypeName: typeSymbol.Name,
@@ -109,7 +105,6 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
             BackingTypeFullName: backingFullName,
             Accessibility: typeSymbol.DeclaredAccessibility switch
             {
-                Accessibility.Public => "public",
                 Accessibility.Internal => "internal",
                 Accessibility.Protected => "protected",
                 Accessibility.Private => "private",
@@ -118,10 +113,11 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
                 _ => "public"
             },
             ContainingTypes: new EquatableArray<string>(containingList.ToImmutableArray()),
-            RejectEmpty: rejectEmpty);
+            RejectEmpty: rejectEmpty,
+            CustomExceptionType: defaults.ExceptionTypeFullName);
     }
 
-    private static string GenerateStrongId(StrongIdTypeInfo info)
+    internal static string GenerateStrongId(StrongIdTypeInfo info)
     {
         var sb = new SourceBuilder();
 
@@ -302,7 +298,14 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
             sb.AppendLine("var error = TryValidate(value);");
             sb.AppendLine("if (error.IsError)");
             sb.IncreaseIndent();
-            sb.AppendLine("throw new DomainPrimitiveValidationException(error);");
+            if (!string.IsNullOrEmpty(info.CustomExceptionType))
+            {
+                sb.AppendLine($"throw new {info.CustomExceptionType}(error.Message);");
+            }
+            else
+            {
+                sb.AppendLine("throw new DomainPrimitiveValidationException(error);");
+            }
             sb.DecreaseIndent();
         }
         sb.AppendLine("return new(value);");
@@ -573,6 +576,10 @@ internal sealed class StrongIdGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 }
+
+
+
+
 
 
 

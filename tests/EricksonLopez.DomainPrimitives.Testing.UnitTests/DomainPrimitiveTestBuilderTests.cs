@@ -1,8 +1,8 @@
-
+// Copyright © Erickson Lopez. MIT License.
 using System;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Testing;
-using FluentAssertions;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Testing.UnitTests;
@@ -81,6 +81,10 @@ public class DomainPrimitiveTestBuilderTests
         act.Should().Throw<InvalidOperationException>().WithMessage("*does not have a private constructor taking*Is it a valid domain primitive*");
     }
 }
+
+
+
+
 
 
 

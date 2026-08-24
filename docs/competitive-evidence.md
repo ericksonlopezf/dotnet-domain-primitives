@@ -140,7 +140,7 @@
 | EF Core | 🟢 | Vogen GitHub: Vogen.EFCore package; ValueConverter generated via `Conversions.EfCore` flag |
 | Dapper | 🟢 | Vogen GitHub: `Conversions.Dapper` flag; generates TypeHandler |
 | System.Text.Json | 🟢 | `Conversions.SystemTextJson` flag |
-| Newtonsoft.Json | 🟢 | `Conversions.NewtonsoftJson` flag — **DP GAP** |
+| Newtonsoft.Json | 🟢 | `Conversions.NewtonsoftJson` flag. **DP now has parity** — `EricksonLopez.DomainPrimitives.NewtonsoftJson` (NOW-002) |
 | ASP.NET Core | 🟢 | Via TypeConverter |
 | OpenAPI | 🟡 | Manual schema mapping; no dedicated package |
 | Mapster | 🔴 | Not found |
@@ -166,7 +166,7 @@
 | EF Core | 🟢 | STI GitHub: EF Core ValueConverter generated |
 | Dapper | 🟢 | STI GitHub: TypeHandler generated |
 | System.Text.Json | 🟢 | Converter via `StronglyTypedIdConverter.SystemTextJson` |
-| Newtonsoft.Json | 🟢 | Converter via `StronglyTypedIdConverter.NewtonsoftJson` — **DP GAP** |
+| Newtonsoft.Json | 🟢 | Converter via `StronglyTypedIdConverter.NewtonsoftJson`. **DP now has parity** — `EricksonLopez.DomainPrimitives.NewtonsoftJson` (NOW-002) |
 | TypeConverter | 🟢 | `StronglyTypedIdConverter.TypeConverter` |
 | ASP.NET Core | 🟢 | Via TypeConverter |
 | OpenAPI | 🟡 | Manual; no dedicated package |

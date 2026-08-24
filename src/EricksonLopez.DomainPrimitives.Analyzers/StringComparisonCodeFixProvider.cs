@@ -1,12 +1,13 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Composition;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
-using System.Composition;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -15,19 +16,30 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
+/// <summary>
+/// Provides code fixes for <c>DP0010</c> (string compared with primitive) and
+/// <c>DP0011</c> (primitive assigned to string) reported by <see cref="StringComparisonAnalyzer"/>.
+/// </summary>
+/// <remarks>
+/// The fix for <c>DP0011</c> appends a <c>.Value</c> member access to the primitive expression.
+/// The fix for <c>DP0010</c> appends <c>.Value</c> to whichever side of the binary expression
+/// is a domain primitive, restoring type-safe comparison semantics.
+/// </remarks>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(StringComparisonCodeFixProvider)), Shared]
 public sealed class StringComparisonCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc />
     public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
         DiagnosticDescriptors.DP0010_StringComparedWithPrimitive.Id,
         DiagnosticDescriptors.DP0011_StringAssignedFromPrimitive.Id);
 
+    /// <inheritdoc />
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
+    /// <inheritdoc />
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
-        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-        if (root == null) return;
+        var root = (await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false))!;
 
         foreach (var diagnostic in context.Diagnostics)
         {
@@ -133,3 +145,6 @@ public sealed class StringComparisonCodeFixProvider : CodeFixProvider
             i.Name is "IDomainPrimitive" or "IStrongId");
     }
 }
+
+
+

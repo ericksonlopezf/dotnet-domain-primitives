@@ -11,8 +11,6 @@
     <Project Path="src/EricksonLopez.DomainPrimitives.Generators/EricksonLopez.DomainPrimitives.Generators.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.Analyzers/EricksonLopez.DomainPrimitives.Analyzers.csproj" />
 
-
-
     <!-- ASP.NET Core -->
     <Project Path="src/EricksonLopez.DomainPrimitives.AspNetCore/EricksonLopez.DomainPrimitives.AspNetCore.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.csproj" />
@@ -29,13 +27,11 @@
     <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi/EricksonLopez.DomainPrimitives.OpenApi.csproj" />
     <Project Path="src/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.csproj" />
 
-
-    <!-- Mapster -->
-    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster/EricksonLopez.DomainPrimitives.Mapster.csproj" />
-    <Project Path="src/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.csproj" />
-
     <!-- Testing -->
     <Project Path="src/EricksonLopez.DomainPrimitives.Testing/EricksonLopez.DomainPrimitives.Testing.csproj" />
+
+    <!-- Serialization -->
+    <Project Path="src/EricksonLopez.DomainPrimitives.NewtonsoftJson/EricksonLopez.DomainPrimitives.NewtonsoftJson.csproj" />
 
   </Folder>
 
@@ -67,15 +63,17 @@
     <Project Path="tests/EricksonLopez.DomainPrimitives.OpenApi.Tests/EricksonLopez.DomainPrimitives.OpenApi.Tests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.Tests.csproj" />
 
-
-
-    <!-- Mapster -->
-    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.Tests/EricksonLopez.DomainPrimitives.Mapster.Tests.csproj" />
-
-    <Project Path="tests/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.Tests/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.Tests.csproj" />
+    <!-- Serialization -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.NewtonsoftJson.Tests/EricksonLopez.DomainPrimitives.NewtonsoftJson.Tests.csproj" />
 
     <!-- Testing utilities -->
     <Project Path="tests/EricksonLopez.DomainPrimitives.Testing.UnitTests/EricksonLopez.DomainPrimitives.Testing.UnitTests.csproj" />
+
+    <!-- Architecture & End-to-End -->
+    <Project Path="tests/EricksonLopez.DomainPrimitives.ArchitectureTests/EricksonLopez.DomainPrimitives.ArchitectureTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.IntegrationTests/EricksonLopez.DomainPrimitives.IntegrationTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.EndToEndTests/EricksonLopez.DomainPrimitives.EndToEndTests.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.AotProbe/EricksonLopez.DomainPrimitives.AotProbe.csproj" />
 
   </Folder>
 
@@ -87,5 +85,3 @@
   </Folder>
 
 </Solution>
-
-

@@ -1,9 +1,25 @@
+# Copyright © Erickson Lopez. MIT License.
 name: Publish NuGet
+
+# ─── Triggers ─────────────────────────────────────────────────────────────────
+# 1. Automatic: Triggered by Release Please when a release PR is merged.
+#    The workflow_dispatch input 'version' will be set to the new SemVer.
+# 2. Manual: Also triggered by pushing a 'v*.*.*' tag manually (legacy support).
+# 3. Manual dispatch: Via GitHub UI for debugging.
+#
+# Automatic versioning flow:
+#   Commit with Conventional prefix (e.g. 'feat:') →
+#   release-please.yml creates/updates Release PR →
+#   Maintainer merges Release PR →
+#   release-please creates GitHub Release + tag vX.Y.Z →
+#   release-please triggers this workflow via workflow_dispatch →
+#   Pack → Sign → Attest → Publish to NuGet.org
+# ─────────────────────────────────────────────────────────────────────────────────
 
 on:
   push:
     tags:
-      - "v*.*.*"
+      - "v*.*.*"           # Legacy: manual tag push still works
   workflow_dispatch:
     inputs:
       version:
@@ -23,40 +39,68 @@ jobs:
       id-token: write        # Required for Sigstore OIDC attestation
       contents: write        # Required for GitHub Release creation
       attestations: write    # Required for actions/attest-build-provenance
+      statuses: read         # Required to query commit statuses for Stryker quality gate
+      actions: read          # Required to query workflow runs for Stryker quality gate
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # Full history required for MinVer and Release Please commit analysis
           fetch-depth: 0
 
+      # ─── Resolve version ──────────────────────────────────────────────────────
+      # Priority: workflow_dispatch input → git tag → fallback to Directory.Build.props
       - name: Resolve version
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            echo "VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
-            echo "Resolved version from workflow_dispatch input: ${{ inputs.version }}"
+          if [ -n "$INPUT_VERSION" ]; then
+            # Triggered by Release Please via workflow_dispatch
+            echo "VERSION=$INPUT_VERSION" >> $GITHUB_OUTPUT
+            echo "Resolved version from workflow_dispatch input: $INPUT_VERSION"
           elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            # Triggered by a git tag push (strip 'v' prefix)
             VERSION="${GITHUB_REF_NAME#v}"
             echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
             echo "Resolved version from git tag: $VERSION"
           else
-            VERSION=$(grep -oP '(?<=<VersionPrefix>)[^<]+' Directory.Build.props)
+            # Fallback: read from Directory.Build.props
+            VERSION=$(grep -oP '(?<=<VersionPrefix>)[^<]+' Directory.Build.props || echo "1.0.0")
             echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
             echo "Resolved version from Directory.Build.props: $VERSION"
           fi
+
+      # ─── Validate Stryker Mutation Testing Quality Gate ───────────────────────
+      # Validates that the code being released has passed Stryker mutation testing
+      # (score >= 95% break threshold) on main. Re-running a 1+ hour test is avoided.
+      - name: Validate Stryker Mutation Quality Gate
+        id: mutation-gate
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const verifyMutationGate = require('./scripts/verify-mutation-gate.js');
+            await verifyMutationGate({ github, context, core });
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
 
+      # ─── Strong Name key ──────────────────────────────────────────────────────
+      # The private .snk is stored as a base64-encoded GitHub Secret (SNK_KEY).
+      # The public key is committed as public.snk. If SNK_KEY is not set (e.g.,
+      # in a fork), the build succeeds without signing (conditional in Directory.Build.props).
       - name: Restore Strong Name key
         env:
           SNK_KEY: ${{ secrets.SNK_KEY }}
         run: |
           if [ -n "$SNK_KEY" ]; then
             echo "$SNK_KEY" | tr -d '\n\r ' | base64 --decode > EricksonLopez.snk
+            echo "Strong Name key restored from secret."
+          else
+            echo "SNK_KEY secret not set — building without strong name signing."
           fi
 
       - name: Restore
@@ -65,18 +109,20 @@ jobs:
       - name: Build (Release)
         run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
 
+      # ─── Full test suite before publish ──────────────────────────────────────
+      # Never publish without a passing test suite.
       - name: Run tests before publish
         run: |
           dotnet test EricksonLopez.DomainPrimitives.slnx \
             --no-build \
             --configuration Release \
-            --logger "trx" \
+            --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./test-results \
             --collect:"XPlat Code Coverage" \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude="[*Tests]*" DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByAttribute="GeneratedCodeAttribute"
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: Upload coverage to Codecov (publish gate)
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: "**/coverage.opencover.xml"
@@ -84,33 +130,38 @@ jobs:
           flags: publish-gate
           name: codecov-publish
 
+      # ─── Pack all packages ────────────────────────────────────────────────────
       - name: Pack All Packages
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
           PACK_ARGS="--no-build --configuration Release --output ./nupkgs -p:VersionPrefix=$VERSION -p:TreatWarningsAsErrors=true"
-          dotnet pack src/EricksonLopez.DomainPrimitives.Testing/EricksonLopez.DomainPrimitives.Testing.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.OpenApi/EricksonLopez.DomainPrimitives.OpenApi.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators/EricksonLopez.DomainPrimitives.Mapster.SourceGenerators.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.Mapster/EricksonLopez.DomainPrimitives.Mapster.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.EFCore/EricksonLopez.DomainPrimitives.EFCore.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.Dapper/EricksonLopez.DomainPrimitives.Dapper.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.Abstractions/EricksonLopez.DomainPrimitives.Abstractions.csproj $PACK_ARGS
           dotnet pack src/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj $PACK_ARGS
           dotnet pack src/EricksonLopez.DomainPrimitives.Generators/EricksonLopez.DomainPrimitives.Generators.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.Abstractions/EricksonLopez.DomainPrimitives.Abstractions.csproj $PACK_ARGS
           dotnet pack src/EricksonLopez.DomainPrimitives.Analyzers/EricksonLopez.DomainPrimitives.Analyzers.csproj $PACK_ARGS
-          dotnet pack src/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.csproj $PACK_ARGS
           dotnet pack src/EricksonLopez.DomainPrimitives.AspNetCore/EricksonLopez.DomainPrimitives.AspNetCore.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.EFCore/EricksonLopez.DomainPrimitives.EFCore.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.Dapper/EricksonLopez.DomainPrimitives.Dapper.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.OpenApi/EricksonLopez.DomainPrimitives.OpenApi.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.NewtonsoftJson/EricksonLopez.DomainPrimitives.NewtonsoftJson.csproj $PACK_ARGS
+          dotnet pack src/EricksonLopez.DomainPrimitives.Testing/EricksonLopez.DomainPrimitives.Testing.csproj $PACK_ARGS
           echo "Packed packages:"
           ls -la ./nupkgs/
 
+      # ─── Sigstore Provenance Attestation ─────────────────────────────────────
+      # Generates a cryptographically signed provenance attestation for every .nupkg
+      # using Sigstore's keyless signing via GitHub's OIDC token.
       - name: Generate Sigstore Provenance Attestation
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: './nupkgs/*.nupkg'
 
+      # ─── NuGet.org publish via OIDC ──────────────────────────────────────────
+      # Uses NuGet Trusted Publishing (OIDC) — no long-lived API keys stored.
       - name: NuGet login (OIDC)
         uses: NuGet/login@v1
         id: login
@@ -124,6 +175,7 @@ jobs:
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
 
+      # ─── GitHub Release ───────────────────────────────────────────────────────
       - name: Create GitHub Release (tag-triggered only)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
@@ -136,33 +188,24 @@ jobs:
 
             | Package | Version |
             |---------|---------|
+            | `EricksonLopez.DomainPrimitives.Abstractions` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.Generators` | `${{ steps.version.outputs.VERSION }}` |
-            | `EricksonLopez.DomainPrimitives.Abstractions` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.Analyzers` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.AspNetCore` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators` | `${{ steps.version.outputs.VERSION }}` |
-            | `EricksonLopez.DomainPrimitives.Dapper` | `${{ steps.version.outputs.VERSION }}` |
-            | `EricksonLopez.DomainPrimitives.Dapper.SourceGenerators` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.EFCore` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.EFCore.SourceGenerators` | `${{ steps.version.outputs.VERSION }}` |
-            | `EricksonLopez.DomainPrimitives.Mapster` | `${{ steps.version.outputs.VERSION }}` |
-            | `EricksonLopez.DomainPrimitives.Mapster.SourceGenerators` | `${{ steps.version.outputs.VERSION }}` |
+            | `EricksonLopez.DomainPrimitives.Dapper` | `${{ steps.version.outputs.VERSION }}` |
+            | `EricksonLopez.DomainPrimitives.Dapper.SourceGenerators` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.OpenApi` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators` | `${{ steps.version.outputs.VERSION }}` |
+            | `EricksonLopez.DomainPrimitives.NewtonsoftJson` | `${{ steps.version.outputs.VERSION }}` |
             | `EricksonLopez.DomainPrimitives.Testing` | `${{ steps.version.outputs.VERSION }}` |
 
             ---
 
             For detailed changes, see [CHANGELOG.md](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/${{ github.ref_name }}/CHANGELOG.md).
-
-            ### Installation
-
-            ```bash
-            dotnet add package EricksonLopez.DomainPrimitives --version ${{ steps.version.outputs.VERSION }}
-            dotnet add package EricksonLopez.DomainPrimitives.EFCore --version ${{ steps.version.outputs.VERSION }}
-            dotnet add package EricksonLopez.DomainPrimitives.AspNetCore --version ${{ steps.version.outputs.VERSION }}
-            ```
           files: ./nupkgs/*.nupkg
           draft: false
           prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}

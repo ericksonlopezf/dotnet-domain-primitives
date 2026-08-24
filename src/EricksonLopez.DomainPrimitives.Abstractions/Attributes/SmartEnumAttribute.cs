@@ -1,15 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Marks a <c>readonly partial record struct</c> as a smart enum with a
-/// <typeparamref name="TValue"/> backing value.
+/// Specifies that a struct is a smart enum with a backing value of type <typeparamref name="TValue"/>.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -38,3 +33,5 @@ public sealed class SmartEnumAttribute<TValue> : Attribute
     where TValue : notnull
 {
 }
+
+
