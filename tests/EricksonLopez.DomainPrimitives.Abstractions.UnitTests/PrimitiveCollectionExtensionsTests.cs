@@ -1,8 +1,9 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
-using FluentAssertions;
-using Xunit;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
+using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
 
@@ -49,7 +50,6 @@ public readonly struct TestPrimitive : IDomainPrimitive<TestPrimitive, int>
 
 public class PrimitiveCollectionExtensionsTests
 {
-#if NET7_0_OR_GREATER
     [Fact]
     public void ToDomainPrimitiveList_FromEnumerable_ShouldConvertValues()
     {
@@ -154,6 +154,51 @@ public class PrimitiveCollectionExtensionsTests
         result[1].Value.Should().Be(2);
         result[2].Value.Should().Be(3);
     }
-#endif
+
+    [Fact]
+    public void ToDomainPrimitiveList_FromEmptyEnumerable_ShouldReturnEmptyList()
+    {
+        // Arrange
+        IEnumerable<int> values = Array.Empty<int>();
+
+        // Act
+        var result = values.ToDomainPrimitiveList<TestPrimitive, int>();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ToDomainPrimitiveArray_FromEmptyICollection_ShouldReturnEmptyArray()
+    {
+        // Arrange
+        ICollection<int> values = new List<int>();
+
+        // Act
+        var result = values.ToDomainPrimitiveArray<TestPrimitive, int>();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ToDomainPrimitiveArray_FromEmptySpan_ShouldReturnEmptyArray()
+    {
+        // Arrange
+        ReadOnlySpan<int> span = ReadOnlySpan<int>.Empty;
+
+        // Act
+        var result = span.ToDomainPrimitiveArray<TestPrimitive, int>();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
+    }
 }
+
+
+
+
 

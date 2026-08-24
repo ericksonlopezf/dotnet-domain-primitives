@@ -21,7 +21,6 @@ StronglyTypedId is an excellent, narrow-focus library. DomainPrimitives is broad
 
 ### Keep StronglyTypedId if you need:
 - **Only** strongly typed IDs — nothing else (StronglyTypedId is simpler for that scenario)
-- Newtonsoft.Json converters (STI has them; DomainPrimitives does not yet)
 - Custom backing types beyond `Guid/int/long/string`
 
 ---
@@ -37,7 +36,7 @@ StronglyTypedId is an excellent, narrow-focus library. DomainPrimitives is broad
 | `[StronglyTypedId(backingType: BackingType.NullableString)]` | N/A | Use `string?` in your model |
 | `[StronglyTypedId(converters: StronglyTypedIdConverter.EfCore)]` | Auto-discovered | No annotation needed |
 | `[StronglyTypedId(converters: StronglyTypedIdConverter.Dapper)]` | Auto-registered | No annotation needed |
-| `[StronglyTypedId(converters: StronglyTypedIdConverter.NewtonsoftJson)]` | ❌ Not yet | Roadmap item |
+| `[StronglyTypedId(converters: StronglyTypedIdConverter.NewtonsoftJson)]` | Supported via package | Use `EricksonLopez.DomainPrimitives.NewtonsoftJson` |
 
 ---
 
@@ -210,10 +209,10 @@ public partial struct OrderId; // ✅ Supported
 ```
 
 **DomainPrimitives:**
-```
-❌ Not yet supported. 
-Workaround: Register a manual Newtonsoft.Json JsonConverter<OrderId> 
-that delegates to OrderId.TryCreate().
+```csharp
+// Install: EricksonLopez.DomainPrimitives.NewtonsoftJson
+// Registration (at app startup or serializer configuration):
+var settings = new JsonSerializerSettings().AddDomainPrimitives();
 ```
 
 ---
@@ -263,7 +262,7 @@ The `record struct` adds:
 | `IUtf8SpanFormattable` | ❌ | ✅ |
 | `TryCreate(out result, out error)` | ❌ | ✅ |
 | JSON ValueSpan hot path | ❌ | ✅ |
-| Newtonsoft.Json | ✅ | ❌ |
+| Newtonsoft.Json | ✅ | ✅ (via `NewtonsoftJson` package) |
 | EF Core auto-discovery | ❌ | ✅ |
 | Dapper auto-registration | ❌ | ✅ |
 | Smart Enum | ❌ | ✅ |

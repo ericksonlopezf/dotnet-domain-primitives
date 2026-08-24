@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 11: SMART ENUMS (ENUMERATIONS RICH IN BEHAVIOR)
 // ============================================================================
@@ -14,10 +11,14 @@ using System.Threading.Tasks;
 // 3. Auto-Discovery: Access to the `All` collection with all declared items.
 // 4. Parsing by Name or by Value: `TryFromValue()`, `TryFromName()`, `TryCreate()`.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter11;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 11: SMART ENUMS (ENUMERATIONS WITH BEHAVIOR)");
@@ -111,5 +112,7 @@ namespace Chapter11
         }
     }
 }
+
+
 
 

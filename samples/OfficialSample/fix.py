@@ -6,9 +6,9 @@ for f in files:
     with open(f, 'r', encoding='utf-8') as file:
         content = file.read()
 
-    # Restore missing variable in 02-PrimerResult
-    if '02-PrimerResult' in f:
-        content = re.sub(r'/\* (Result<Money> resultadoTransaccion.*?) \*/', r'\1', content, flags=re.DOTALL)
+    # Restore missing variable in 02-FirstResult
+    if '02-FirstResult' in f:
+        content = re.sub(r'/\* (Result<Money> transactionResult.*?) \*/', r'\1', content, flags=re.DOTALL)
 
     # 1. Any 'error.Description' where 'error' is a PrimitiveError -> 'error.Message'
     # 2. Any 'error.Type' where 'error' is PrimitiveError -> 'ErrorType.Validation' 

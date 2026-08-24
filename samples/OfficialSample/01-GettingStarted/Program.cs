@@ -1,16 +1,17 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 01: GETTING STARTED - INTRODUCTION TO DOMAIN PRIMITIVES
 // ============================================================================
 // This chapter teaches the fundamentals of the Domain Primitives ecosystem in .NET 10.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter01;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 01: INTRODUCTION TO DOMAIN PRIMITIVES (.NET 10)");
@@ -94,5 +95,7 @@ namespace Chapter01
     [Email]
     public readonly partial record struct EmailAddress;
 }
+
+
 
 

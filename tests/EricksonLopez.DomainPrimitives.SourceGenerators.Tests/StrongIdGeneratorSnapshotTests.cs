@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -8,30 +9,29 @@ using System.Linq;
 
 namespace EricksonLopez.DomainPrimitives.Generators.Tests;
 
-[UsesVerify]
 public class StrongIdGeneratorSnapshotTests
 {
     [Fact]
     public Task GeneratesStrongIdCorrectly()
     {
         var source = @"
-using System;
-using EricksonLopez.DomainPrimitives;
+                    using System;
+                    using EricksonLopez.DomainPrimitives;
 
-namespace TestNamespace
-{
-    [StrongId<string>]
-    public readonly partial record struct UserId;
-}
+                    namespace TestNamespace
+                    {
+                        [StrongId<string>]
+                        public readonly partial record struct UserId;
+                    }
 
-namespace EricksonLopez.DomainPrimitives
-{
-    public class StrongIdAttribute<TValue> : System.Attribute {}
-}
-";
+                    namespace EricksonLopez.DomainPrimitives
+                    {
+                        public class StrongIdAttribute<TValue> : System.Attribute {}
+                    }
+                    ";
 
         // Parse the provided string into a C# syntax tree
-        var syntaxTree = CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+        var syntaxTree = CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
 
         // Create a Roslyn compilation for the syntax tree.
         var compilation = CSharpCompilation.Create(
@@ -73,7 +73,7 @@ namespace EricksonLopez.DomainPrimitives
     public class StrongIdAttribute<T> : System.Attribute {}
 }
 ";
-        var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.CSharp11));
+        var syntaxTree = Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(EricksonLopez.DomainPrimitives.SourceGenerators.Tests.TestCompilationHelper.EnsureUsings(source), new CSharpParseOptions(LanguageVersion.CSharp11));
         var compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("Tests", new[] { syntaxTree }, Basic.Reference.Assemblies.Net80.References.All, new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
         var generator = new EricksonLopez.DomainPrimitives.Generators.StrongIdGenerator();
         Microsoft.CodeAnalysis.GeneratorDriver driver = Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver.Create(generator);
@@ -81,4 +81,5 @@ namespace EricksonLopez.DomainPrimitives
         return VerifyXunit.Verifier.Verify(driver).UseDirectory("Snapshots");
     }
 }
+
 

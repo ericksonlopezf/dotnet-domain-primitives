@@ -1,4 +1,16 @@
+# Copyright © Erickson Lopez. MIT License.
 name: Mutation Testing (Stryker)
+
+# ─── Purpose ─────────────────────────────────────────────────────────────────
+# Runs Stryker.NET mutation testing against EricksonLopez.DomainPrimitives.
+# Mutation testing operates as an asynchronous deferred quality gate on `main`
+# (and manual/scheduled runs), preventing heavy runs from blocking PRs.
+#
+# Thresholds (Single Source of Truth in stryker-config.json):
+#   • high  (≥100%) — ✅ HIGH (target quality score)
+#   • low   (≥ 98%) — 🟡 LOW (acceptable, investigate minor regressions)
+#   • break (< 95%) — ❌ FAILED (hard quality gate: non-zero exit code)
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   workflow_dispatch:
@@ -12,8 +24,18 @@ on:
           - Basic
           - Standard
           - Advanced
+  # Run daily at 04:00 UTC (asynchronous deferred quality gate)
   schedule:
     - cron: "0 4 * * 1"
+
+concurrency:
+  group: mutation-testing-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  statuses: write
+  actions: read
 
 env:
   DOTNET_NOLOGO: true
@@ -23,10 +45,11 @@ jobs:
   mutation-test:
     name: Stryker Mutation Testing
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 480
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -50,17 +73,19 @@ jobs:
       - name: Install Stryker
         run: dotnet tool install --global dotnet-stryker
 
-      - name: Run Stryker (Core package)
-        run: >
-          dotnet stryker
-          --project src/dotnet-primitive-core/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj
-          --test-project tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj
-          --mutation-level ${{ inputs.mutation-level || 'Standard' }}
-          --reporter html
-          --reporter json
-          --reporter progress
-          --output StrykerOutput/ci
-        continue-on-error: false
+      # Stryker reads thresholds directly from stryker-config.json.
+      - name: Run Stryker Mutation Testing
+        id: stryker
+        run: |
+          set +e
+          dotnet stryker \
+            --config-file stryker-config.json \
+            --mutation-level ${{ inputs.mutation-level || 'Standard' }} \
+            --output StrykerOutput/ci
+          STRYKER_EXIT_CODE=$?
+          echo "exit_code=$STRYKER_EXIT_CODE" >> $GITHUB_OUTPUT
+          echo "Stryker finished with exit code: $STRYKER_EXIT_CODE"
+          exit 0
 
       - name: Upload Stryker report
         if: always()
@@ -70,54 +95,60 @@ jobs:
           path: StrykerOutput/ci/
           retention-days: 30
 
+      # ─── Extract and report mutation score ───────────────────────────────
       - name: Extract and report mutation score
+        id: report
+        if: always()
+        run: node scripts/record-stryker-result.js
+
+      # ─── Post GitHub Commit Status ──────────────────────────────────────────
+      - name: Publish Commit Status
+        if: always() && steps.report.outputs.score != ''
+        uses: actions/github-script@v7
+        env:
+          SCORE: ${{ steps.report.outputs.score }}
+          PASSED_GATE: ${{ steps.report.outputs.passed_gate }}
+          STATUS: ${{ steps.report.outputs.status }}
+          KILLED: ${{ steps.report.outputs.killed }}
+          TOTAL: ${{ steps.report.outputs.total }}
+        with:
+          script: |
+            const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
+            const sha = context.sha;
+            const score = process.env.SCORE;
+            const passed = process.env.PASSED_GATE === 'true';
+            const statusLabel = process.env.STATUS;
+            const killed = process.env.KILLED;
+            const total = process.env.TOTAL;
+
+            const state = passed ? 'success' : 'failure';
+            const description = `Stryker: ${score}% (${killed}/${total} killed) - ${statusLabel}`;
+            const targetUrl = `${serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            try {
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: sha,
+                state: state,
+                context: 'mutation-testing/stryker',
+                description: description.substring(0, 140),
+                target_url: targetUrl
+              });
+              console.log(`Commit status successfully published as '${state}' on ${sha}`);
+            } catch (err) {
+              console.warn(`Could not set commit status: ${err.message}`);
+            }
+
+      # ─── Enforce Stryker Quality Gate ───────────────────────────────────────
+      - name: Enforce Stryker Quality Gate
         if: always()
         run: |
-          REPORT=$(find StrykerOutput/ci -name "*.json" -not -name "*.html.json" | head -1)
-          if [ -f "$REPORT" ]; then
-            python3 - "$REPORT" << 'PYEOF'
-          import sys, json
+          STRYKER_CODE="${{ steps.stryker.outputs.exit_code }}"
+          PASSED_GATE="${{ steps.report.outputs.passed_gate }}"
 
-          report_path = sys.argv[1]
-          with open(report_path) as f:
-              data = json.load(f)
-
-          files = data.get('files', {})
-          total  = sum(f.get('mutants', {}).get('total',  0) for f in files.values() if 'mutants' in f)
-          killed = sum(f.get('mutants', {}).get('killed', 0) for f in files.values() if 'mutants' in f)
-          score  = round(killed / total * 100, 1) if total > 0 else 0.0
-
-          HIGH  = 100
-          LOW   = 98
-          BREAK = 95
-
-          if score >= HIGH:
-              status = "✅ HIGH"
-          elif score >= LOW:
-              status = "🟡 LOW"
-          elif score >= BREAK:
-              status = "🟠 WARNING (approaching break threshold)"
-          else:
-              status = "❌ BELOW BREAK THRESHOLD (CI gate failed)"
-
-          summary = f"""
-          ## Stryker Mutation Testing Results
-
-          | Metric | Value |
-          |--------|-------|
-          | Mutation Score | **{score}%** |
-          | Mutants Killed | {killed} / {total} |
-          | Status | {status} |
-          | High Threshold | ≥{HIGH}% |
-          | Low Threshold  | ≥{LOW}% |
-          | Break Threshold| ≥{BREAK}% |
-          """
-          print(summary)
-
-          import os
-          with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/stdout'), 'a') as gh:
-              gh.write(summary)
-          PYEOF
-          else
-            echo "### ⚠️ Stryker report not found — mutation score unavailable" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$STRYKER_CODE" != "0" ] || [ "$PASSED_GATE" != "true" ]; then
+            echo "❌ Stryker mutation testing quality gate failed (Exit code: $STRYKER_CODE, Passed Gate: $PASSED_GATE)."
+            exit 1
           fi
+          echo "✅ Stryker mutation testing quality gate passed successfully."

@@ -1,13 +1,14 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using EricksonLopez.DomainPrimitives;
+using System.Threading.Tasks;
 
-namespace EricksonLopez.DomainPrimitives.Tests.TestTypes;
+namespace EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
 
 /// <summary>
 /// Test strong ID backed by Guid.
@@ -34,3 +35,5 @@ public readonly partial record struct TransactionId;
 [StrongId<string>]
 [MinLength(1), MaxLength(50)]
 public readonly partial record struct Sku;
+
+

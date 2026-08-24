@@ -1,24 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Defines a custom normalization strategy.
-/// </summary>
-public interface INormalizer<T>
-{
-#if NET7_0_OR_GREATER
-    /// <summary>
-    /// Normalizes the input value.
-    /// </summary>
-    /// <param name="value">The value to normalize.</param>
-    /// <returns>The normalized value.</returns>
-    static abstract T Normalize(T value);
-#endif
-}
-
-/// <summary>
-/// Applies a custom normalization strategy to a domain primitive.
+/// Specifies a custom normalization strategy to apply to a domain primitive.
 /// </summary>
 /// <remarks>
 /// The normalizer is invoked before validation.

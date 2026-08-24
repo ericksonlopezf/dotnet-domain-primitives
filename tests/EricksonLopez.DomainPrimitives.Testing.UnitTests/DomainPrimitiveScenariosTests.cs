@@ -1,99 +1,152 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using AwesomeAssertions;
+using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Testing;
-using FluentAssertions;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Testing.UnitTests;
 
+[Email]
+public readonly partial record struct ScenarioEmail;
+
+[Phone]
+public readonly partial record struct ScenarioPhone;
+
+[Slug]
+public readonly partial record struct ScenarioSlug;
+
+[StringPrimitive]
+[Trim]
+[Regex(@"^[a-z0-9]+(?:-[a-z0-9]+)*$")]
+public readonly partial record struct ScenarioStrictSlug;
+
+[StrongId<Guid>]
+public readonly partial record struct ScenarioGuidId;
+
+[Age]
+public readonly partial record struct ScenarioAge;
+
+[Percentage]
+public readonly partial record struct ScenarioPercentage;
+
+[CountryCode]
+public readonly partial record struct ScenarioCountryCode;
+
 public class DomainPrimitiveScenariosTests
 {
-    [Fact]
-    public void ValidEmailInputs_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.ValidEmailInputs), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void ValidEmailInputs_ShouldSuccessfullyCreateEmail(string email)
     {
-        DomainPrimitiveScenarios.ValidEmailInputs.Should().NotBeEmpty();
+        var created = ScenarioEmail.Create(email);
+        created.Value.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
-    public void InvalidEmailInputs_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.InvalidEmailInputs), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void InvalidEmailInputs_ShouldFailValidation(string email)
     {
-        DomainPrimitiveScenarios.InvalidEmailInputs.Should().NotBeEmpty();
+        Action act = () => ScenarioEmail.Create(email);
+        act.Should().Throw<DomainPrimitiveValidationException>();
     }
 
-    [Fact]
-    public void ValidPhoneInputs_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.ValidPhoneInputs), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void ValidPhoneInputs_ShouldSuccessfullyCreatePhone(string phone)
     {
-        DomainPrimitiveScenarios.ValidPhoneInputs.Should().NotBeEmpty();
+        var created = ScenarioPhone.Create(phone);
+        created.Value.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
-    public void InvalidPhoneInputs_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.InvalidPhoneInputs), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void InvalidPhoneInputs_ShouldFailValidation(string phone)
     {
-        DomainPrimitiveScenarios.InvalidPhoneInputs.Should().NotBeEmpty();
+        Action act = () => ScenarioPhone.Create(phone);
+        act.Should().Throw<DomainPrimitiveValidationException>();
     }
 
-    [Fact]
-    public void ValidSlugInputs_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.ValidSlugInputs), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void ValidSlugInputs_ShouldSuccessfullyCreateSlug(string slug)
     {
-        DomainPrimitiveScenarios.ValidSlugInputs.Should().NotBeEmpty();
+        var created = ScenarioSlug.Create(slug);
+        created.Value.Should().NotBeNullOrWhiteSpace();
     }
 
-    [Fact]
-    public void InvalidSlugInputs_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.InvalidSlugInputs), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void InvalidSlugInputs_ShouldFailValidation(string slug)
     {
-        DomainPrimitiveScenarios.InvalidSlugInputs.Should().NotBeEmpty();
+        Action act = () => ScenarioStrictSlug.Create(slug);
+        act.Should().Throw<DomainPrimitiveValidationException>();
     }
 
-    [Fact]
-    public void ValidGuidStrings_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.ValidGuidStrings), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void ValidGuidStrings_ShouldSuccessfullyParseGuidId(string guidStr)
     {
-        DomainPrimitiveScenarios.ValidGuidStrings.Should().NotBeEmpty();
+        var created = ScenarioGuidId.Parse(guidStr);
+        created.Value.Should().NotBeEmpty();
     }
 
-    [Fact]
-    public void InvalidGuidStrings_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.InvalidGuidStrings), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void InvalidGuidStrings_ShouldFailValidation(string guidStr)
     {
-        DomainPrimitiveScenarios.InvalidGuidStrings.Should().NotBeEmpty();
+        Action act = () => ScenarioGuidId.Parse(guidStr);
+        act.Should().Throw<FormatException>();
     }
 
-    [Fact]
-    public void ValidAgeValues_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.ValidAgeValues), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void ValidAgeValues_ShouldSuccessfullyCreateAge(int age)
     {
-        DomainPrimitiveScenarios.ValidAgeValues.Should().NotBeEmpty();
+        var created = ScenarioAge.Create(age);
+        created.Value.Should().Be(age);
     }
 
-    [Fact]
-    public void InvalidAgeValues_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.InvalidAgeValues), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void InvalidAgeValues_ShouldFailValidation(int age)
     {
-        DomainPrimitiveScenarios.InvalidAgeValues.Should().NotBeEmpty();
+        Action act = () => ScenarioAge.Create(age);
+        act.Should().Throw<DomainPrimitiveValidationException>();
     }
 
-    [Fact]
-    public void ValidPercentageValues_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.ValidPercentageValues), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void ValidPercentageValues_ShouldSuccessfullyCreatePercentage(decimal percentage)
     {
-        DomainPrimitiveScenarios.ValidPercentageValues.Should().NotBeEmpty();
+        var created = ScenarioPercentage.Create(percentage);
+        created.Value.Should().Be(percentage);
     }
 
-    [Fact]
-    public void InvalidPercentageValues_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.InvalidPercentageValues), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void InvalidPercentageValues_ShouldFailValidation(decimal percentage)
     {
-        DomainPrimitiveScenarios.InvalidPercentageValues.Should().NotBeEmpty();
+        Action act = () => ScenarioPercentage.Create(percentage);
+        act.Should().Throw<DomainPrimitiveValidationException>();
     }
 
-    [Fact]
-    public void EmailNormalizationScenarios_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.EmailNormalizationScenarios), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void EmailNormalizationScenarios_ShouldNormalizeEmailAsExpected(string rawInput, string expectedNormalized)
     {
-        DomainPrimitiveScenarios.EmailNormalizationScenarios.Should().NotBeEmpty();
+        var created = ScenarioEmail.Create(rawInput);
+        created.Value.Should().Be(expectedNormalized);
     }
 
-    [Fact]
-    public void CountryCodeNormalizationScenarios_ShouldNotBeEmpty()
+    [Theory]
+    [MemberData(nameof(DomainPrimitiveScenarios.CountryCodeNormalizationScenarios), MemberType = typeof(DomainPrimitiveScenarios))]
+    public void CountryCodeNormalizationScenarios_ShouldNormalizeCountryCodeAsExpected(string rawInput, string expectedNormalized)
     {
-        DomainPrimitiveScenarios.CountryCodeNormalizationScenarios.Should().NotBeEmpty();
+        var created = ScenarioCountryCode.Create(rawInput);
+        created.Value.Should().Be(expectedNormalized);
     }
 }
+
+

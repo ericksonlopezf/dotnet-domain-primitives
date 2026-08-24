@@ -1,13 +1,8 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using EricksonLopez.DomainPrimitives;
 
-namespace EricksonLopez.DomainPrimitives.Tests.TestTypes;
+namespace EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
 
 /// <summary>
 /// Basic score with constrained range.
@@ -20,7 +15,7 @@ public readonly partial record struct Score;
 /// Measure with addition and scalar math.
 /// </summary>
 [NumericPrimitive<double>(Operations = EricksonLopez.DomainPrimitives.NumericOperations.Addition | EricksonLopez.DomainPrimitives.NumericOperations.ScalarMultiplication | EricksonLopez.DomainPrimitives.NumericOperations.ScalarDivision)]
-[PrimitiveRange(0, double.MaxValue)] // Positive only
+[PrimitiveRange(0, 1000)] // Bounded for range testing
 public readonly partial record struct Distance;
 
 /// <summary>
@@ -47,3 +42,5 @@ public readonly partial record struct MovieRating;
 [NumericPrimitive<double>]
 [PrimitiveRange(1, 10)]
 public readonly partial record struct PrimitiveRangeScore;
+
+

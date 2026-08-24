@@ -15,8 +15,7 @@ Please check the packages that are affected by this change:
 - [ ] `EricksonLopez.DomainPrimitives.Dapper.SourceGenerators`
 - [ ] `EricksonLopez.DomainPrimitives.OpenApi`
 - [ ] `EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators`
-- [ ] `EricksonLopez.DomainPrimitives.Mapster`
-- [ ] `EricksonLopez.DomainPrimitives.Mapster.SourceGenerators`
+- [ ] `EricksonLopez.DomainPrimitives.NewtonsoftJson`
 - [ ] `EricksonLopez.DomainPrimitives.Testing`
 
 ## Type of Change
@@ -36,7 +35,7 @@ Please check the packages that are affected by this change:
 - [ ] I have updated the documentation accordingly (`README.md`, `/docs/*.md`, XML comments).
 - [ ] I have added unit / integration tests to cover my changes.
 - [ ] All new and existing tests passed (`dotnet test --collect:"XPlat Code Coverage"`).
-- [ ] API Compatibility Check passes (PackageValidation against baseline v1.1.0).
+- [ ] API Compatibility Check passes (PackageValidation baseline).
 - [ ] Codecov and SonarQube analyses pass without dropping thresholds.
 - [ ] Stryker mutation testing passes (break threshold: 95%).
 - [ ] Native AOT compatibility verified (no IL3050/IL2026 warnings).

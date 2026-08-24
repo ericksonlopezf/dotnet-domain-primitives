@@ -13,42 +13,47 @@ To build the solution locally:
 
 ```bash
 # Restore dependencies
-dotnet restore
+dotnet restore EricksonLopez.DomainPrimitives.slnx
 
 # Build the entire solution in Release configuration
-dotnet build --configuration Release --no-restore
+dotnet build EricksonLopez.DomainPrimitives.slnx --configuration Release --no-restore
 ```
 
 ## Testing and Quality
 
 We maintain a high standard of quality. Please ensure your code is well-tested.
 
-### Unit Tests with Code Coverage
+### Unit & Integration Tests with Code Coverage
 
 ```bash
-dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+dotnet test EricksonLopez.DomainPrimitives.slnx --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 ```
 
 ### Security Gate Tests
 
 ```bash
-dotnet test --configuration Release --no-build --filter "Category=Security" --verbosity normal
+dotnet test EricksonLopez.DomainPrimitives.slnx --configuration Release --no-build --filter "Category=Security" --verbosity normal
+```
+
+### API Surface Budget Gate Tests
+
+```bash
+dotnet test tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj --configuration Release --no-build --filter "Category=ApiSurfaceBudget" --verbosity normal
 ```
 
 ### Mutation Testing (Stryker)
 
-Mutation testing verifies that your tests are meaningful. The project uses [Stryker.NET](https://stryker-mutator.io/docs/stryker-net/introduction/) with a break threshold of **95%**.
+Mutation testing verifies that your tests are meaningful. The project uses [Stryker.NET](https://stryker-mutator.io/docs/stryker-net/introduction/) with a break threshold of **95%** and high threshold of **100%**.
 
 ```bash
 # Install Stryker (if not already installed)
 dotnet tool install -g dotnet-stryker
 
 # Run from the repository root using stryker-config.json
-# (targets Stryker.slnx with 5 test projects; target framework: net8.0)
 dotnet-stryker
 ```
 
-Configuration is in [`stryker-config.json`](stryker-config.json) at the repository root. The mutation solution `Stryker.slnx` covers: `Abstractions.UnitTests`, `UnitTests`, `Testing.UnitTests`, `Mapster.Tests`, and `Dapper.IntegrationTests`.
+Configuration is in [`stryker-config.json`](stryker-config.json) at the repository root. The mutation solution `Stryker.slnx` targets `net8.0` and covers 8 test projects: `Abstractions.UnitTests`, `UnitTests`, `Testing.UnitTests`, `Dapper.IntegrationTests`, `EFCore.UnitTests`, `AspNetCore.UnitTests`, `OpenApi.Tests`, and `NewtonsoftJson.Tests`.
 
 ### Benchmarks
 
@@ -78,10 +83,10 @@ Examples:
 
 ## Pull Request Process
 
-1. Fork the repository and create your branch from `main`.
+1. Fork the repository and create your branch from `main` or `develop`.
 2. Ensure you have added tests that cover your changes.
 3. Ensure all tests pass.
-4. Update documentation if you are changing public APIs (`README.md`, `/docs/*.md`, XML comments).
+4. Update documentation if you are changing public APIs or architecture (`README.md`, `/docs/*.md`, `docs/architecture.md`, `docs/boundary.md`, XML comments).
 5. Update `CHANGELOG.md` under `[Unreleased]`.
 6. Create the PR and ensure the CI checks pass:
    - Build (Release, `TreatWarningsAsErrors`)
@@ -92,7 +97,6 @@ Examples:
    - Stryker mutation testing (break threshold: 95%)
    - Native AOT compatibility verification
    - Benchmark validation
-   - Sigstore package signing
 7. Fill out the [PR template](.github/PULL_REQUEST_TEMPLATE.md) completely.
 
 ## Governance and RFCs

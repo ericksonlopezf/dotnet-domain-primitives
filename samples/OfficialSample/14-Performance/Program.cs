@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 14: PERFORMANCE OPTIMIZATIONS (ZERO ALLOCATION AND NATIVEAOT)
 // ============================================================================
@@ -13,10 +10,14 @@ using System.Threading.Tasks;
 // 2. Allocation-free formatting: Implementation of `ISpanFormattable` and `IUtf8SpanFormattable`.
 // 3. NativeAOT Ready: Zero hot reflection, optimized for AOT compilation.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using Chapter14;
 using EricksonLopez.DomainPrimitives;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 14: PERFORMANCE AND ZERO ALLOCATIONS (.NET 10)");
@@ -72,5 +73,7 @@ namespace Chapter14
     [StrongId<Guid>]
     public readonly partial record struct CustomerId;
 }
+
+
 
 

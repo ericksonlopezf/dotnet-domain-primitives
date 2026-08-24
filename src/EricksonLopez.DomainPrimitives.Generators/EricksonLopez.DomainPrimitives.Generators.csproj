@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PublishAot>false</PublishAot>
     <AssemblyName>EricksonLopez.DomainPrimitives.Generators</AssemblyName>
@@ -12,7 +11,7 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
 
-    <!-- Do NOT set IsAotCompatible â€” generators run at compile time only -->
+    <!-- Do NOT set IsAotCompatible — generators run at compile time only -->
     <IsTrimmable>false</IsTrimmable>
 
     <!-- NuGet packaging -->
@@ -23,8 +22,7 @@
 
     <!-- Suppress nullable warnings for netstandard2.0 -->
     <Nullable>enable</Nullable>
-    <NoWarn>CS1591;$(NoWarn)</NoWarn>
-    <PackageTags>$(PackageTags);source-generators;roslyn</PackageTags>
+    <PackageTags>$(CommonPackageTags);source-generator;source-generators;roslyn;code-generation;incremental-generator;value-objects;strongly-typed-id;smart-enum;compile-time;zero-allocation</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

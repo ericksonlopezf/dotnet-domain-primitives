@@ -1,14 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Marks a <c>readonly partial record struct</c> as a date/time-backed domain primitive.
+/// Specifies that a struct is a date- or time-backed domain primitive.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -30,19 +26,19 @@ namespace EricksonLopez.DomainPrimitives;
 public sealed class DatePrimitiveAttribute : Attribute
 {
     /// <summary>
-    /// The backing temporal type. Default: <see cref="DatePrimitiveKind.DateOnly"/>.
+    /// Gets the backing temporal type. Default: <see cref="DatePrimitiveKind.DateOnly"/>.
     /// </summary>
     public DatePrimitiveKind Kind { get; init; } = DatePrimitiveKind.DateOnly;
 
     /// <summary>
-    /// If <c>true</c>, only past dates/times are allowed (before <c>now</c>).
-    /// Default: <c>false</c>.
+    /// Gets a value indicating whether only past dates or times are allowed (before current UTC time).
     /// </summary>
     public bool PastOnly { get; init; }
 
     /// <summary>
-    /// If <c>true</c>, only future dates/times are allowed (after <c>now</c>).
-    /// Default: <c>false</c>.
+    /// Gets a value indicating whether only future dates or times are allowed (after current UTC time).
     /// </summary>
     public bool FutureOnly { get; init; }
 }
+
+

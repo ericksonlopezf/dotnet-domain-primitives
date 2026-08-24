@@ -1,11 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
 using EricksonLopez.DomainPrimitives.Generators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -58,7 +59,7 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
             merged = merged.Collect().Combine(additional.Collect())
                 .SelectMany(static (pair, _) =>
                 {
-                    var list = new System.Collections.Generic.List<NumericPrimitiveTypeInfo?>(pair.Left.Length + pair.Right.Length);
+                    var list = new List<NumericPrimitiveTypeInfo?>(pair.Left.Length + pair.Right.Length);
                     list.AddRange(pair.Left);
                     list.AddRange(pair.Right);
                     return list;
@@ -71,8 +72,8 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
             .Collect()
             .SelectMany(static (all, _) =>
             {
-                var seen = new System.Collections.Generic.HashSet<string>();
-                var result = new System.Collections.Generic.List<NumericPrimitiveTypeInfo>();
+                var seen = new HashSet<string>();
+                var result = new List<NumericPrimitiveTypeInfo>();
                 foreach (var info in all)
                     if (seen.Add($"{info.Namespace}.{info.TypeName}"))
                         result.Add(info);
@@ -86,27 +87,19 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
         });
     }
 
-    private static NumericPrimitiveTypeInfo? ExtractTypeInfo(
-        GeneratorSyntaxContext context,
-        CancellationToken ct)
-        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
-
-    private static NumericPrimitiveTypeInfo? ExtractTypeInfo(
+    internal static NumericPrimitiveTypeInfo? ExtractTypeInfo(
         SemanticModel semanticModel,
         RecordDeclarationSyntax recordSyntax,
         CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(recordSyntax, ct) as INamedTypeSymbol;
-        if (typeSymbol is null)
-            return null;
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(recordSyntax, ct)!;
 
         var attributes = typeSymbol.GetAttributes();
 
         string? domainShortcut = null;
         string? backingTypeName = null;
-        bool hasNumericPrimitive = false;
 
         bool allowAddition = false;
         bool allowSubtraction = false;
@@ -135,7 +128,6 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
             else if (attr.AttributeClass is { IsGenericType: true } ac &&
                      ac.OriginalDefinition.Name == "NumericPrimitiveAttribute")
             {
-                hasNumericPrimitive = true;
                 backingTypeName = GeneratorHelpers.ResolveSpecialType(ac.TypeArguments[0]);
 
                 foreach (var named in attr.NamedArguments)
@@ -152,7 +144,7 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
             }
         }
 
-        if (!hasNumericPrimitive && domainShortcut is null)
+        if (backingTypeName is null && domainShortcut is null)
             return null;
 
         double? rangeMin = null;
@@ -300,12 +292,14 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
         if (backingTypeName is null) return null;
 
         var containingType = typeSymbol.ContainingType;
-        var containingList = new System.Collections.Generic.List<string>();
+        var containingList = new List<string>();
         while (containingType is not null)
         {
             containingList.Insert(0, containingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
             containingType = containingType.ContainingType;
         }
+
+        var defaults = GeneratorHelpers.ExtractAssemblyDefaults(semanticModel.Compilation);
 
         return new NumericPrimitiveTypeInfo(
             Namespace: typeSymbol.ContainingNamespace.ToDisplayString(),
@@ -313,7 +307,6 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
             BackingTypeName: backingTypeName,
             Accessibility: typeSymbol.DeclaredAccessibility switch
             {
-                Accessibility.Public => "public",
                 Accessibility.Internal => "internal",
                 Accessibility.Protected => "protected",
                 Accessibility.Private => "private",
@@ -334,12 +327,13 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
             DomainShortcut: domainShortcut,
             Scale: scale,
             RangeStringMin: rangeStringMin,
-            RangeStringMax: rangeStringMax);
+            RangeStringMax: rangeStringMax,
+            CustomExceptionType: defaults.ExceptionTypeFullName);
     }
 
 
 
-    private static string GenerateNumericPrimitive(NumericPrimitiveTypeInfo info)
+    internal static string GenerateNumericPrimitive(NumericPrimitiveTypeInfo info)
     {
         var sb = new SourceBuilder();
 
@@ -465,7 +459,14 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
         sb.AppendLine($"var error = TryValidate(value);");
         sb.AppendLine($"if (error.IsError)");
         sb.OpenBrace();
-        sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        if (!string.IsNullOrEmpty(info.CustomExceptionType))
+        {
+            sb.AppendLine($"throw new {info.CustomExceptionType}(error.Message);");
+        }
+        else
+        {
+            sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        }
         sb.CloseBrace();
         sb.CloseBrace();
         sb.AppendLine();
@@ -692,6 +693,10 @@ internal sealed class NumericPrimitiveGenerator : IIncrementalGenerator
         }
     }
 }
+
+
+
+
 
 
 

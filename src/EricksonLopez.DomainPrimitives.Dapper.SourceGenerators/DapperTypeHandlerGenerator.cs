@@ -1,4 +1,4 @@
-#pragma warning disable CS1591
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,6 +31,16 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
             (spc, source) => Execute(source.Left, source.Right, spc));
     }
 
+    internal static bool IsDomainPrimitiveAttribute(AttributeData a)
+    {
+        var ns = a.AttributeClass?.ContainingNamespace?.ToDisplayString();
+        if (ns == null || !ns.StartsWith("EricksonLopez.DomainPrimitives", StringComparison.Ordinal))
+            return false;
+
+        var name = a.AttributeClass?.Name;
+        return name is not "DapperAttribute" and not "EFCoreAttribute" and not "DomainPrimitivesDefaultsAttribute" and not "AspNetCoreAttribute" and not "ValueObjectAttribute";
+    }
+
     private static PrimitiveInfo? GetDomainPrimitiveInfo(GeneratorSyntaxContext context)
     {
         var typeDecl = (TypeDeclarationSyntax)context.Node;
@@ -43,70 +53,19 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
 
         // Look for attributes from our abstractions
         var attributes = symbol.GetAttributes();
-        
-
-
-        AttributeData? primitiveAttr = null;
-        
-        foreach (var attr in attributes)
-        {
-            var attrClass = attr.AttributeClass;
-            if (attrClass == null) continue;
-            
-            if (attrClass.ContainingNamespace.ToString() == "EricksonLopez.DomainPrimitives")
-            {
-                // We only care about single-value primitives for TypeHandlers. ValueObjects are handled separately.
-                if (attrClass.Name == "ValueObjectAttribute") return null;
-                
-                // If it's one of our primitive attributes, capture it
-                if (attrClass.Name == "StrongIdAttribute" || 
-                    attrClass.Name == "StringPrimitiveAttribute" ||
-                    attrClass.Name == "NumericPrimitiveAttribute" ||
-                    attrClass.Name == "DatePrimitiveAttribute" ||
-                    // Shortcuts
-                    attrClass.Name == "EmailAttribute" || attrClass.Name == "PhoneAttribute" ||
-                    attrClass.Name == "UrlAttribute" || attrClass.Name == "SlugAttribute" ||
-                    attrClass.Name == "CountryCodeAttribute" || attrClass.Name == "LanguageCodeAttribute" ||
-                    attrClass.Name == "CurrencyCodeAttribute" || attrClass.Name == "UsernameAttribute" ||
-                    attrClass.Name == "PasswordHashAttribute" || attrClass.Name == "HexColorAttribute" ||
-                    attrClass.Name == "IPAddressAttribute" || attrClass.Name == "MacAddressAttribute" ||
-                    attrClass.Name == "IBANAttribute" || attrClass.Name == "ISBNAttribute" ||
-                    attrClass.Name == "VINAttribute" ||
-                    attrClass.Name == "MoneyAttribute" || attrClass.Name == "PercentageAttribute" ||
-                    attrClass.Name == "LatitudeAttribute" || attrClass.Name == "LongitudeAttribute" ||
-                    attrClass.Name == "AgeAttribute" || attrClass.Name == "WeightAttribute" ||
-                    attrClass.Name == "HeightAttribute" || attrClass.Name == "DistanceAttribute" ||
-                    attrClass.Name == "TemperatureAttribute" || attrClass.Name == "ScoreAttribute" ||
-                    attrClass.Name == "QuantityAttribute" || attrClass.Name == "PriceAttribute" ||
-                    attrClass.Name == "TaxRateAttribute" || attrClass.Name == "DiscountAttribute" ||
-                    attrClass.Name == "RatingAttribute" ||
-                    attrClass.Name == "BirthDateAttribute" || attrClass.Name == "ExpirationDateAttribute" ||
-                    attrClass.Name == "BusinessDateAttribute" || attrClass.Name == "FiscalYearAttribute" ||
-                    attrClass.Name == "MonthAttribute" || attrClass.Name == "QuarterAttribute" ||
-                    attrClass.Name == "WeekAttribute" || attrClass.Name == "DateRangeAttribute" ||
-                    attrClass.Name == "TimeRangeAttribute" ||
-                    attrClass.Name == "SmartEnumAttribute")
-                {
-                    primitiveAttr = attr;
-                    break;
-                }
-            }
-        }
-
+        var primitiveAttr = attributes.FirstOrDefault(IsDomainPrimitiveAttribute);
         if (primitiveAttr == null) return null;
 
-        // Determine backing type
         string backingType = "string"; // Default for StringPrimitive and most shortcuts
-        bool isGuidBacked = false;
+        var attrClass = primitiveAttr.AttributeClass!;
+        var attrName = attrClass.Name;
 
-        var attrName = primitiveAttr.AttributeClass!.Name;
-        if (attrName == "StrongIdAttribute" || attrName == "NumericPrimitiveAttribute")
+        if (attrName is "StrongIdAttribute" or "NumericPrimitiveAttribute")
         {
-            if (primitiveAttr.AttributeClass.IsGenericType)
+            if (attrClass.IsGenericType)
             {
-                var typeArg = primitiveAttr.AttributeClass.TypeArguments[0];
+                var typeArg = attrClass.TypeArguments[0];
                 backingType = typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-                isGuidBacked = typeArg.Name == "Guid";
             }
         }
         else if (attrName == "DatePrimitiveAttribute")
@@ -117,20 +76,20 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
             if (!kindArg.IsNull && kindArg.Value is int kindInt)
             {
                 // 0 = DateOnly, 1 = DateTime, 2 = TimeOnly, 3 = DateTimeOffset
-                if (kindInt == 1) backingType = "global::System.DateTime";
+                if (kindInt == 1) backingType = "global::DateTime";
                 else if (kindInt == 2) backingType = "global::System.TimeOnly";
                 else if (kindInt == 3) backingType = "global::System.DateTimeOffset";
             }
         }
-        else if (attrName == "MoneyAttribute" || attrName == "PercentageAttribute")
+        else if (attrName is "MoneyAttribute" or "PercentageAttribute")
         {
             backingType = "decimal";
         }
         else if (attrName == "SmartEnumAttribute")
         {
-            if (primitiveAttr.AttributeClass.IsGenericType)
+            if (attrClass.IsGenericType)
             {
-                var typeArg = primitiveAttr.AttributeClass.TypeArguments[0];
+                var typeArg = attrClass.TypeArguments[0];
                 backingType = typeArg.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
             }
             else
@@ -143,7 +102,6 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
             symbol.ContainingNamespace.ToDisplayString(),
             symbol.Name,
             backingType,
-            isGuidBacked,
             attrName == "SmartEnumAttribute"
         );
     }
@@ -152,7 +110,6 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
     {
         if (primitives.IsDefaultOrEmpty) return;
 
-        var sb = new StringBuilder();
         var handlerClasses = new List<string>();
 
         foreach (var primitive in primitives.Distinct())
@@ -160,80 +117,91 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
             var handlerClassName = $"{primitive.TypeName}TypeHandler";
             handlerClasses.Add(handlerClassName);
 
-            sb.Clear();
-            sb.AppendLine("// <auto-generated/>");
-            sb.AppendLine("#nullable enable");
-            sb.AppendLine("using System;");
-            sb.AppendLine("using System.Data;");
-            sb.AppendLine("using Dapper;");
-            if (primitive.Namespace != "<global namespace>")
-            {
-                sb.AppendLine($"using {primitive.Namespace};");
-            }
-            sb.AppendLine();
-            sb.AppendLine("namespace EricksonLopez.DomainPrimitives.Dapper.Generated;");
-            sb.AppendLine();
-            sb.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
-            sb.AppendLine($"internal sealed class {handlerClassName} : SqlMapper.TypeHandler<{primitive.TypeName}>");
-            sb.AppendLine("{");
-            
-            // SetValue
-            sb.AppendLine($"    public override void SetValue(IDbDataParameter parameter, {primitive.TypeName} value)");
-            sb.AppendLine("    {");
-            sb.AppendLine("        parameter.Value = value.Value;");
-            sb.AppendLine("    }");
-            sb.AppendLine();
-
-            // Parse
-            sb.AppendLine($"    public override {primitive.TypeName} Parse(object value)");
-            sb.AppendLine("    {");
-            sb.AppendLine("        if (value is null || value == DBNull.Value)");
-            sb.AppendLine($"            throw new DataException($\"Cannot parse null as {primitive.TypeName}.\");");
-            sb.AppendLine();
-
-
-            string factoryMethod = primitive.IsSmartEnum ? "FromValue" : "Create";
-
-            string backingWithoutGlobal = primitive.BackingType.Replace("global::", "");
-            if (backingWithoutGlobal == "System.Guid" || primitive.IsGuidBacked)
-            {
-                sb.AppendLine("        if (value is Guid g) return " + primitive.TypeName + $".{factoryMethod}(g);");
-                sb.AppendLine("        if (value is string s && Guid.TryParse(s, out var parsed)) return " + primitive.TypeName + $".{factoryMethod}(parsed);");
-                sb.AppendLine("        if (value is byte[] b && b.Length == 16) return " + primitive.TypeName + $".{factoryMethod}(new Guid(b));");
-            }
-            else if (backingWithoutGlobal == "string")
-            {
-                sb.AppendLine("        if (value is string s) return " + primitive.TypeName + $".{factoryMethod}(s);");
-                sb.AppendLine("        return " + primitive.TypeName + $".{factoryMethod}(value.ToString() ?? string.Empty);");
-            }
-            else if (backingWithoutGlobal == "System.DateOnly")
-            {
-                sb.AppendLine("        if (value is DateTime dt) return " + primitive.TypeName + $".{factoryMethod}(DateOnly.FromDateTime(dt));");
-                sb.AppendLine("        if (value is string s && DateOnly.TryParse(s, out var parsed)) return " + primitive.TypeName + $".{factoryMethod}(parsed);");
-            }
-            else
-            {
-                // Numerics and others - try to change type
-                sb.AppendLine($"        try");
-                sb.AppendLine($"        {{");
-                sb.AppendLine($"            var converted = ({primitive.BackingType})Convert.ChangeType(value, typeof({primitive.BackingType}));");
-                sb.AppendLine($"            return {primitive.TypeName}.{factoryMethod}(converted);");
-                sb.AppendLine($"        }}");
-                sb.AppendLine($"        catch (InvalidCastException)");
-                sb.AppendLine($"        {{");
-                sb.AppendLine($"        }}");
-            }
-
-            sb.AppendLine();
-            sb.AppendLine($"        throw new DataException($\"Cannot parse {{value.GetType()}} as {primitive.TypeName}.\");");
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-
-            context.AddSource($"{handlerClassName}.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+            var code = GenerateTypeHandler(primitive);
+            context.AddSource($"{handlerClassName}.g.cs", SourceText.From(code, Encoding.UTF8));
         }
 
-        // Generate Registration Class
-        sb.Clear();
+        var regCode = GenerateRegistration(handlerClasses);
+        context.AddSource("DapperDomainPrimitivesRegistration.g.cs", SourceText.From(regCode, Encoding.UTF8));
+    }
+
+    internal static string GenerateTypeHandler(PrimitiveInfo primitive)
+    {
+        var handlerClassName = $"{primitive.TypeName}TypeHandler";
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.Data;");
+        sb.AppendLine("using Dapper;");
+        if (primitive.Namespace != "<global namespace>")
+        {
+            sb.AppendLine($"using {primitive.Namespace};");
+        }
+        sb.AppendLine();
+        sb.AppendLine("namespace EricksonLopez.DomainPrimitives.Dapper.Generated;");
+        sb.AppendLine();
+        sb.AppendLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
+        sb.AppendLine($"internal sealed class {handlerClassName} : SqlMapper.TypeHandler<{primitive.TypeName}>");
+        sb.AppendLine("{");
+        
+        // SetValue
+        sb.AppendLine($"    public override void SetValue(IDbDataParameter parameter, {primitive.TypeName} value)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        parameter.Value = value.Value;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        // Parse
+        sb.AppendLine($"    public override {primitive.TypeName} Parse(object value)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        if (value is null || value == DBNull.Value)");
+        sb.AppendLine($"            throw new DataException($\"Cannot parse null as {primitive.TypeName}.\");");
+        sb.AppendLine();
+
+        string factoryMethod = primitive.IsSmartEnum ? "FromValue" : "Create";
+
+        string backingWithoutGlobal = primitive.BackingType.Replace("global::", "");
+        if (backingWithoutGlobal is "Guid" or "System.Guid")
+        {
+            sb.AppendLine("        if (value is Guid g) return " + primitive.TypeName + $".{factoryMethod}(g);");
+            sb.AppendLine("        if (value is string s && Guid.TryParse(s, out var parsed)) return " + primitive.TypeName + $".{factoryMethod}(parsed);");
+            sb.AppendLine("        if (value is byte[] b && b.Length == 16) return " + primitive.TypeName + $".{factoryMethod}(new Guid(b));");
+        }
+        else if (backingWithoutGlobal == "string")
+        {
+            sb.AppendLine("        if (value is string s) return " + primitive.TypeName + $".{factoryMethod}(s);");
+            sb.AppendLine("        return " + primitive.TypeName + $".{factoryMethod}(value.ToString() ?? string.Empty);");
+        }
+        else if (backingWithoutGlobal is "System.DateOnly" or "DateOnly")
+        {
+            sb.AppendLine("        if (value is DateTime dt) return " + primitive.TypeName + $".{factoryMethod}(DateOnly.FromDateTime(dt));");
+            sb.AppendLine("        if (value is string s && DateOnly.TryParse(s, out var parsed)) return " + primitive.TypeName + $".{factoryMethod}(parsed);");
+        }
+        else
+        {
+            // Numerics and others - try to change type
+            sb.AppendLine($"        try");
+            sb.AppendLine($"        {{");
+            sb.AppendLine($"            var converted = ({primitive.BackingType})Convert.ChangeType(value, typeof({primitive.BackingType}));");
+            sb.AppendLine($"            return {primitive.TypeName}.{factoryMethod}(converted);");
+            sb.AppendLine($"        }}");
+            sb.AppendLine($"        catch (InvalidCastException)");
+            sb.AppendLine($"        {{");
+            sb.AppendLine($"        }}");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine($"        throw new DataException($\"Cannot parse {{value.GetType()}} as {primitive.TypeName}.\");");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+
+    internal static string GenerateRegistration(IReadOnlyList<string> handlerClasses)
+    {
+        var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated/>");
         sb.AppendLine("using Dapper;");
         sb.AppendLine();
@@ -273,25 +241,8 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
         sb.AppendLine("    }");
         sb.AppendLine("}");
 
-        context.AddSource("DapperDomainPrimitivesRegistration.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+        return sb.ToString();
     }
 }
 
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-internal readonly struct PrimitiveInfo
-{
-    public string Namespace { get; }
-    public string TypeName { get; }
-    public string BackingType { get; }
-    public bool IsGuidBacked { get; }
-    public bool IsSmartEnum { get; }
 
-    public PrimitiveInfo(string @namespace, string typeName, string backingType, bool isGuidBacked, bool isSmartEnum = false)
-    {
-        Namespace = @namespace;
-        TypeName = typeName;
-        BackingType = backingType;
-        IsGuidBacked = isGuidBacked;
-        IsSmartEnum = isSmartEnum;
-    }
-}

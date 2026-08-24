@@ -1,17 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <AssemblyName>EricksonLopez.DomainPrimitives</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives</RootNamespace>
     <!-- RS0016/RS0017: New public types added in v1.2.0 (Diagnostics move from Abstractions).
          API evolution is tracked via ApiCompat (CRIT-003) in CI. PublicApiAnalyzers is
          redundant for this meta-package since ApiCompat provides stronger binary compat gates. -->
-    <!-- CA1711: ValidationFailureEventArgs uses 'EventArgs' suffix intentionally â€” it IS
+    <!-- CA1711: ValidationFailureEventArgs uses 'EventArgs' suffix intentionally — it IS
          event arguments for OnValidationFailed. Suppressed to match pre-migration Abstractions behavior. -->
     <NoWarn>$(NoWarn);RS0016;RS0017;CA1711</NoWarn>
-    <PackageTags>$(PackageTags);core</PackageTags>
+    <PackageTags>$(CommonPackageTags);value-objects;strongly-typed-id;smart-enum;primitive-obsession;validation;source-generator;roslyn-analyzers;zero-allocation;clean-architecture;native-aot</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
@@ -30,7 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Abstractions\EricksonLopez.DomainPrimitives.Abstractions.csproj" />
 
-    <!-- Source generators are analyzer references â€” they don't add runtime dependencies -->
+    <!-- Source generators are analyzer references — they don't add runtime dependencies -->
     <ProjectReference Include="..\EricksonLopez.DomainPrimitives.Generators\EricksonLopez.DomainPrimitives.Generators.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false" />

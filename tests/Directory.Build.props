@@ -5,8 +5,24 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <NoWarn>CS1574;CA1859;$(NoWarn);CA1707;CS1591;CS0618;CA1859;CA1001;CA1861;CA1305;CA1825;CA1018</NoWarn>
+    <SonarQubeTestProject>true</SonarQubeTestProject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>CS1574;CA1859;$(NoWarn);CA1707;CA1001;CA1861;CA1305;CA1825;CA1018</NoWarn>
+    <EnableTrimAnalyzer Condition="'$(PublishAot)' != 'true'">false</EnableTrimAnalyzer>
   </PropertyGroup>
+
+  <!-- Exclude generator/analyzer test projects from Sonar CPD entirely.
+       These projects test Roslyn Source Generators and Analyzers: their test methods
+       share identical scaffolding (source strings, VerifySourceGenerator calls, Diagnostic
+       assertion patterns) that is structurally repetitive by design, not by negligence.
+       SonarQubeExclude at MSBuild level is the most reliable exclusion mechanism —
+       it operates before glob pattern evaluation and overrides sonar.cpd.exclusions. -->
+  <PropertyGroup Condition="$(MSBuildProjectName.Contains('.Generators.Tests')) Or
+                            $(MSBuildProjectName.Contains('.Analyzers.Tests')) Or
+                            $(MSBuildProjectName.Contains('.SourceGenerators.Tests'))">
+    <SonarQubeExclude>true</SonarQubeExclude>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AwesomeAssertions" />
@@ -31,3 +47,5 @@
     <ExcludeByAttribute>GeneratedCodeAttribute</ExcludeByAttribute>
   </PropertyGroup>
 </Project>
+
+

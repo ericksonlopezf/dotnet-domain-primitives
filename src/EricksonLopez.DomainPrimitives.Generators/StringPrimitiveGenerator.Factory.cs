@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -54,3 +55,7 @@ internal sealed partial class StringPrimitiveGenerator
     }
 
 }
+
+
+
+

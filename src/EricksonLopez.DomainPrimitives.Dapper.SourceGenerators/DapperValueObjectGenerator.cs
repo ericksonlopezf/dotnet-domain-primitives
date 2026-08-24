@@ -1,4 +1,4 @@
-#pragma warning disable CS1591
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -31,15 +31,9 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
         var symbol = context.SemanticModel.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
         if (symbol == null) return null;
 
-        bool hasValueObject = false;
-        foreach (var attr in symbol.GetAttributes())
-        {
-            if (attr.AttributeClass?.Name == "ValueObjectAttribute" &&
-                attr.AttributeClass.ContainingNamespace.ToString() == "EricksonLopez.DomainPrimitives")
-            {
-                hasValueObject = true;
-            }
-        }
+        bool hasValueObject = symbol.GetAttributes().Any(attr =>
+            attr.AttributeClass?.Name == "ValueObjectAttribute" &&
+            attr.AttributeClass.ContainingNamespace.ToString() == "EricksonLopez.DomainPrimitives");
 
         if (!hasValueObject) return null;
 
@@ -62,6 +56,12 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
     }
 
     private static void Execute(ValueObjectInfo info, SourceProductionContext context)
+    {
+        var code = GenerateValueObjectDapperExtensions(info);
+        context.AddSource($"{info.TypeName}DapperExtensions.g.cs", SourceText.From(code, Encoding.UTF8));
+    }
+
+    internal static string GenerateValueObjectDapperExtensions(ValueObjectInfo info)
     {
         var sb = new StringBuilder();
 
@@ -90,12 +90,9 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine($"    /// </summary>");
         sb.AppendLine($"    public static void AddParameters(this DynamicParameters parameters, {info.TypeName} value, string prefix = \"\")");
         sb.AppendLine("    {");
-        if (info.Properties.Length > 0)
+        foreach (var prop in info.Properties.Values)
         {
-            foreach (var prop in info.Properties.Values)
-            {
-                sb.AppendLine($"        parameters.Add($\"{{prefix}}{prop.Name}\", value.{prop.Name});");
-            }
+            sb.AppendLine($"        parameters.Add($\"{{prefix}}{prop.Name}\", value.{prop.Name});");
         }
         sb.AppendLine("    }");
         sb.AppendLine();
@@ -107,7 +104,11 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine($"    public static {info.TypeName} ParseValueObject(this IDataRecord record, string prefix = \"\")");
         sb.AppendLine("    {");
         
-        if (info.Properties.Length > 0)
+        if (info.Properties.Length == 0)
+        {
+            sb.AppendLine($"        return {info.TypeName}.Create();");
+        }
+        else
         {
             foreach (var prop in info.Properties.Values)
             {
@@ -118,118 +119,11 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
             var args = string.Join(", ", info.Properties.Values.Select(p => $"val_{p.Name}!"));
             sb.AppendLine($"        return {info.TypeName}.Create({args});");
         }
-        else
-        {
-            sb.AppendLine($"        return {info.TypeName}.Create();");
-        }
         
         sb.AppendLine("    }");
 
         sb.AppendLine("}");
 
-        context.AddSource($"{info.TypeName}DapperExtensions.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+        return sb.ToString();
     }
-}
-
-internal sealed class ValueObjectInfo : IEquatable<ValueObjectInfo>
-{
-    public string Namespace { get; }
-    public string TypeName { get; }
-    public EquatableArray<ValueObjectProperty> Properties { get; }
-
-    public ValueObjectInfo(string ns, string typeName, EquatableArray<ValueObjectProperty> properties)
-    {
-        Namespace = ns;
-        TypeName = typeName;
-        Properties = properties;
-    }
-
-    public bool Equals(ValueObjectInfo? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Namespace == other.Namespace && TypeName == other.TypeName && Properties.Equals(other.Properties);
-    }
-
-    public override bool Equals(object? obj) => Equals(obj as ValueObjectInfo);
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            var hashCode = Namespace.GetHashCode();
-            hashCode = (hashCode * 397) ^ TypeName.GetHashCode();
-            hashCode = (hashCode * 397) ^ Properties.GetHashCode();
-            return hashCode;
-        }
-    }
-}
-
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-internal readonly struct ValueObjectProperty : IEquatable<ValueObjectProperty>
-{
-    public string Name { get; }
-    public string Type { get; }
-
-    public ValueObjectProperty(string name, string type)
-    {
-        Name = name;
-        Type = type;
-    }
-
-    public bool Equals(ValueObjectProperty other) => Name == other.Name && Type == other.Type;
-    public override bool Equals(object? obj) => obj is ValueObjectProperty other && Equals(other);
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            return (Name.GetHashCode() * 397) ^ Type.GetHashCode();
-        }
-    }
-}
-
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-internal readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>
-    where T : IEquatable<T>
-{
-    private readonly ImmutableArray<T> _array;
-
-    public EquatableArray(ImmutableArray<T> array) => _array = array;
-    public EquatableArray(IEnumerable<T> items) => _array = items.ToImmutableArray();
-
-    public ImmutableArray<T> Values => _array.IsDefault ? ImmutableArray<T>.Empty : _array;
-    public int Length => Values.Length;
-    public T this[int index] => Values[index];
-
-    public bool Equals(EquatableArray<T> other)
-    {
-        var self = Values;
-        var otherValues = other.Values;
-
-        if (self.Length != otherValues.Length)
-            return false;
-
-        for (int i = 0; i < self.Length; i++)
-        {
-            if (!self[i].Equals(otherValues[i]))
-                return false;
-        }
-
-        return true;
-    }
-
-    public override bool Equals(object? obj) => obj is EquatableArray<T> other && Equals(other);
-
-    public override int GetHashCode()
-    {
-        var values = Values;
-        unchecked
-        {
-            int hash = 17;
-            foreach (var item in values)
-                hash = hash * 31 + item.GetHashCode();
-            return hash;
-        }
-    }
-
-    public static implicit operator EquatableArray<T>(ImmutableArray<T> array) => new(array);
 }

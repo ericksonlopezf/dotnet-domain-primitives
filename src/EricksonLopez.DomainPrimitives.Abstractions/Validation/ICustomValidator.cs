@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
+
 namespace EricksonLopez.DomainPrimitives.Validation;
 
 /// <summary>
@@ -45,27 +40,4 @@ public interface ICustomValidator<in T>
     /// <returns>The validation errors produced during validation, or an empty collection if validation passes.</returns>
     static abstract PrimitiveError Validate(T value);
 #endif
-}
-
-/// <summary>
-/// Applies a custom <see cref="ICustomValidator{T}"/> to a domain primitive.
-/// </summary>
-/// <remarks>
-/// The validator is invoked after built-in validation (normalization → built-in rules → custom).
-/// Multiple <c>[CustomValidator]</c> attributes can be stacked.
-/// </remarks>
-/// <example>
-/// <code>
-/// [StringPrimitive]
-/// [CustomValidator&lt;LuhnCheckValidator&gt;]
-/// public readonly partial record struct CreditCardNumber;
-/// </code>
-/// </example>
-/// <typeparam name="TValidator">
-/// The validator type implementing <see cref="ICustomValidator{T}"/>.
-/// Must have a parameterless constructor or use only static methods.
-/// </typeparam>
-[AttributeUsage(AttributeTargets.Struct, AllowMultiple = true, Inherited = false)]
-public sealed class CustomValidatorAttribute<TValidator> : Attribute
-{
 }
