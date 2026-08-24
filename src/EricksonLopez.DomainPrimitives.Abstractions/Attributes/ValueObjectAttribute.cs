@@ -1,15 +1,10 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
-/// Marks a <c>readonly partial record struct</c> as a composite value object
-/// with structural equality across all properties.
+/// Specifies that a struct is a composite value object with structural equality across all properties.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -38,3 +33,5 @@ namespace EricksonLopez.DomainPrimitives;
 public sealed class ValueObjectAttribute : Attribute
 {
 }
+
+

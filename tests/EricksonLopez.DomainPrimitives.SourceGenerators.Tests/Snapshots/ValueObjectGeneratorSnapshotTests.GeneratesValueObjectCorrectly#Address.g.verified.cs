@@ -5,6 +5,8 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Validation;
@@ -18,8 +20,16 @@ namespace TestNamespace;
 [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Auto)]
 public readonly partial record struct Address :
     IDomainPrimitive<Address>,
+    IParsable<Address>,
+    ISpanParsable<Address>,
+    #if NET8_0_OR_GREATER
+    IUtf8SpanParsable<Address>,
+    #endif
     IFormattable,
     ISpanFormattable,
+    #if NET8_0_OR_GREATER
+    IUtf8SpanFormattable,
+    #endif
     System.Numerics.IEqualityOperators<Address, Address, bool>
 {
     /// <summary>Returns true if this instance was created via default(T) rather than via Create().</summary>
@@ -79,7 +89,94 @@ public readonly partial record struct Address :
         return true;
     }
 
-    // ─── Formatting (IFormattable, ISpanFormattable) ──────────────────────
+    // ─── Parsing (IParsable, ISpanParsable, IUtf8SpanParsable) ───────
+
+    public static Address Parse(string s) => Parse(s, null);
+    public static Address Parse(string s, IFormatProvider? provider)
+    {
+        if (TryParse(s, provider, out var result)) return result;
+        throw new System.FormatException($"The value '{s}' is not valid for Address.");
+    }
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Address result)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            result = default;
+            return false;
+        }
+        try
+        {
+            var obj = global::System.Text.Json.JsonSerializer.Deserialize<Address>(s);
+            var err = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;
+            Validate(ref obj, ref err);
+            if (err.IsError)
+            {
+                result = default;
+                return false;
+            }
+            result = obj;
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+
+    public static Address Parse(ReadOnlySpan<char> s, IFormatProvider? provider = null)
+    {
+        if (TryParse(s, provider, out var result)) return result;
+        throw new System.FormatException("The span value is not valid.");
+    }
+
+    public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out Address result)
+    {
+        if (s.IsEmpty || s.IsWhiteSpace())
+        {
+            result = default;
+            return false;
+        }
+        return TryParse(s.ToString(), provider, out result);
+    }
+
+    #if NET8_0_OR_GREATER
+    public static Address Parse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider = null)
+    {
+        if (TryParse(utf8Text, provider, out var result)) return result;
+        throw new System.FormatException("The UTF-8 span value is not valid.");
+    }
+
+    public static bool TryParse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider, out Address result)
+    {
+        if (utf8Text.IsEmpty)
+        {
+            result = default;
+            return false;
+        }
+        try
+        {
+            var obj = global::System.Text.Json.JsonSerializer.Deserialize<Address>(utf8Text);
+            var err = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;
+            Validate(ref obj, ref err);
+            if (err.IsError)
+            {
+                result = default;
+                return false;
+            }
+            result = obj;
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
+    }
+    #endif
+
+    // ─── Formatting (IFormattable, ISpanFormattable, IUtf8SpanFormattable) ───
 
     /// <summary>Returns a human-readable representation of this value object.</summary>
     public override string ToString()
@@ -103,6 +200,15 @@ public readonly partial record struct Address :
         charsWritten = 0;
         return false;
     }
+
+    #if NET8_0_OR_GREATER
+    /// <inheritdoc/>
+    public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null)
+    {
+        var str = ToString();
+        return global::System.Text.Encoding.UTF8.TryGetBytes(str.AsSpan(), utf8Destination, out bytesWritten);
+    }
+    #endif
 
     // ─── TypeConverter (ASP.NET / WinForms model binding) ─────────────────
 
@@ -150,13 +256,48 @@ public readonly partial record struct Address :
     {
         public override Address Read(ref global::System.Text.Json.Utf8JsonReader reader, global::System.Type typeToConvert, global::System.Text.Json.JsonSerializerOptions options)
         {
-            var obj = global::System.Text.Json.JsonSerializer.Deserialize<Address>(ref reader, options);
-            return obj;
+            if (reader.TokenType == global::System.Text.Json.JsonTokenType.Null)
+                return default;
+            if (reader.TokenType != global::System.Text.Json.JsonTokenType.StartObject)
+                throw new global::System.Text.Json.JsonException("Expected StartObject token for Address.");
+
+            string? streetValue = default;
+            string? cityValue = default;
+            while (reader.Read())
+            {
+                if (reader.TokenType == global::System.Text.Json.JsonTokenType.EndObject)
+                    break;
+                if (reader.TokenType != global::System.Text.Json.JsonTokenType.PropertyName)
+                    throw new global::System.Text.Json.JsonException("Expected PropertyName token.");
+
+                var propName = reader.GetString();
+                reader.Read();
+
+                if (string.Equals(propName, "Street", global::System.StringComparison.OrdinalIgnoreCase) || string.Equals(propName, "street", global::System.StringComparison.OrdinalIgnoreCase))
+                {
+                    streetValue = global::System.Text.Json.JsonSerializer.Deserialize<string>(ref reader, options);
+                }
+                else if (string.Equals(propName, "City", global::System.StringComparison.OrdinalIgnoreCase) || string.Equals(propName, "city", global::System.StringComparison.OrdinalIgnoreCase))
+                {
+                    cityValue = global::System.Text.Json.JsonSerializer.Deserialize<string>(ref reader, options);
+                }
+                else
+                {
+                    reader.Skip();
+                }
+            }
+
+            return Create(streetValue!, cityValue!);
         }
 
         public override void Write(global::System.Text.Json.Utf8JsonWriter writer, Address value, global::System.Text.Json.JsonSerializerOptions options)
         {
-            global::System.Text.Json.JsonSerializer.Serialize(writer, value, options);
+            writer.WriteStartObject();
+            writer.WritePropertyName("street");
+            global::System.Text.Json.JsonSerializer.Serialize(writer, value.Street, options);
+            writer.WritePropertyName("city");
+            global::System.Text.Json.JsonSerializer.Serialize(writer, value.City, options);
+            writer.WriteEndObject();
         }
     }
 

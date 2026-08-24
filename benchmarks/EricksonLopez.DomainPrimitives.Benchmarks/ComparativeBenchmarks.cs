@@ -1,14 +1,15 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using EricksonLopez.DomainPrimitives;
 using StronglyTypedIds;
+using System.Threading.Tasks;
 using ValueOf;
 
 namespace EricksonLopez.DomainPrimitives.Benchmarks;
@@ -16,11 +17,11 @@ namespace EricksonLopez.DomainPrimitives.Benchmarks;
 // ─── Guid Strong ID Primitives ───────────────────────────────────────────────
 
 // EricksonLopez.DomainPrimitives
-[StrongId<System.Guid>]
+[StrongId<Guid>]
 public readonly partial record struct DPUserId;
 
 // Vogen
-[Vogen.ValueObject(typeof(System.Guid))]
+[Vogen.ValueObject(typeof(Guid))]
 public partial struct VogenUserId { }
 
 // StronglyTypedId
@@ -28,17 +29,17 @@ public partial struct VogenUserId { }
 public partial struct StronglyTypedUserId { }
 
 // ValueOf
-public class ValueOfUserId : ValueOf<System.Guid, ValueOfUserId> { }
+public class ValueOfUserId : ValueOf<Guid, ValueOfUserId> { }
 
 // Meziantou
-[global::Meziantou.Framework.Annotations.StronglyTypedId(typeof(System.Guid))]
+[global::Meziantou.Framework.Annotations.StronglyTypedId(typeof(Guid))]
 public readonly partial struct MeziantouUserId { }
 
 // TinyTypes pattern
-public readonly struct TinyTypeUserId : System.IEquatable<TinyTypeUserId>
+public readonly struct TinyTypeUserId : IEquatable<TinyTypeUserId>
 {
-    public System.Guid Value { get; }
-    public TinyTypeUserId(System.Guid value) => Value = value;
+    public Guid Value { get; }
+    public TinyTypeUserId(Guid value) => Value = value;
     public bool Equals(TinyTypeUserId other) => Value.Equals(other.Value);
     public override bool Equals(object? obj) => obj is TinyTypeUserId other && Equals(other);
     public override int GetHashCode() => Value.GetHashCode();
@@ -75,7 +76,7 @@ public readonly partial record struct DPOrderStatus
 [SimpleJob(RuntimeMoniker.Net90)]
 public class ComparativeBenchmarks
 {
-    private System.Guid _testGuid = System.Guid.NewGuid();
+    private Guid _testGuid = Guid.NewGuid();
     private string _testGuidString = string.Empty;
     private DPUserId _dpUserId;
     private string _jsonSerializedGuid = string.Empty;
@@ -109,7 +110,7 @@ public class ComparativeBenchmarks
     // ─── Strong ID Benchmarks ────────────────────────────────────────────────
 
     [Benchmark(Baseline = true)]
-    public System.Guid RawGuid_Create()
+    public Guid RawGuid_Create()
     {
         return _testGuid;
     }
@@ -151,9 +152,9 @@ public class ComparativeBenchmarks
     }
 
     [Benchmark]
-    public System.Guid RawGuid_Parse()
+    public Guid RawGuid_Parse()
     {
-        return System.Guid.Parse(_testGuidString);
+        return Guid.Parse(_testGuidString);
     }
 
     [Benchmark]
@@ -165,19 +166,19 @@ public class ComparativeBenchmarks
     [Benchmark]
     public VogenUserId Vogen_Parse()
     {
-        return VogenUserId.From(System.Guid.Parse(_testGuidString));
+        return VogenUserId.From(Guid.Parse(_testGuidString));
     }
 
     [Benchmark]
     public StronglyTypedUserId StronglyTypedId_Parse()
     {
-        return new StronglyTypedUserId(System.Guid.Parse(_testGuidString));
+        return new StronglyTypedUserId(Guid.Parse(_testGuidString));
     }
 
     [Benchmark]
     public ValueOfUserId ValueOf_Parse()
     {
-        return ValueOfUserId.From(System.Guid.Parse(_testGuidString));
+        return ValueOfUserId.From(Guid.Parse(_testGuidString));
     }
 
     [Benchmark]
@@ -189,7 +190,7 @@ public class ComparativeBenchmarks
     [Benchmark]
     public TinyTypeUserId TinyTypes_Parse()
     {
-        return new TinyTypeUserId(System.Guid.Parse(_testGuidString));
+        return new TinyTypeUserId(Guid.Parse(_testGuidString));
     }
 
     [Benchmark]
@@ -326,9 +327,9 @@ public class ComparativeBenchmarks
     }
 
     [Benchmark]
-    public System.Guid RawGuid_JsonDeserialize()
+    public Guid RawGuid_JsonDeserialize()
     {
-        return System.Text.Json.JsonSerializer.Deserialize<System.Guid>(_jsonSerializedGuid);
+        return System.Text.Json.JsonSerializer.Deserialize<Guid>(_jsonSerializedGuid);
     }
 
     [Benchmark]
@@ -385,7 +386,7 @@ public class ComparativeBenchmarks
 
     [Benchmark]
     [BenchmarkCategory("Integration")]
-    public System.Guid EFCore_ValueConverter_ConvertToProvider()
+    public Guid EFCore_ValueConverter_ConvertToProvider()
     {
         return _valueConverter!.SimulateConvertToProvider(_dpUserId);
     }
@@ -408,7 +409,7 @@ internal sealed class DPUserIdTypeHandler
     public object SimulateSetValue(DPUserId id) => id.Value;
 
     // Simulates TypeHandler.Parse(): wraps a raw DB value into a domain primitive.
-    public DPUserId SimulateParse(System.Guid raw) => DPUserId.Create(raw);
+    public DPUserId SimulateParse(Guid raw) => DPUserId.Create(raw);
 }
 
 /// <summary>
@@ -417,7 +418,9 @@ internal sealed class DPUserIdTypeHandler
 /// </summary>
 internal sealed class DPUserIdValueConverter
 {
-    public System.Guid SimulateConvertToProvider(DPUserId id) => id.Value;
-    public DPUserId SimulateConvertFromProvider(System.Guid raw) => DPUserId.Create(raw);
+    public Guid SimulateConvertToProvider(DPUserId id) => id.Value;
+    public DPUserId SimulateConvertFromProvider(Guid raw) => DPUserId.Create(raw);
 }
+
+
 

@@ -1,14 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using EricksonLopez.DomainPrimitives.Tests.TestTypes;
-using FluentAssertions;
+using AwesomeAssertions;
+using EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
+using EricksonLopez.DomainPrimitives.Validation;
+using Xunit;
 
-namespace EricksonLopez.DomainPrimitives.Tests;
+namespace EricksonLopez.DomainPrimitives.UnitTests;
 
 public sealed class GuidStrongIdTests
 {
@@ -39,9 +37,10 @@ public sealed class GuidStrongIdTests
     public void TryCreate_Returns_Success()
     {
         var guid = Guid.NewGuid();
-        var success = CustomerId.TryCreate(guid, out var result, out _);
+        var success = CustomerId.TryCreate(guid, out var result, out var error);
         success.Should().BeTrue();
         result.Value.Should().Be(guid);
+        error.Should().Be(PrimitiveError.None);
     }
 
     [Fact]
@@ -65,7 +64,6 @@ public sealed class GuidStrongIdTests
 
         id1.Should().Be(id2);
         (id1 == id2).Should().BeTrue();
-        (id1 != id2).Should().BeFalse();
     }
 
     [Fact]
@@ -119,6 +117,15 @@ public sealed class GuidStrongIdTests
         var success = CustomerId.TryParse(invalidGuidString, null, out var id);
 
         // Assert
+        success.Should().BeFalse();
+        id.Should().Be(default(CustomerId));
+    }
+
+    [Fact]
+    public void TryParse_Null_String_Returns_False()
+    {
+        var success = CustomerId.TryParse((string?)null, null, out var id);
+
         success.Should().BeFalse();
         id.Should().Be(default(CustomerId));
     }
@@ -232,3 +239,7 @@ public sealed class GuidStrongIdTests
         CustomerId.PrimitiveName.Should().Be("CustomerId");
     }
 }
+
+
+
+

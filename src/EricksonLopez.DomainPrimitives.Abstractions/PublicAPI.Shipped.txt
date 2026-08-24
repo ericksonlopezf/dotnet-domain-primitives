@@ -439,6 +439,9 @@ static readonly EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesMetri
 #nullable enable
 EricksonLopez.DomainPrimitives.DomainPrimitiveFormatException
 EricksonLopez.DomainPrimitives.DomainPrimitiveFormatException.DomainPrimitiveFormatException(string! primitiveName, string! message) -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveValidationException
+EricksonLopez.DomainPrimitives.DomainPrimitiveValidationException.DomainPrimitiveValidationException(EricksonLopez.DomainPrimitives.Validation.PrimitiveError error, string! paramName = "value") -> void
+EricksonLopez.DomainPrimitives.DomainPrimitiveValidationException.Error.get -> EricksonLopez.DomainPrimitives.Validation.PrimitiveError
 EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>
 EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.Build(out TPrimitive result) -> bool
 EricksonLopez.DomainPrimitives.Advanced.PrimitiveBuilder<TPrimitive, TValue>.BuildOrThrow() -> TPrimitive
@@ -451,5 +454,10 @@ EricksonLopez.DomainPrimitives.LengthAttribute.ErrorCode.set -> void
 EricksonLopez.DomainPrimitives.LengthAttribute.ErrorMessage.get -> string?
 EricksonLopez.DomainPrimitives.LengthAttribute.ErrorMessage.set -> void
 EricksonLopez.DomainPrimitives.NumericPrimitiveAttribute<TValue>.NumericPrimitiveAttribute() -> void
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError.Code.get -> string?
 EricksonLopez.DomainPrimitives.Validation.PrimitiveError.Create(string! code, string! message) -> EricksonLopez.DomainPrimitives.Validation.PrimitiveError
-
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError.IsError.get -> bool
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError.Message.get -> string?
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None.get -> EricksonLopez.DomainPrimitives.Validation.PrimitiveError
+EricksonLopez.DomainPrimitives.Validation.PrimitiveError.PrimitiveError(string? Code, string? Message) -> void

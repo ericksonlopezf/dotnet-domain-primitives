@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 
 namespace EricksonLopez.DomainPrimitives.Generators.Shared;
@@ -34,3 +35,4 @@ internal static class ComparisonTemplate
         sb.AppendLine();
     }
 }
+

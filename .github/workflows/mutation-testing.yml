@@ -13,7 +13,11 @@ on:
           - Standard
           - Advanced
   schedule:
-    - cron: "0 4 * * 1"
+    - cron: "0 4 * * 1" # Weekly deep mutation run (Mondays at 4:00 UTC)
+
+concurrency:
+  group: mutation-testing-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   DOTNET_NOLOGO: true
@@ -23,15 +27,27 @@ jobs:
   mutation-test:
     name: Stryker Mutation Testing
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 150 # Stryker exhaustive mutation testing can exceed 60m; 150m prevents premature timeout while guarding against hangs
+    permissions:
+      contents: read
+      statuses: write
+      actions: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
 
       - name: Restore Strong Name key
         env:
@@ -50,74 +66,58 @@ jobs:
       - name: Install Stryker
         run: dotnet tool install --global dotnet-stryker
 
-      - name: Run Stryker (Core package)
-        run: >
-          dotnet stryker
-          --project src/dotnet-primitive-core/EricksonLopez.DomainPrimitives/EricksonLopez.DomainPrimitives.csproj
-          --test-project tests/EricksonLopez.DomainPrimitives.UnitTests/EricksonLopez.DomainPrimitives.UnitTests.csproj
-          --mutation-level ${{ inputs.mutation-level || 'Standard' }}
-          --reporter html
-          --reporter json
-          --reporter progress
-          --output StrykerOutput/ci
-        continue-on-error: false
+      - name: Run Stryker Mutation Testing
+        id: stryker
+        run: |
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "Running scheduled weekly deep mutation testing (Advanced)..."
+            dotnet stryker \
+              --config-file stryker-config.json \
+              --mutation-level Advanced \
+              --output StrykerOutput/ci
+          else
+            MUTATION_LVL="${{ inputs.mutation-level || 'Standard' }}"
+            echo "Running main branch mutation testing with level: $MUTATION_LVL..."
+            dotnet stryker \
+              --config-file stryker-config.json \
+              --mutation-level "$MUTATION_LVL" \
+              --output StrykerOutput/ci
+          fi
+        continue-on-error: true
 
-      - name: Upload Stryker report
+      - name: Upload Stryker HTML/JSON Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stryker-report-${{ github.run_id }}
+          name: stryker-report-${{ github.sha }}
           path: StrykerOutput/ci/
           retention-days: 30
 
-      - name: Extract and report mutation score
+      - name: Extract, Report Mutation Score & Update Commit Status
+        if: always()
+        id: record_result
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STRYKER_OUTCOME: ${{ steps.stryker.outcome }}
+        run: |
+          python3 .github/scripts/record-stryker-result.py StrykerOutput/ci stryker-config.json
+
+      - name: Upload Stryker Metadata Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stryker-metadata-${{ github.sha }}
+          path: stryker-metadata.json
+          retention-days: 30
+
+      - name: Enforce Stryker Quality Gate
         if: always()
         run: |
-          REPORT=$(find StrykerOutput/ci -name "*.json" -not -name "*.html.json" | head -1)
-          if [ -f "$REPORT" ]; then
-            python3 - "$REPORT" << 'PYEOF'
-          import sys, json
-
-          report_path = sys.argv[1]
-          with open(report_path) as f:
-              data = json.load(f)
-
-          files = data.get('files', {})
-          total  = sum(f.get('mutants', {}).get('total',  0) for f in files.values() if 'mutants' in f)
-          killed = sum(f.get('mutants', {}).get('killed', 0) for f in files.values() if 'mutants' in f)
-          score  = round(killed / total * 100, 1) if total > 0 else 0.0
-
-          HIGH  = 100
-          LOW   = 98
-          BREAK = 95
-
-          if score >= HIGH:
-              status = "✅ HIGH"
-          elif score >= LOW:
-              status = "🟡 LOW"
-          elif score >= BREAK:
-              status = "🟠 WARNING (approaching break threshold)"
-          else:
-              status = "❌ BELOW BREAK THRESHOLD (CI gate failed)"
-
-          summary = f"""
-          ## Stryker Mutation Testing Results
-
-          | Metric | Value |
-          |--------|-------|
-          | Mutation Score | **{score}%** |
-          | Mutants Killed | {killed} / {total} |
-          | Status | {status} |
-          | High Threshold | ≥{HIGH}% |
-          | Low Threshold  | ≥{LOW}% |
-          | Break Threshold| ≥{BREAK}% |
-          """
-          print(summary)
-
-          import os
-          with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/stdout'), 'a') as gh:
-              gh.write(summary)
-          PYEOF
-          else
-            echo "### ⚠️ Stryker report not found — mutation score unavailable" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.stryker.outcome }}" != "success" ] || [ "${{ steps.record_result.outcome }}" != "success" ]; then
+            echo "::error::Stryker mutation quality gate failed (score < 95% or mutation run error)."
+            exit 1
           fi
+          echo "Stryker mutation quality gate passed successfully."

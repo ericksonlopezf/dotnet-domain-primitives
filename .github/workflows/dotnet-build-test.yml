@@ -82,7 +82,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: env.SONAR_TOKEN != ''
         run: |
-          dotnet sonarscanner begin /k:"EricksonLopez_${{ github.event.repository.name }}" /o:"ericksonlopez" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          dotnet sonarscanner begin /k:"ericksonlopezf_${{ github.event.repository.name }}" \
+            /o:"ericksonlopezf" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.exclusions="samples/**,benchmarks/**,scripts/**,.github/**,**/bin/**,**/obj/**,**/*.js,**/*.html,**/*.py,**/*.json,**/*.md" \
+            /d:sonar.coverage.exclusions="tests/**,samples/**,benchmarks/**,**/*Tests.cs,**/*Test*.cs,**/tests/**,**/benchmarks/**,**/samples/**,**/bin/**,**/obj/**" \
+            /d:sonar.cpd.exclusions="tests/**,**/tests/**,**/*Tests.cs,**/*Test*.cs,**/samples/**,**/benchmarks/**,**/bin/**,**/obj/**,**/.github/**,**/scripts/**,**/*Generator*.cs,**/*Analyzer*.cs,**/*Primitive*.cs,**/EquatableArray.cs,**/GeneratorHelpers.cs,**/*Validation.cs,**/*Provider*.cs,**/*Handler*.cs,**/*Converter*.cs,**/*Filter*.cs"
 
       - name: Build (Release)
         run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
@@ -95,7 +102,7 @@ jobs:
 
       - name: API Surface Budget Gate (P2 Gate — TD-015)
         run: |
-          echo "Running API Surface Budget tests (AUDIT.md §API SURFACE BUDGET POR CATEGORÍA)..."
+          echo "Running API Surface Budget tests (AUDIT.md §API SURFACE BUDGET BY CATEGORY)..."
           dotnet test tests/EricksonLopez.DomainPrimitives.UnitTests \
             --no-build \
             --configuration Release \
@@ -123,7 +130,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: always() && env.SONAR_TOKEN != ''
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
       - name: Upload test results
         if: always()

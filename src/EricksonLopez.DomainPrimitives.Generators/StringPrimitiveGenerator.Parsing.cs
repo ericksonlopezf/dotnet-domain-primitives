@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -110,7 +111,7 @@ internal sealed partial class StringPrimitiveGenerator
                     // MemoryExtensions.ToLowerInvariant(ReadOnlySpan<char>, Span<char>) — in-place, no allocation
                     sb.AppendLine("MemoryExtensions.ToLowerInvariant(s, buf);");
                 }
-                else if (info.UpperCase)
+                else
                 {
                     sb.AppendLine("MemoryExtensions.ToUpperInvariant(s, buf);");
                 }
@@ -130,10 +131,8 @@ internal sealed partial class StringPrimitiveGenerator
                 sb.AppendLine("var rentedSpan = rented.AsSpan(0, s.Length);");
                 if (info.LowerCase)
                     sb.AppendLine("MemoryExtensions.ToLowerInvariant(s, rentedSpan);");
-                else if (info.UpperCase)
-                    sb.AppendLine("MemoryExtensions.ToUpperInvariant(s, rentedSpan);");
                 else
-                    sb.AppendLine("s.CopyTo(rentedSpan);");
+                    sb.AppendLine("MemoryExtensions.ToUpperInvariant(s, rentedSpan);");
                 // Single unavoidable allocation at storage time
                 sb.AppendLine("var normalized = rentedSpan.ToString().Normalize(System.Text.NormalizationForm.FormC);");
                 sb.AppendLine("var spanError = TryValidate(normalized);");
@@ -215,3 +214,7 @@ internal sealed partial class StringPrimitiveGenerator
     }
 
 }
+
+
+
+

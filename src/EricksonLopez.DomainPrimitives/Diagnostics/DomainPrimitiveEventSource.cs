@@ -1,12 +1,7 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 
 namespace EricksonLopez.DomainPrimitives.Diagnostics;
-
-/// <summary>Event arguments describing a domain primitive validation failure.</summary>
-/// <param name="PrimitiveName">The name of the domain primitive type that failed validation (e.g., <c>"EmailAddress"</c>).</param>
-/// <param name="ErrorType">The error code identifying the failure category (e.g., <c>"FORMAT"</c>, <c>"LENGTH"</c>).</param>
-/// <param name="ErrorMessage">The human-readable description of the validation failure.</param>
-public readonly record struct ValidationFailureEventArgs(string PrimitiveName, string ErrorType, string ErrorMessage);
 
 /// <summary>
 /// Provides a static event source for consuming domain primitive validation events
@@ -15,10 +10,8 @@ public readonly record struct ValidationFailureEventArgs(string PrimitiveName, s
 /// <remarks>
 /// Subscribe to <see cref="OnValidationFailed"/> to route validation failure events to any sink
 /// (e.g., <c>ILogger</c>, metrics, structured logging) without coupling domain primitives to DI infrastructure.
-/// Moved from <c>EricksonLopez.DomainPrimitives.Abstractions</c> to <c>EricksonLopez.DomainPrimitives</c> in v1.2.0.
-/// See BREAKING_CHANGES.md for migration details.
+/// Provided by <c>EricksonLopez.DomainPrimitives</c> (Core package) since v1.0.0.
 /// </remarks>
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 public static class DomainPrimitiveEventSource
 {
     /// <summary>

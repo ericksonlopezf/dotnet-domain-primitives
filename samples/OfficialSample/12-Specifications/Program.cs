@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 12: SPECIFICATION PATTERN (COMPOSITE DOMAIN RULES)
 // ============================================================================
@@ -13,10 +10,14 @@ using System.Threading.Tasks;
 // 2. Query Filters: Express search criteria translatable to LINQ / EF Core.
 // 3. Composite Rules: Combine simple specifications into advanced business rules.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using Chapter12;
 using EricksonLopez.DomainPrimitives;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 12: SPECIFICATION PATTERN (REUSABLE RULES)");
@@ -185,5 +186,7 @@ namespace Chapter12
         }
     }
 }
+
+
 
 

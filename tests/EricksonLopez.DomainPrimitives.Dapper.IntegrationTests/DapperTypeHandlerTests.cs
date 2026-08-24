@@ -1,10 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using AwesomeAssertions;
 using Dapper;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Dapper.Generated;
-using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -77,4 +79,10 @@ public class DapperTypeHandlerTests : IAsyncLifetime
         public Points Points { get; set; }
     }
 }
+
+
+
+
+
+
 

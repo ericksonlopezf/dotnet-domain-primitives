@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 
@@ -20,7 +19,7 @@
     
     <PackageId>EricksonLopez.DomainPrimitives.Dapper.SourceGenerators</PackageId>
     <Description>Source Generators for Dapper integration with EricksonLopez.DomainPrimitives.</Description>
-    <PackageTags>$(PackageTags);dapper;source-generators</PackageTags>
+    <PackageTags>$(CommonPackageTags);dapper;source-generator;source-generators;roslyn;type-handler;code-generation;micro-orm;sql</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

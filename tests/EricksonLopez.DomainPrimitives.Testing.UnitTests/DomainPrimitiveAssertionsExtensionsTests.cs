@@ -1,7 +1,8 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Testing;
-using FluentAssertions;
 using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Testing.UnitTests;
@@ -151,7 +152,7 @@ public class DomainPrimitiveAssertionsExtensionsTests
     public void ShouldHaveValidationPrimitiveError_WhenValid_ShouldThrow()
     {
         Action act = () => ((object)42).Should().ShouldHaveValidationPrimitiveError<TestPrimitive, int>("RANGE");
-        act.Should().Throw<Exception>();
+        act.Should().Throw<Exception>().WithMessage("*Expected a <EricksonLopez.DomainPrimitives.DomainPrimitiveValidationException> to be thrown*");
     }
 
     [Fact]
@@ -161,6 +162,10 @@ public class DomainPrimitiveAssertionsExtensionsTests
         act.Should().Throw<Exception>().WithMessage("*the validation error*");
     }
 }
+
+
+
+
 
 
 

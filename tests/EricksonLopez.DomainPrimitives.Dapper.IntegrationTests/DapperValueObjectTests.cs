@@ -1,15 +1,11 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Data;
+using AwesomeAssertions;
 using Dapper;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Dapper.Generated;
-using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -72,4 +68,10 @@ public class DapperValueObjectTests : IAsyncLifetime
         result.City.Should().Be("Springfield");
     }
 }
+
+
+
+
+
+
 

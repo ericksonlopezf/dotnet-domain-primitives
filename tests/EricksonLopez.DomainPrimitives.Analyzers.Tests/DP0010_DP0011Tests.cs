@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,17 +6,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
+using Xunit;
+
 using CSharpAnalyzerTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpAnalyzerTest<
     EricksonLopez.DomainPrimitives.Analyzers.StringComparisonAnalyzer,
-    Microsoft.CodeAnalysis.Testing.Verifiers.XUnitVerifier>;
+    Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 using CSharpAnalyzerVerifier = Microsoft.CodeAnalysis.CSharp.Testing.XUnit.AnalyzerVerifier<
     EricksonLopez.DomainPrimitives.Analyzers.StringComparisonAnalyzer>;
 using CSharpCodeFixTest = Microsoft.CodeAnalysis.CSharp.Testing.CSharpCodeFixTest<
     EricksonLopez.DomainPrimitives.Analyzers.StringComparisonAnalyzer,
     EricksonLopez.DomainPrimitives.Analyzers.StringComparisonCodeFixProvider,
-    Microsoft.CodeAnalysis.Testing.Verifiers.XUnitVerifier>;
+    Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers.Tests;
 
@@ -352,5 +355,131 @@ class Test { void Req(int a, string s) {} void M(EmailAddress email) { Req(1, em
 
         await new CSharpCodeFixTest { TestCode = testCode, FixedCode = fixedCode, CompilerDiagnostics = CompilerDiagnostics.None }.RunAsync();
     }
+
+    [Fact]
+    public async Task StrongIdComparedWithString_TriggersDiagnosticAndFixes()
+    {
+        var strongIdStub = @"
+namespace EricksonLopez.DomainPrimitives
+{
+    public interface IStrongId<TSelf, TValue> where TSelf : IStrongId<TSelf, TValue> { TValue Value { get; } }
+    public readonly partial record struct OrderId : IStrongId<OrderId, string>
+    {
+        public string Value { get; init; }
+        public static implicit operator string(OrderId id) => id.Value;
+    }
 }
+";
+        var testCode = "using EricksonLopez.DomainPrimitives;\n" + strongIdStub + @"
+class Test { void M(OrderId id) { string raw = """"; _ = {|DP0010:raw == id|}; } }";
+        var fixedCode = "using EricksonLopez.DomainPrimitives;\n" + strongIdStub + @"
+class Test { void M(OrderId id) { string raw = """"; _ = raw == id.Value; } }";
+
+        await new CSharpCodeFixTest { TestCode = testCode, FixedCode = fixedCode, CompilerDiagnostics = CompilerDiagnostics.None }.RunAsync();
+    }
+
+    [Fact]
+    public async Task NonStringArgument_DoesNotTriggerDP0011()
+    {
+        var testCode = "using EricksonLopez.DomainPrimitives;\n" + DomainPrimitiveStubs + @"
+class Test { void Req(int a) {} void M(EmailAddress email) { Req(1); } }";
+
+        var test = new CSharpAnalyzerTest { TestCode = testCode, CompilerDiagnostics = CompilerDiagnostics.None };
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task StringToStringComparison_ProducesNoDiagnostics()
+    {
+        var testCode = "using EricksonLopez.DomainPrimitives;\n" + DomainPrimitiveStubs + @"
+class Test
+{
+    void M(string a, string b)
+    {
+        _ = a == b;
+        _ = a != b;
+    }
+}";
+
+        var test = new CSharpAnalyzerTest { TestCode = testCode, CompilerDiagnostics = CompilerDiagnostics.None };
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task NonStringLocalAndFieldAssignedFromPrimitive_ProducesNoDiagnostics()
+    {
+        var stub = @"
+namespace EricksonLopez.DomainPrimitives
+{
+    public readonly partial record struct IntConvertiblePrim : IDomainPrimitive<IntConvertiblePrim, string>
+    {
+        public string Value { get; init; }
+        public static implicit operator int(IntConvertiblePrim p) => 42;
+    }
+}
+";
+        var testCode = "using EricksonLopez.DomainPrimitives;\n" + DomainPrimitiveStubs + stub + @"
+class Test
+{
+    private int fieldVal = new IntConvertiblePrim();
+
+    void M(IntConvertiblePrim prim)
+    {
+        int a = prim;
+    }
+}";
+
+        var test = new CSharpAnalyzerTest { TestCode = testCode, CompilerDiagnostics = CompilerDiagnostics.None };
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task InvocationWithMultipleArguments_ReportsForEachPrimitiveArgument()
+    {
+        var testCode = "using EricksonLopez.DomainPrimitives;\n" + DomainPrimitiveStubs + @"
+class Test
+{
+    void MultiParam(string a, string b) {}
+    void M(EmailAddress email)
+    {
+        MultiParam({|#0:email|}, {|#1:email|});
+    }
+}";
+        var test = new CSharpAnalyzerTest { TestCode = testCode, CompilerDiagnostics = CompilerDiagnostics.None };
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("DP0011", DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithArguments("EmailAddress"));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("DP0011", DiagnosticSeverity.Warning)
+                .WithLocation(1)
+                .WithArguments("EmailAddress"));
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task InvocationWithParamsArray_ReportsOnlyForStringParameters()
+    {
+        var testCode = "using EricksonLopez.DomainPrimitives;\n" + DomainPrimitiveStubs + @"
+class Test
+{
+    void ParamsMethod(string first, params int[] rest) {}
+    void M(EmailAddress email)
+    {
+        ParamsMethod({|#0:email|}, 1, 2);
+    }
+}";
+        var test = new CSharpAnalyzerTest { TestCode = testCode, CompilerDiagnostics = CompilerDiagnostics.None };
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("DP0011", DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithArguments("EmailAddress"));
+        await test.RunAsync();
+    }
+}
+
+
+
+
+
 

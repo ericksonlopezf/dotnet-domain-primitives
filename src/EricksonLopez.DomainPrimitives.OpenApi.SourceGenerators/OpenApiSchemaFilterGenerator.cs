@@ -1,12 +1,8 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-#pragma warning disable CS1591
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -32,92 +28,76 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
             static (spc, source) => Execute(source.Left, source.Right, spc));
     }
 
-    private static PrimitiveInfo? GetDomainPrimitiveInfo(GeneratorSyntaxContext context)
+    internal static bool IsDomainPrimitiveAttribute(AttributeData a)
+    {
+        var ns = a.AttributeClass?.ContainingNamespace?.ToDisplayString();
+        if (ns == null || !ns.StartsWith("EricksonLopez.DomainPrimitives", StringComparison.Ordinal))
+            return false;
+
+        var name = a.AttributeClass?.Name;
+        return name is not "OpenApiAttribute" and not "DapperAttribute" and not "EFCoreAttribute" and not "DomainPrimitivesDefaultsAttribute" and not "AspNetCoreAttribute" and not "ValueObjectAttribute";
+    }
+
+    internal static PrimitiveInfo? GetDomainPrimitiveInfo(GeneratorSyntaxContext context)
     {
         var typeDecl = (TypeDeclarationSyntax)context.Node;
         var symbol = context.SemanticModel.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
-        if (symbol == null || !symbol.IsValueType) return null;
+        if (symbol == null) return null;
+        if (!symbol.IsValueType) return null;
 
         var attributes = symbol.GetAttributes();
+        var primitiveAttr = attributes.FirstOrDefault(IsDomainPrimitiveAttribute);
+        if (primitiveAttr == null) return null;
 
+        var attrClass = primitiveAttr.AttributeClass!;
+        var name = attrClass.Name;
 
-        bool isDomainPrimitive = false;
         bool isSmartEnum = false;
         string openApiType = "string";
         string openApiFormat = "";
 
-        foreach (var attr in attributes)
+        if (name is "NumericPrimitiveAttribute" or "MoneyAttribute" or "PercentageAttribute")
         {
-            var attrClass = attr.AttributeClass;
-            if (attrClass == null) continue;
-
-            if (attrClass.ContainingNamespace.ToString() == "EricksonLopez.DomainPrimitives")
+            openApiType = "number";
+            if (name == "MoneyAttribute") openApiFormat = "double";
+        }
+        else if (name is "DatePrimitiveAttribute" or "BirthDateAttribute" or "ExpirationDateAttribute")
+        {
+            openApiType = "string";
+            openApiFormat = "date";
+        }
+        else if (name == "StrongIdAttribute")
+        {
+            if (attrClass.IsGenericType && attrClass.TypeArguments[0].Name == "Guid")
             {
-                var name = attrClass.Name;
-                if (name == "StrongIdAttribute" || 
-                    name == "StringPrimitiveAttribute" ||
-                    name == "NumericPrimitiveAttribute" ||
-                    name == "DatePrimitiveAttribute" ||
-                    name == "EmailAttribute" || name == "PhoneAttribute" ||
-                    name == "UrlAttribute" || name == "SlugAttribute" ||
-                    name == "CountryCodeAttribute" || name == "LanguageCodeAttribute" ||
-                    name == "CurrencyCodeAttribute" || name == "UsernameAttribute" ||
-                    name == "PasswordHashAttribute" || name == "HexColorAttribute" ||
-                    name == "MoneyAttribute" || name == "PercentageAttribute" ||
-                    name == "BirthDateAttribute" || name == "ExpirationDateAttribute" ||
-                    name == "SmartEnumAttribute")
-                {
-                    isDomainPrimitive = true;
-                    
-                    if (name == "NumericPrimitiveAttribute" || name == "MoneyAttribute" || name == "PercentageAttribute")
-                    {
-                        openApiType = "number";
-                        if (name == "MoneyAttribute") openApiFormat = "double";
-                    }
-                    else if (name == "DatePrimitiveAttribute" || name == "BirthDateAttribute" || name == "ExpirationDateAttribute")
-                    {
-                        openApiType = "string";
-                        openApiFormat = "date";
-                    }
-                    else if (name == "StrongIdAttribute")
-                    {
-                        if (attrClass.IsGenericType && attrClass.TypeArguments[0].Name == "Guid")
-                        {
-                            openApiType = "string";
-                            openApiFormat = "uuid";
-                        }
-                        else if (attrClass.IsGenericType && (attrClass.TypeArguments[0].Name == "Int32" || attrClass.TypeArguments[0].Name == "Int64"))
-                        {
-                            openApiType = "integer";
-                        }
-                    }
-                    else if (name == "EmailAttribute")
-                    {
-                        openApiFormat = "email";
-                    }
-                    else if (name == "UrlAttribute")
-                    {
-                        openApiFormat = "uri";
-                    }
-                    else if (name == "SmartEnumAttribute")
-                    {
-                        isSmartEnum = true;
-                        if (attrClass.IsGenericType)
-                        {
-                            var typeArg = attrClass.TypeArguments[0];
-                            if (typeArg.Name == "Int32" || typeArg.Name == "Int64")
-                                openApiType = "integer";
-                            else
-                                openApiType = "string";
-                        }
-                    }
-                    
-                    break;
-                }
+                openApiType = "string";
+                openApiFormat = "uuid";
+            }
+            else if (attrClass.IsGenericType && attrClass.TypeArguments[0].Name is "Int32" or "Int64")
+            {
+                openApiType = "integer";
             }
         }
-
-        if (!isDomainPrimitive) return null;
+        else if (name == "EmailAttribute")
+        {
+            openApiFormat = "email";
+        }
+        else if (name == "UrlAttribute")
+        {
+            openApiFormat = "uri";
+        }
+        else if (name == "SmartEnumAttribute")
+        {
+            isSmartEnum = true;
+            if (attrClass.IsGenericType)
+            {
+                var typeArg = attrClass.TypeArguments[0];
+                if (typeArg.Name is "Int32" or "Int64")
+                    openApiType = "integer";
+                else
+                    openApiType = "string";
+            }
+        }
 
         return new PrimitiveInfo(symbol.ContainingNamespace.ToDisplayString(), symbol.Name, openApiType, openApiFormat, isSmartEnum);
     }
@@ -126,9 +106,16 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
     {
         if (primitives.IsDefaultOrEmpty) return;
 
+        var source = GenerateSchemaFilterSource(primitives);
+        context.AddSource("DomainPrimitivesSchemaFilter.g.cs", SourceText.From(source, Encoding.UTF8));
+    }
+
+    internal static string GenerateSchemaFilterSource(IEnumerable<PrimitiveInfo> primitives)
+    {
         var sb = new StringBuilder();
         sb.AppendLine("// <auto-generated/>");
         sb.AppendLine("using System;");
+        sb.AppendLine("using System.Collections.Generic;");
         sb.AppendLine("using Microsoft.OpenApi.Models;");
         sb.AppendLine("using Microsoft.OpenApi.Any;");
         sb.AppendLine("using Swashbuckle.AspNetCore.SwaggerGen;");
@@ -140,7 +127,7 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
         sb.AppendLine("/// </summary>");
         sb.AppendLine("public class DomainPrimitivesSchemaFilter : ISchemaFilter");
         sb.AppendLine("{");
-        sb.AppendLine("    private readonly System.Collections.Generic.Dictionary<Type, Action<OpenApiSchema>> _schemaConfigs = new()");
+        sb.AppendLine("    private readonly Dictionary<Type, Action<OpenApiSchema>> _schemaConfigs = new()");
         sb.AppendLine("    {");
         
         foreach (var primitive in primitives.Distinct())
@@ -156,7 +143,7 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
             }
             if (primitive.IsSmartEnum)
             {
-                sb.AppendLine($"                schema.Enum = new System.Collections.Generic.List<IOpenApiAny>();");
+                sb.AppendLine($"                schema.Enum = new List<IOpenApiAny>();");
                 sb.AppendLine($"                foreach (var item in {fqdn}.All)");
                 sb.AppendLine($"                {{");
                 if (primitive.OpenApiType == "integer")
@@ -181,29 +168,11 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         sb.AppendLine("            configAction(schema);");
         sb.AppendLine("        }");
-        
         sb.AppendLine("    }");
         sb.AppendLine("}");
 
-        context.AddSource("DomainPrimitivesSchemaFilter.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
+        return sb.ToString();
     }
 }
 
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-internal readonly struct PrimitiveInfo
-{
-    public string Namespace { get; }
-    public string TypeName { get; }
-    public string OpenApiType { get; }
-    public string OpenApiFormat { get; }
-    public bool IsSmartEnum { get; }
 
-    public PrimitiveInfo(string @namespace, string typeName, string openApiType, string openApiFormat, bool isSmartEnum = false)
-    {
-        Namespace = @namespace;
-        TypeName = typeName;
-        OpenApiType = openApiType;
-        OpenApiFormat = openApiFormat;
-        IsSmartEnum = isSmartEnum;
-    }
-}

@@ -3,10 +3,10 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <NoWarn>CA1036;CA2231;CA1305;NU1603;CS0616;CA1707;CA1822;CA1861;CA1001;CA1018;CA1825;CS1591;CS1574;CA1859;CS0162</NoWarn>
+    <IsTestProject>false</IsTestProject>
+    <NoWarn>CA1036;CA2231;CA1305;NU1603;CS0616;CA1707;CA1822;CA1861;CA1001;CA1018;CA1825;CS1574;CA1859;CS0162</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

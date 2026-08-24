@@ -4,14 +4,15 @@
 
 | Version | Supported | Notes |
 | ------- | --------- | ----- |
-| 1.0.x   | :white_check_mark: | Current stable release |
+| 1.1.x   | :white_check_mark: | Current release |
+| 1.0.x   | :white_check_mark: | Security patches only |
 | < 1.0   | :x: | Pre-release; not supported |
 
-> Only the latest minor version receives security patches. Users are encouraged to stay on the latest `1.0.x` patch.
+> Only the latest minor version receives active maintenance. The previous minor version (`1.0.x`) receives critical security patches only. Users are encouraged to stay on the latest release.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within `DomainPrimitives`, please send an e-mail to security@ericksonlopez.dev. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within `DomainPrimitives`, please send an e-mail to [ericksonlopezf@gmail.com](mailto:ericksonlopezf@gmail.com). All security vulnerabilities will be promptly addressed.
 
 **Do not** open a public GitHub issue for security vulnerabilities. Use [GitHub Private Security Advisories](https://docs.github.com/en/code-security/security-advisories) or the email above.
 

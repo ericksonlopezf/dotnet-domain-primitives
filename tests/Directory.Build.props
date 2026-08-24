@@ -5,7 +5,10 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <NoWarn>CS1574;CA1859;$(NoWarn);CA1707;CS1591;CS0618;CA1859;CA1001;CA1861;CA1305;CA1825;CA1018</NoWarn>
+    <SonarQubeTestProject>true</SonarQubeTestProject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>CS1574;CA1859;$(NoWarn);CA1707;CA1001;CA1861;CA1305;CA1825;CA1018</NoWarn>
+    <EnableTrimAnalyzer Condition="'$(PublishAot)' != 'true'">false</EnableTrimAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,3 +34,5 @@
     <ExcludeByAttribute>GeneratedCodeAttribute</ExcludeByAttribute>
   </PropertyGroup>
 </Project>
+
+

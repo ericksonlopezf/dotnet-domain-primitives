@@ -105,9 +105,9 @@ readonly partial record struct NestedPrimitive :
         return false;
     }
 
-    public static NestedPrimitive FromName(string name)
+    public static NestedPrimitive FromName(string name, bool ignoreCase = false)
     {
-        if (TryFromName(name, out var result)) return result;
+        if (TryFromName(name, ignoreCase, out var result)) return result;
         throw new ArgumentException($"No NestedPrimitive found with name {name}", nameof(name));
     }
 

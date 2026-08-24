@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 07: DOMAIN EVENTS AND DECOUPLING
 // ============================================================================
@@ -15,10 +12,14 @@ using System.Threading.Tasks;
 //    and are only dispatched WHEN the transaction or persistence has been successfully committed.
 // 3. ClearDomainEvents(): Cleaning the event queue after processing by infrastructure.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter07;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 07: DOMAIN EVENTS (DECOUPLING)");
@@ -157,3 +158,5 @@ public abstract class AggregateRoot<TId>
     protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
     public void ClearDomainEvents() => _domainEvents.Clear();
 }
+
+

@@ -1,28 +1,48 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 15: ASP.NET CORE INTEGRATION (.NET 10 MINIMAL APIS & PROBLEM DETAILS)
 // ============================================================================
 // In this chapter you will learn to integrate the Domain Primitives
-// and `dotnet-result` ecosystem into ASP.NET Core web applications (Minimal APIs & Controllers).
+// and `dotnet-result` ecosystem into ASP.NET Core web applications.
 //
-// INTEGRATED FEATURES:
-// 1. Automatic Parameter Binding: Route and query string binding using `StrongId` and `IParsable`.
-// 2. Result to HTTP Response: Functional mapping of `Result<T>` to HTTP `IResult` (200 OK, 400 Bad Request, 404 Not Found).
-// 3. RFC 7807 Standard (ProblemDetails): Structured format for validation error responses.
+// COVERED APIS:
+// 1. IParsable<T> route binding in Minimal APIs (auto-generated).
+// 2. MvcOptions.AddDomainPrimitivesModelBinding() — MVC model binder registration.
+// 3. IServiceCollection.AddDomainPrimitivesModelBinding() — DI registration.
+// 4. Result<T> → IResult HTTP mapping with RFC 7807 ProblemDetails.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter15;
 using EricksonLopez.DomainPrimitives;
+using EricksonLopez.DomainPrimitives.AspNetCore;
 using EricksonLopez.Result;
 using HttpResult = Microsoft.AspNetCore.Http.IResult;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ─────────────────────────────────────────────────────────────────────────
+// SECTION 0: DomainPrimitivesMvcBuilderExtensions — Service Registration
+// ─────────────────────────────────────────────────────────────────────────
+
+// Option A — MvcOptions overload (fine-grained, per MVC setup)
+// builder.Services.AddControllers(options => options.AddDomainPrimitivesModelBinding());
+
+// Option B — IServiceCollection overload (preferred for DI composition)
+// Registers the DomainPrimitiveModelBinder for all [StringPrimitive], [StrongId<T>],
+// and other generated primitives in your MVC Controllers and Razor Pages.
+builder.Services.AddDomainPrimitivesModelBinding();
+
+// Confirm the registration chain:
+Console.WriteLine("[DI] DomainPrimitivesModelBinding registered via IServiceCollection.AddDomainPrimitivesModelBinding() ✅");
+Console.WriteLine("[DI] Equivalent: builder.Services.AddControllers(opts => opts.AddDomainPrimitivesModelBinding())");
 
 // Configure services
 builder.Services.AddEndpointsApiExplorer();
@@ -129,6 +149,8 @@ namespace Chapter15
     [Email]
     public readonly partial record struct EmailAddress;
 }
+
+
 
 
 

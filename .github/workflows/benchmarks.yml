@@ -63,6 +63,8 @@ jobs:
       - name: Run benchmarks
         run: >
           dotnet run
+          --no-build
+          --no-restore
           --project benchmarks/EricksonLopez.DomainPrimitives.Benchmarks/EricksonLopez.DomainPrimitives.Benchmarks.csproj
           --configuration Release
           --framework net10.0

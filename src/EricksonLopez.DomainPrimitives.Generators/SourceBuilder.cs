@@ -1,20 +1,20 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
 
 /// <summary>
 /// Helper for generating well-formatted C# source code with proper indentation.
 /// </summary>
-[ExcludeFromCodeCoverage]
 internal sealed class SourceBuilder
 {
     private readonly StringBuilder _sb = new(4096);
@@ -68,5 +68,7 @@ internal sealed class SourceBuilder
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => _sb.ToString();
 }
+
+
 
 

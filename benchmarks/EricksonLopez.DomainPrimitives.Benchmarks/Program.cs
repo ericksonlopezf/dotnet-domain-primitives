@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
@@ -115,3 +116,4 @@ public class Program
         BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }
+

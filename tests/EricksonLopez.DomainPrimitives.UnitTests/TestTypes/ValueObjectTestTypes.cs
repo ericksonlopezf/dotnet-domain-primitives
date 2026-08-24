@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 using EricksonLopez.DomainPrimitives;
 
-namespace EricksonLopez.DomainPrimitives.Tests.TestTypes;
+namespace EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
 
 [ValueObject]
 public readonly partial record struct Address
@@ -21,5 +15,8 @@ public readonly partial record struct Address
     {
         if (string.IsNullOrWhiteSpace(value.Street))
             errors = new EricksonLopez.DomainPrimitives.Validation.PrimitiveError("Address", "Street cannot be empty.");
+        else if (string.IsNullOrWhiteSpace(value.City))
+            errors = new EricksonLopez.DomainPrimitives.Validation.PrimitiveError("Address", "City cannot be empty.");
     }
 }
+

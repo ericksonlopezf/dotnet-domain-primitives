@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Reflection;
 
@@ -110,4 +111,5 @@ public static class DomainPrimitiveTestBuilder
         return (TPrimitive)constructor.Invoke([value]);
     }
 }
+
 

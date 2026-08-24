@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
-using FluentAssertions;
 using Xunit;
 
-#pragma warning disable CS8602
-
+#pragma warning disable CS8602, CS8625
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
 
 public class ValueObjectTests
@@ -67,7 +60,7 @@ public class ValueObjectTests
     {
         var vo = new TestValueObject(1, "test");
 
-        vo.Equals(null).Should().BeFalse();
+        vo.Equals((TestValueObject?)null).Should().BeFalse();
         vo.Equals((object?)null).Should().BeFalse();
         (vo == null).Should().BeFalse();
         (null == vo).Should().BeFalse();
@@ -121,4 +114,52 @@ public class ValueObjectTests
         (vo1 == vo2).Should().BeTrue();
         (vo1 != vo2).Should().BeFalse();
     }
+
+    private sealed record class NestedCompoundValueObject : ValueObject
+    {
+        public TestValueObject Child { get; }
+        public string Tag { get; }
+
+        public NestedCompoundValueObject(TestValueObject child, string tag)
+        {
+            Child = child;
+            Tag = tag;
+        }
+    }
+
+    [Fact]
+    public void Equals_WithNestedCompoundValueObjects_ShouldEvaluateStructuralEquality()
+    {
+        var compound1 = new NestedCompoundValueObject(new TestValueObject(10, "nested"), "tagA");
+        var compound2 = new NestedCompoundValueObject(new TestValueObject(10, "nested"), "tagA");
+        var compound3 = new NestedCompoundValueObject(new TestValueObject(20, "nested"), "tagA");
+
+        compound1.Should().Be(compound2);
+        compound1.GetHashCode().Should().Be(compound2.GetHashCode());
+        compound1.Should().NotBe(compound3);
+        (compound1 == compound2).Should().BeTrue();
+        (compound1 != compound3).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Equals_MathematicalAxioms_ReflexiveSymmetricTransitive()
+    {
+        var x = new TestValueObject(5, "axiom");
+        var y = new TestValueObject(5, "axiom");
+        var z = new TestValueObject(5, "axiom");
+
+        // Reflexive: x == x
+        x.Equals(x).Should().BeTrue();
+
+        // Symmetric: x == y implies y == x
+        x.Equals(y).Should().BeTrue();
+        y.Equals(x).Should().BeTrue();
+
+        // Transitive: x == y and y == z implies x == z
+        x.Equals(y).Should().BeTrue();
+        y.Equals(z).Should().BeTrue();
+        x.Equals(z).Should().BeTrue();
+    }
 }
+
+

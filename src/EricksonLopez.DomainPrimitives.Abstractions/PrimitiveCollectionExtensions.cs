@@ -1,10 +1,5 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives;
 
@@ -27,7 +22,7 @@ public static class PrimitiveCollectionExtensions
     /// A new <see cref="List{T}"/> containing one validated domain primitive for each element in <paramref name="values"/>.
     /// Never returns <see langword="null"/> but may be empty if the source sequence is empty.
     /// </returns>
-    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules.</exception>
+    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules</exception>
     public static List<TPrimitive> ToDomainPrimitiveList<TPrimitive, TValue>(
         this IEnumerable<TValue> values)
 #if NET7_0_OR_GREATER
@@ -53,7 +48,7 @@ public static class PrimitiveCollectionExtensions
     /// Creates an array of domain primitives by creating each element from the corresponding raw value.
     /// </summary>
     /// <remarks>
-    /// For sequences that implement <see cref="System.Collections.Generic.ICollection{T}"/>, the output array
+    /// For sequences that implement <see cref="ICollection{T}"/>, the output array
     /// is pre-allocated to the exact count. For other enumerables, elements are buffered before conversion.
     /// </remarks>
     /// <typeparam name="TPrimitive">The domain primitive struct type to create.</typeparam>
@@ -63,7 +58,7 @@ public static class PrimitiveCollectionExtensions
     /// A new array containing one validated domain primitive for each element in <paramref name="values"/>.
     /// Never returns <see langword="null"/> but may be empty if the source sequence is empty.
     /// </returns>
-    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules.</exception>
+    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules</exception>
     public static TPrimitive[] ToDomainPrimitiveArray<TPrimitive, TValue>(
         this IEnumerable<TValue> values)
 #if NET7_0_OR_GREATER
@@ -112,7 +107,7 @@ public static class PrimitiveCollectionExtensions
     /// A new array containing one validated domain primitive for each element in <paramref name="values"/>.
     /// Never returns <see langword="null"/> but may be empty if <paramref name="values"/> is empty.
     /// </returns>
-    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules.</exception>
+    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules</exception>
     public static TPrimitive[] ToDomainPrimitiveArray<TPrimitive, TValue>(
         this System.ReadOnlySpan<TValue> values)
         where TPrimitive : struct, IDomainPrimitive<TPrimitive, TValue>
@@ -127,3 +122,5 @@ public static class PrimitiveCollectionExtensions
     }
 #endif
 }
+
+
