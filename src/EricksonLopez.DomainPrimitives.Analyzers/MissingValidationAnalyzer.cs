@@ -1,28 +1,40 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
+/// <summary>
+/// Detects domain primitive types that declare no validation rules, ensuring that
+/// every primitive enforces at least one invariant to justify its existence.
+/// </summary>
+/// <remarks>
+/// Reports <c>DP0009</c> when a <c>[StringPrimitive]</c>, <c>[NumericPrimitive]</c>, or
+/// <c>[DatePrimitive]</c> type carries no validation or domain-shortcut attribute.
+/// Also reports <c>DP0009</c> for <c>[StrongId&lt;string&gt;]</c> types that carry no
+/// length or format constraint, as an unconstrained string id is semantically
+/// equivalent to a plain <see langword="string"/>.
+/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly string[] ValidationAttributeNames =
+    internal static readonly string[] ValidationAttributeNames =
     [
         "MinLengthAttribute", "MaxLengthAttribute", "LengthAttribute", 
         "RegexAttribute", "RangeAttribute", "PrimitiveRangeAttribute", "NotEmptyAttribute", "CustomValidatorAttribute"
     ];
 
-    private static readonly string[] DomainShortcutAttributeNames =
+    internal static readonly string[] DomainShortcutAttributeNames =
     [
         "EmailAttribute", "PhoneAttribute", "UrlAttribute", "SlugAttribute",
         "CountryCodeAttribute", "LanguageCodeAttribute", "CurrencyCodeAttribute",
@@ -39,14 +51,16 @@ public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
     /// <summary>
     /// Constraint attributes that are valid for string-backed StrongId types.
     /// </summary>
-    private static readonly string[] StringIdConstraintAttributeNames =
+    internal static readonly string[] StringIdConstraintAttributeNames =
     [
         "MinLengthAttribute", "MaxLengthAttribute", "LengthAttribute", "RegexAttribute"
     ];
 
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => 
         ImmutableArray.Create(DiagnosticDescriptors.DP0009_MissingValidation);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -57,32 +71,7 @@ public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
     private void AnalyzeStructDeclaration(SyntaxNodeAnalysisContext context)
     {
         var typeDeclaration = (TypeDeclarationSyntax)context.Node;
-        if (typeDeclaration.AttributeLists.Count == 0)
-            return;
-
-        bool isCandidate = false;
-        foreach (var attrList in typeDeclaration.AttributeLists)
-        {
-            foreach (var attr in attrList.Attributes)
-            {
-                var name = attr.Name.ToString();
-                if (name.Contains("Primitive") || name.Contains("StrongId") ||
-                    DomainShortcutAttributeNames.Any(s => s.StartsWith(name, System.StringComparison.Ordinal)))
-                {
-                    isCandidate = true;
-                    break;
-                }
-            }
-            if (isCandidate) break;
-        }
-
-        if (!isCandidate)
-            return;
-
-        var symbol = context.SemanticModel.GetDeclaredSymbol(typeDeclaration) as INamedTypeSymbol;
-
-        if (symbol == null)
-            return;
+        var symbol = (INamedTypeSymbol)context.SemanticModel.GetDeclaredSymbol(typeDeclaration, context.CancellationToken)!;
 
         bool isPrimitive = false;
         bool hasValidation = false;
@@ -92,17 +81,14 @@ public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
 
         foreach (var attr in symbol.GetAttributes())
         {
-            var attrClass = attr.AttributeClass;
-            if (attrClass == null) continue;
-
-            var ns = attrClass.ContainingNamespace.ToDisplayString();
+            var attrClass = attr.AttributeClass!;
+            var ns = attrClass.ContainingNamespace?.ToDisplayString();
             if (ns != "EricksonLopez.DomainPrimitives" && ns != "EricksonLopez.DomainPrimitives.Validation")
                 continue;
 
             var name = attrClass.Name;
-            var originalName = attrClass.IsGenericType ? attrClass.OriginalDefinition.Name : name;
 
-            if (name == "StringPrimitiveAttribute" || originalName == "NumericPrimitiveAttribute" || name == "DatePrimitiveAttribute")
+            if (name == "StringPrimitiveAttribute" || name == "NumericPrimitiveAttribute" || name == "DatePrimitiveAttribute")
             {
                 isPrimitive = true;
                 if (attr.NamedArguments.Any(arg => (arg.Key == "PastOnly" || arg.Key == "FutureOnly") && arg.Value.Value is true))
@@ -113,7 +99,7 @@ public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
 
             // MED-001: Detect StrongId<string> — emits DP0009 if no string constraints present.
             // StrongId<string> is valid but must have at least one constraint to be meaningful.
-            if (originalName == "StrongIdAttribute" && attrClass.IsGenericType && attrClass.TypeArguments.Length == 1)
+            if (name == "StrongIdAttribute" && attrClass.TypeArguments.Length == 1)
             {
                 var backingType = attrClass.TypeArguments[0];
                 if (backingType.SpecialType == SpecialType.System_String)
@@ -122,17 +108,17 @@ public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
                 }
             }
             
-            if (ValidationAttributeNames.Contains(originalName))
+            if (ValidationAttributeNames.Contains(name))
             {
                 hasValidation = true;
             }
 
-            if (StringIdConstraintAttributeNames.Contains(originalName))
+            if (StringIdConstraintAttributeNames.Contains(name))
             {
                 hasStringIdConstraint = true;
             }
             
-            if (DomainShortcutAttributeNames.Contains(originalName))
+            if (DomainShortcutAttributeNames.Contains(name))
             {
                 hasShortcut = true;
             }
@@ -162,3 +148,5 @@ public sealed class MissingValidationAnalyzer : DiagnosticAnalyzer
         }
     }
 }
+
+

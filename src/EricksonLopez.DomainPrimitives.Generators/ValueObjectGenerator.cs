@@ -1,11 +1,12 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Immutable;
 using EricksonLopez.DomainPrimitives.Generators.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +17,7 @@ namespace EricksonLopez.DomainPrimitives.Generators;
 /// <summary>
 /// Source generator that augments partial record structs decorated with <c>[ValueObject]</c>.
 /// Generates validation factory methods (<c>Create</c>, <c>TryCreate</c>), BCL interface
-/// implementations (<c>IFormattable</c>, <c>ISpanFormattable</c>), and
+/// implementations (<c>IParsable</c>, <c>ISpanParsable</c>, <c>IUtf8SpanParsable</c>, <c>IFormattable</c>, <c>ISpanFormattable</c>, <c>IUtf8SpanFormattable</c>), and
 /// infrastructure (<c>JsonConverter</c>, <c>TypeConverter</c>).
 /// </summary>
 [Generator(LanguageNames.CSharp)]
@@ -40,35 +41,16 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         });
     }
 
-    private static ValueObjectTypeInfo? ExtractTypeInfo(
-        GeneratorSyntaxContext context,
-        CancellationToken ct)
-        => ExtractTypeInfo(context.SemanticModel, (RecordDeclarationSyntax)context.Node, ct);
-
-    private static ValueObjectTypeInfo? ExtractTypeInfo(
+    internal static ValueObjectTypeInfo? ExtractTypeInfo(
         SemanticModel semanticModel,
         RecordDeclarationSyntax recordSyntax,
         CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        var typeSymbol = semanticModel.GetDeclaredSymbol(recordSyntax, ct) as INamedTypeSymbol;
-        if (typeSymbol is null)
-            return null;
+        var typeSymbol = (INamedTypeSymbol)semanticModel.GetDeclaredSymbol(recordSyntax, ct)!;
 
-        var attributes = typeSymbol.GetAttributes();
-        bool hasValueObject = false;
-
-        foreach (var attr in attributes)
-        {
-            if (attr.AttributeClass?.Name == "ValueObjectAttribute")
-            {
-                hasValueObject = true;
-                break;
-            }
-        }
-
-        if (!hasValueObject)
+        if (!typeSymbol.GetAttributes().Any(static attr => attr.AttributeClass?.Name == "ValueObjectAttribute"))
             return null;
 
         var properties = ImmutableArray.CreateBuilder<ValueObjectPropertyInfo>();
@@ -97,12 +79,13 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
             containingType = containingType.ContainingType;
         }
 
+        var defaults = GeneratorHelpers.ExtractAssemblyDefaults(semanticModel.Compilation);
+
         return new ValueObjectTypeInfo(
             Namespace: typeSymbol.ContainingNamespace.ToDisplayString(),
             TypeName: typeSymbol.Name,
             Accessibility: typeSymbol.DeclaredAccessibility switch
             {
-                Accessibility.Public => "public",
                 Accessibility.Internal => "internal",
                 Accessibility.Protected => "protected",
                 Accessibility.Private => "private",
@@ -111,10 +94,11 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
                 _ => "public"
             },
             ContainingTypes: new EquatableArray<string>(containingList.ToImmutable()),
-            Properties: new EquatableArray<ValueObjectPropertyInfo>(properties.ToImmutable()));
+            Properties: new EquatableArray<ValueObjectPropertyInfo>(properties.ToImmutable()),
+            CustomExceptionType: defaults.ExceptionTypeFullName);
     }
 
-    private static string GenerateValueObject(ValueObjectTypeInfo info)
+    internal static string GenerateValueObject(ValueObjectTypeInfo info)
     {
         var sb = new SourceBuilder();
 
@@ -124,6 +108,8 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine();
         sb.AppendLine("using System;");
         sb.AppendLine("using System.ComponentModel;");
+        sb.AppendLine("using System.Diagnostics.CodeAnalysis;");
+        sb.AppendLine("using System.Globalization;");
         sb.AppendLine("using System.Runtime.CompilerServices;");
         sb.AppendLine("using EricksonLopez.DomainPrimitives;");
         sb.AppendLine("using EricksonLopez.DomainPrimitives.Validation;");
@@ -146,8 +132,16 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine($"{info.Accessibility} readonly partial record struct {info.TypeName} :");
         sb.IncreaseIndent();
         sb.AppendLine($"IDomainPrimitive<{info.TypeName}>,");
+        sb.AppendLine($"IParsable<{info.TypeName}>,");
+        sb.AppendLine($"ISpanParsable<{info.TypeName}>,");
+        sb.AppendLine("#if NET8_0_OR_GREATER");
+        sb.AppendLine($"IUtf8SpanParsable<{info.TypeName}>,");
+        sb.AppendLine("#endif");
         sb.AppendLine("IFormattable,");
         sb.AppendLine($"ISpanFormattable,");
+        sb.AppendLine("#if NET8_0_OR_GREATER");
+        sb.AppendLine($"IUtf8SpanFormattable,");
+        sb.AppendLine("#endif");
         sb.AppendLine($"System.Numerics.IEqualityOperators<{info.TypeName}, {info.TypeName}, bool>");
         sb.DecreaseIndent();
         sb.OpenBrace();
@@ -180,6 +174,9 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
 
         // ── Factory Methods ────────────────────────────────────────────────────
         GenerateFactoryMethods(sb, info);
+
+        // ── Parsing ────────────────────────────────────────────────────────────
+        GenerateParsing(sb, info);
 
         // ── Formatting ─────────────────────────────────────────────────────────
         GenerateFormatting(sb, info);
@@ -226,7 +223,14 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine("Validate(ref instance, ref error);");
         sb.AppendLine("if (error.IsError)");
         sb.OpenBrace();
-        sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        if (!string.IsNullOrEmpty(info.CustomExceptionType))
+        {
+            sb.AppendLine($"throw new {info.CustomExceptionType}(error.Message);");
+        }
+        else
+        {
+            sb.AppendLine($"throw new DomainPrimitiveValidationException(error);");
+        }
         sb.CloseBrace();
         sb.AppendLine("return instance;");
         sb.CloseBrace();
@@ -251,9 +255,112 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine();
     }
 
+    private static void GenerateParsing(SourceBuilder sb, ValueObjectTypeInfo info)
+    {
+        sb.AppendLine("// ─── Parsing (IParsable, ISpanParsable, IUtf8SpanParsable) ───────");
+        sb.AppendLine();
+
+        // Parse(string)
+        sb.AppendLine($"public static {info.TypeName} Parse(string s) => Parse(s, null);");
+        sb.AppendLine($"public static {info.TypeName} Parse(string s, IFormatProvider? provider)");
+        sb.OpenBrace();
+        sb.AppendLine("if (TryParse(s, provider, out var result)) return result;");
+        sb.AppendLine($"throw new System.FormatException($\"The value '{{s}}' is not valid for {info.TypeName}.\");");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // TryParse(string)
+        sb.AppendLine($"public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out {info.TypeName} result)");
+        sb.OpenBrace();
+        sb.AppendLine("if (string.IsNullOrWhiteSpace(s))");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine("try");
+        sb.OpenBrace();
+        sb.AppendLine($"var obj = global::System.Text.Json.JsonSerializer.Deserialize<{info.TypeName}>(s);");
+        sb.AppendLine("var err = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;");
+        sb.AppendLine("Validate(ref obj, ref err);");
+        sb.AppendLine("if (err.IsError)");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine("result = obj;");
+        sb.AppendLine("return true;");
+        sb.CloseBrace();
+        sb.AppendLine("catch");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // Parse(ReadOnlySpan<char>)
+        sb.AppendLine($"public static {info.TypeName} Parse(ReadOnlySpan<char> s, IFormatProvider? provider = null)");
+        sb.OpenBrace();
+        sb.AppendLine($"if (TryParse(s, provider, out var result)) return result;");
+        sb.AppendLine("throw new System.FormatException(\"The span value is not valid.\");");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // TryParse(ReadOnlySpan<char>)
+        sb.AppendLine($"public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out {info.TypeName} result)");
+        sb.OpenBrace();
+        sb.AppendLine("if (s.IsEmpty || s.IsWhiteSpace())");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine("return TryParse(s.ToString(), provider, out result);");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // Parse(ReadOnlySpan<byte>) — UTF-8
+        sb.AppendLine("#if NET8_0_OR_GREATER");
+        sb.AppendLine($"public static {info.TypeName} Parse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider = null)");
+        sb.OpenBrace();
+        sb.AppendLine($"if (TryParse(utf8Text, provider, out var result)) return result;");
+        sb.AppendLine("throw new System.FormatException(\"The UTF-8 span value is not valid.\");");
+        sb.CloseBrace();
+        sb.AppendLine();
+
+        // TryParse(ReadOnlySpan<byte>) — UTF-8
+        sb.AppendLine($"public static bool TryParse(ReadOnlySpan<byte> utf8Text, IFormatProvider? provider, out {info.TypeName} result)");
+        sb.OpenBrace();
+        sb.AppendLine("if (utf8Text.IsEmpty)");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine("try");
+        sb.OpenBrace();
+        sb.AppendLine($"var obj = global::System.Text.Json.JsonSerializer.Deserialize<{info.TypeName}>(utf8Text);");
+        sb.AppendLine("var err = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;");
+        sb.AppendLine("Validate(ref obj, ref err);");
+        sb.AppendLine("if (err.IsError)");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.AppendLine("result = obj;");
+        sb.AppendLine("return true;");
+        sb.CloseBrace();
+        sb.AppendLine("catch");
+        sb.OpenBrace();
+        sb.AppendLine("result = default;");
+        sb.AppendLine("return false;");
+        sb.CloseBrace();
+        sb.CloseBrace();
+        sb.AppendLine("#endif");
+        sb.AppendLine();
+    }
+
     private static void GenerateFormatting(SourceBuilder sb, ValueObjectTypeInfo info)
     {
-        sb.AppendLine("// ─── Formatting (IFormattable, ISpanFormattable) ──────────────────────");
+        sb.AppendLine("// ─── Formatting (IFormattable, ISpanFormattable, IUtf8SpanFormattable) ───");
         sb.AppendLine();
 
         // ToString()
@@ -311,6 +418,17 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine("charsWritten = 0;");
         sb.AppendLine("return false;");
         sb.CloseBrace();
+        sb.AppendLine();
+
+        // IUtf8SpanFormattable.TryFormat
+        sb.AppendLine("#if NET8_0_OR_GREATER");
+        sb.AppendLine("/// <inheritdoc/>");
+        sb.AppendLine("public bool TryFormat(Span<byte> utf8Destination, out int bytesWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null)");
+        sb.OpenBrace();
+        sb.AppendLine("var str = ToString();");
+        sb.AppendLine("return global::System.Text.Encoding.UTF8.TryGetBytes(str.AsSpan(), utf8Destination, out bytesWritten);");
+        sb.CloseBrace();
+        sb.AppendLine("#endif");
         sb.AppendLine();
     }
 
@@ -374,19 +492,74 @@ internal sealed class ValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine($"private sealed class {info.TypeName}JsonConverter : global::System.Text.Json.Serialization.JsonConverter<{info.TypeName}>");
         sb.OpenBrace();
 
-        // Read: deserialize through the generated record struct's own deserialization
+        // Read
         sb.AppendLine($"public override {info.TypeName} Read(ref global::System.Text.Json.Utf8JsonReader reader, global::System.Type typeToConvert, global::System.Text.Json.JsonSerializerOptions options)");
         sb.OpenBrace();
-        // Avoid infinite recursion by getting the object without converter
-        sb.AppendLine($"var obj = global::System.Text.Json.JsonSerializer.Deserialize<{info.TypeName}>(ref reader, options);");
-        sb.AppendLine("return obj;");
+        sb.AppendLine("if (reader.TokenType == global::System.Text.Json.JsonTokenType.Null)");
+        sb.AppendLine("    return default;");
+        sb.AppendLine("if (reader.TokenType != global::System.Text.Json.JsonTokenType.StartObject)");
+        sb.AppendLine($"    throw new global::System.Text.Json.JsonException(\"Expected StartObject token for {info.TypeName}.\");");
+        sb.AppendLine();
+
+        foreach (var p in info.Properties.Values)
+        {
+            sb.AppendLine($"{p.TypeName}? {p.CamelCaseName}Value = default;");
+        }
+
+        sb.AppendLine("while (reader.Read())");
+        sb.OpenBrace();
+        sb.AppendLine("if (reader.TokenType == global::System.Text.Json.JsonTokenType.EndObject)");
+        sb.AppendLine("    break;");
+        sb.AppendLine("if (reader.TokenType != global::System.Text.Json.JsonTokenType.PropertyName)");
+        sb.AppendLine("    throw new global::System.Text.Json.JsonException(\"Expected PropertyName token.\");");
+        sb.AppendLine();
+        sb.AppendLine("var propName = reader.GetString();");
+        sb.AppendLine("reader.Read();");
+        sb.AppendLine();
+
+        bool first = true;
+        foreach (var p in info.Properties.Values)
+        {
+            var ifElse = first ? "if" : "else if";
+            first = false;
+            sb.AppendLine($"{ifElse} (string.Equals(propName, \"{p.Name}\", global::System.StringComparison.OrdinalIgnoreCase) || string.Equals(propName, \"{p.CamelCaseName}\", global::System.StringComparison.OrdinalIgnoreCase))");
+            sb.OpenBrace();
+            sb.AppendLine($"{p.CamelCaseName}Value = global::System.Text.Json.JsonSerializer.Deserialize<{p.TypeName}>(ref reader, options);");
+            sb.CloseBrace();
+        }
+        if (!first)
+        {
+            sb.AppendLine("else");
+            sb.OpenBrace();
+            sb.AppendLine("reader.Skip();");
+            sb.CloseBrace();
+        }
+
+        sb.CloseBrace(); // end while
+        sb.AppendLine();
+
+        if (info.Properties.Length > 0)
+        {
+            var args = string.Join(", ", info.Properties.Values.Select(p => $"{p.CamelCaseName}Value!"));
+            sb.AppendLine($"return Create({args});");
+        }
+        else
+        {
+            sb.AppendLine($"return default;");
+        }
         sb.CloseBrace();
         sb.AppendLine();
 
-        // Write: serialize through the record struct's own serialization
+        // Write
         sb.AppendLine($"public override void Write(global::System.Text.Json.Utf8JsonWriter writer, {info.TypeName} value, global::System.Text.Json.JsonSerializerOptions options)");
         sb.OpenBrace();
-        sb.AppendLine($"global::System.Text.Json.JsonSerializer.Serialize(writer, value, options);");
+        sb.AppendLine("writer.WriteStartObject();");
+        foreach (var p in info.Properties.Values)
+        {
+            sb.AppendLine($"writer.WritePropertyName(\"{p.CamelCaseName}\");");
+            sb.AppendLine($"global::System.Text.Json.JsonSerializer.Serialize(writer, value.{p.Name}, options);");
+        }
+        sb.AppendLine("writer.WriteEndObject();");
         sb.CloseBrace();
 
         sb.CloseBrace();

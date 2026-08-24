@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
+
 namespace EricksonLopez.DomainPrimitives;
 
 /// <summary>
@@ -13,22 +8,24 @@ namespace EricksonLopez.DomainPrimitives;
 public enum DatePrimitiveKind
 {
     /// <summary>
-    /// Backed by <see cref="System.DateOnly"/>. Use for dates without time components.
+    /// Specifies backing by <see cref="System.DateOnly"/> for dates without time components.
     /// </summary>
     DateOnly,
 
     /// <summary>
-    /// Backed by <see cref="System.DateTime"/>. Use when both date and time are needed.
+    /// Specifies backing by <see cref="System.DateTime"/> when both date and time are needed.
     /// </summary>
     DateTime,
 
     /// <summary>
-    /// Backed by <see cref="System.DateTimeOffset"/>. Use when timezone-aware timestamps are needed.
+    /// Specifies backing by <see cref="System.DateTimeOffset"/> when timezone-aware timestamps are needed.
     /// </summary>
     DateTimeOffset,
 
     /// <summary>
-    /// Backed by <see cref="System.TimeOnly"/>. Use for time-of-day without a date component.
+    /// Specifies backing by <see cref="System.TimeOnly"/> for time-of-day without a date component.
     /// </summary>
     TimeOnly
 }
+
+

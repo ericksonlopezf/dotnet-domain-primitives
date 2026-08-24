@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 18: OBSERVABILITY, METRICS AND OPENTELEMETRY
 // ============================================================================
@@ -13,11 +10,15 @@ using System.Threading.Tasks;
 // 2. `domain_primitive.validation.success`: Validation successes.
 // 3. `domain_primitive.validation.failure`: Validation failures with error type tags.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Linq;
+using System.Threading;
 using Chapter18;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Diagnostics;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 18: OBSERVABILITY & OPENTELEMETRY METRICS");
@@ -82,5 +83,7 @@ namespace Chapter18
     [Money(Min = 0)]
     public readonly partial record struct Money;
 }
+
+
 
 

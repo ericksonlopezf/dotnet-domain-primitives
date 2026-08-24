@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <AssemblyName>EricksonLopez.DomainPrimitives.Testing</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives.Testing</RootNamespace>
@@ -10,16 +9,14 @@
     <Description>Testing library for EricksonLopez.DomainPrimitives. Provides Assertions, Builders, and Fakes for unit testing your domain primitives seamlessly with xUnit, NSubstitute and AwesomeAssertions.</Description>
     <!-- This project is a library package, not a test project. Prevent dotnet test from treating it as runnable. -->
     <IsTestProject>false</IsTestProject>
-    <PackageTags>$(PackageTags);testing;unit-testing;fakes</PackageTags>
+    <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+    <PackageType>TestingTooling</PackageType>
+    <PackageTags>$(CommonPackageTags);testing;unit-testing;assertions;fluent-assertions;fakes;test-doubles;test-data;fake-data</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AwesomeAssertions" />
-    <PackageReference Include="xunit.extensibility.core" />
     <PackageReference Include="Verify.Xunit" />
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="xunit.core" />
-    <PackageReference Include="xunit.assert" />
   </ItemGroup>
 
   <ItemGroup>

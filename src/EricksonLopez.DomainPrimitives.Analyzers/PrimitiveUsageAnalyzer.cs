@@ -1,24 +1,37 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Analyzers;
 
+/// <summary>
+/// Detects usage of the default constructor or <c>default</c> literal on domain primitive types,
+/// where the standard <c>Create()</c> factory should be used instead.
+/// </summary>
+/// <remarks>
+/// Reports <c>DP0007</c> for any <c>new PrimitiveType()</c>, implicit <c>new()</c>,
+/// <c>default(PrimitiveType)</c>, or <c>default</c> literal expression that resolves to
+/// a type implementing <c>IDomainPrimitive</c> or <c>IStrongId</c>.
+/// Such expressions bypass validation and produce an uninitialized primitive instance.
+/// </remarks>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class PrimitiveUsageAnalyzer : DiagnosticAnalyzer
 {
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticDescriptors.DP0007_AvoidDefaultConstructor);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
@@ -112,3 +125,5 @@ public sealed class PrimitiveUsageAnalyzer : DiagnosticAnalyzer
             i.OriginalDefinition.Name == "IStrongId");
     }
 }
+
+

@@ -23,12 +23,12 @@ measurement methodology.
 | `NumericPrimitive` | 15 | 23 | **≤ 38** | Higher: arithmetic operators + INumber<T> coverage. With Operations enabled: up to **≤ 42** |
 | `StrongId` | 15 | 25 | **≤ 40** | Despite simplicity, full BCL interface stack applies (Parse×3, Format×2, Create, etc.) |
 | `DatePrimitive` | 15 | 22 | **≤ 37** | Similar to String but with temporal constraints |
-| `ValueObject` | 20 + N | 5 | **≤ 25 + N** | N = number of user properties. If N > 7, consider splitting |
+| `ValueObject` | 28 + N | 5 | **≤ 33 + N** | N = number of user properties. Full BCL interface stack (Parse/TryParse×3, TryFormat×2) per rfc-0006 |
 | `SmartEnum` | 29 + M | 3 | **≤ 29 + M** | M = number of static instances defined by user |
 
 > **Note:** Original spec estimates (25, 27, 15, 23, 20+N, 12+M) did not account for `readonly record struct`
 > auto-generated members and the full BCL interface stack. Updated values are evidence-based (measured on net10.0).
-> See [ADR-016](adr/ADR-016-target-runtime-primary-vs-minimum.md) for context on why net10 is the measurement target.
+> See [adr-016](adr/adr-016-target-runtime-primary-vs-minimum.md) for context on why net10 is the measurement target.
 
 ---
 
@@ -76,7 +76,7 @@ dotnet test --filter "Category=ApiSurfaceCensus" -v detailed
 
 ## Current Surface Measurement
 
-> **Last measured:** 2026-08-10  
+> **Last measured:** 2026-08-19  
 > **Tool:** `ApiSurfaceBudgetTests.ApiSurface_Census_OutputCurrentCounts` (see test output)  
 
 | Type | Category | N/M | Measured | Budget | Status |
@@ -87,8 +87,9 @@ dotnet test --filter "Category=ApiSurfaceCensus" -v detailed
 | `Distance` | NumericPrimitive+Ops | — | **37** | ≤ 42 | ✅ PASS |
 | `CustomerId` | StrongId\<Guid\> | — | **36** | ≤ 40 | ✅ PASS |
 | `OrderNumber` | StrongId\<int\> | — | **36** | ≤ 40 | ✅ PASS |
-| `Address` | ValueObject | N=4 | **26** | ≤ 29 | ✅ PASS |
+| `Address` | ValueObject | N=4 | **34** | ≤ 37 | ✅ PASS |
 | `TestOrderStatus` | SmartEnum | M=3 | **32** | ≤ 32 | ✅ PASS |
+| `RegistrationTimestamp` | DatePrimitive | — | **33** | ≤ 37 | ✅ PASS |
 
 > **Measurement date:** 2026-08-10 · **Target TFM:** net10.0
 > All tests pass with `dotnet test --filter "FullyQualifiedName~ApiSurfaceBudgetTests"` (9/9 passed)

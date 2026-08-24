@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 05: STRONGLY TYPED IDS
 // ============================================================================
@@ -13,10 +10,14 @@ using System.Threading.Tasks;
 // 2. Int / Long: Assigned by database or numeric sequences.
 // 3. String: Product SKUs, serial numbers, etc.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter05;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 05: STRONGLY TYPED IDS ([StrongId<T>])");
@@ -91,5 +92,7 @@ namespace Chapter05
     [StrongId<string>]
     public readonly partial record struct SkuId;
 }
+
+
 
 

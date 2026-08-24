@@ -1,7 +1,4 @@
-using System.Linq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 02: THE RESULT PATTERN - FLOW CONTROL WITHOUT EXCEPTIONS
 // ============================================================================
@@ -14,10 +11,14 @@ using System.Threading.Tasks;
 //    does not indicate that it might throw `DivideByZeroException`.
 // 3. Complexity: The code fills up with nested try-catch blocks.
 // ============================================================================
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Chapter02;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.Result;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 02: FLOW CONTROL WITH RESULT<T>");
@@ -98,5 +99,7 @@ namespace Chapter02
     [Money(Min = 0.01, Max = 1_000_000)]
     public readonly partial record struct Money;
 }
+
+
 
 

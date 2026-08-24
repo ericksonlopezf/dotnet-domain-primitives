@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 #nullable enable
 
 namespace EricksonLopez.DomainPrimitives.Validation;
@@ -51,3 +45,7 @@ public readonly record struct PrimitiveError(string? Code, string? Message)
     public static PrimitiveError Create(string code, string message) =>
         new PrimitiveError(code, message);
 }
+
+
+
+

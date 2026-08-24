@@ -1,14 +1,50 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using Xunit;
-using FluentAssertions;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives;
+using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
 
+/// <summary>
+/// Unit tests verifying default initialization and property assignments for domain shortcut attributes.
+/// Ensures that parameterless constructors and property mutations do not throw and instantiate correctly (Stryker constructor coverage).
+/// </summary>
 public class ShortcutAttributesCoverageTests
 {
+    public static readonly TheoryData<Type> ParameterlessAttributeTypes = new()
+    {
+        typeof(LatitudeAttribute),
+        typeof(LongitudeAttribute),
+        typeof(AgeAttribute),
+        typeof(ExpirationDateAttribute),
+        typeof(MonthAttribute),
+        typeof(QuarterAttribute),
+        typeof(DateRangeAttribute),
+        typeof(TimeRangeAttribute),
+        typeof(PhoneAttribute),
+        typeof(CountryCodeAttribute),
+        typeof(LanguageCodeAttribute),
+        typeof(CurrencyCodeAttribute),
+        typeof(PasswordHashAttribute),
+        typeof(HexColorAttribute),
+        typeof(IPAddressAttribute),
+        typeof(MacAddressAttribute),
+        typeof(IBANAttribute),
+        typeof(ISBNAttribute),
+        typeof(VINAttribute)
+    };
+
+    [Theory]
+    [MemberData(nameof(ParameterlessAttributeTypes))]
+    public void ParameterlessShortcutAttributes_InstantiateSuccessfully(Type attributeType)
+    {
+        var instance = Activator.CreateInstance(attributeType);
+        instance.Should().NotBeNull();
+    }
+
     [Fact]
-    public void MoneyAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void MoneyAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr1 = new MoneyAttribute();
         attr1.Currency.Should().Be("USD");
@@ -25,7 +61,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void PercentageAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void PercentageAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new PercentageAttribute { Min = 10, Max = 90 };
         attr.Min.Should().Be(10);
@@ -33,28 +69,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void LatitudeAttribute_CanBeInstantiated()
-    {
-        var attr = new LatitudeAttribute();
-        attr.Should().NotBeNull();
-    }
-
-    [Fact]
-    public void LongitudeAttribute_CanBeInstantiated()
-    {
-        var attr = new LongitudeAttribute();
-        attr.Should().NotBeNull();
-    }
-
-    [Fact]
-    public void AgeAttribute_CanBeInstantiated()
-    {
-        var attr = new AgeAttribute();
-        attr.Should().NotBeNull();
-    }
-
-    [Fact]
-    public void WeightAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void WeightAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new WeightAttribute { Min = 10, Max = 200 };
         attr.Min.Should().Be(10);
@@ -62,7 +77,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void HeightAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void HeightAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new HeightAttribute { Min = 10, Max = 250 };
         attr.Min.Should().Be(10);
@@ -70,7 +85,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void DistanceAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void DistanceAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new DistanceAttribute { Min = 10, Max = 1000 };
         attr.Min.Should().Be(10);
@@ -78,7 +93,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void TemperatureAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void TemperatureAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new TemperatureAttribute { Min = -100, Max = 100 };
         attr.Min.Should().Be(-100);
@@ -86,7 +101,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void ScoreAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void ScoreAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new ScoreAttribute { Min = 10, Max = 90 };
         attr.Min.Should().Be(10);
@@ -94,7 +109,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void QuantityAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void QuantityAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new QuantityAttribute { Min = 10, Max = 90 };
         attr.Min.Should().Be(10);
@@ -102,7 +117,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void PriceAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void PriceAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new PriceAttribute { Min = 10, Max = 90 };
         attr.Min.Should().Be(10);
@@ -110,7 +125,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void TaxRateAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void TaxRateAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new TaxRateAttribute { Min = 10, Max = 90 };
         attr.Min.Should().Be(10);
@@ -118,7 +133,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void DiscountAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void DiscountAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new DiscountAttribute { Min = 10, Max = 90 };
         attr.Min.Should().Be(10);
@@ -126,7 +141,7 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void RatingAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void RatingAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new RatingAttribute { Min = 1, Max = 10, Scale = 2 };
         attr.Min.Should().Be(1);
@@ -135,108 +150,62 @@ public class ShortcutAttributesCoverageTests
     }
 
     [Fact]
-    public void BirthDateAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void BirthDateAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new BirthDateAttribute { MaxAge = 100 };
         attr.MaxAge.Should().Be(100);
     }
 
     [Fact]
-    public void ExpirationDateAttribute_CanBeInstantiated() { var attr = new ExpirationDateAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void BusinessDateAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void BusinessDateAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new BusinessDateAttribute { AllowWeekends = true };
         attr.AllowWeekends.Should().BeTrue();
     }
 
     [Fact]
-    public void FiscalYearAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void FiscalYearAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new FiscalYearAttribute { MinYear = 2000 };
         attr.MinYear.Should().Be(2000);
     }
 
     [Fact]
-    public void MonthAttribute_CanBeInstantiated() { var attr = new MonthAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void QuarterAttribute_CanBeInstantiated() { var attr = new QuarterAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void WeekAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void WeekAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new WeekAttribute { IsoWeekNumbering = false };
         attr.IsoWeekNumbering.Should().BeFalse();
     }
 
     [Fact]
-    public void DateRangeAttribute_CanBeInstantiated() { var attr = new DateRangeAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void TimeRangeAttribute_CanBeInstantiated() { var attr = new TimeRangeAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void EmailAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void EmailAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new EmailAttribute { MaxLength = 100 };
         attr.MaxLength.Should().Be(100);
     }
 
     [Fact]
-    public void PhoneAttribute_CanBeInstantiated() { var attr = new PhoneAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void UrlAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void UrlAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new UrlAttribute { AllowedSchemes = new[] { "ftp" } };
         attr.AllowedSchemes.Should().Contain("ftp");
     }
 
     [Fact]
-    public void SlugAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void SlugAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new SlugAttribute { MaxLength = 50 };
         attr.MaxLength.Should().Be(50);
     }
 
     [Fact]
-    public void CountryCodeAttribute_CanBeInstantiated() { var attr = new CountryCodeAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void LanguageCodeAttribute_CanBeInstantiated() { var attr = new LanguageCodeAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void CurrencyCodeAttribute_CanBeInstantiated() { var attr = new CurrencyCodeAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void UsernameAttribute_CanBeInstantiated_AndPropertiesSet()
+    public void UsernameAttribute_ConstructorAndProperties_WorkAsExpected()
     {
         var attr = new UsernameAttribute { MinLength = 5, MaxLength = 20 };
         attr.MinLength.Should().Be(5);
         attr.MaxLength.Should().Be(20);
     }
-
-    [Fact]
-    public void PasswordHashAttribute_CanBeInstantiated() { var attr = new PasswordHashAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void HexColorAttribute_CanBeInstantiated() { var attr = new HexColorAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void IPAddressAttribute_CanBeInstantiated() { var attr = new IPAddressAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void MacAddressAttribute_CanBeInstantiated() { var attr = new MacAddressAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void IBANAttribute_CanBeInstantiated() { var attr = new IBANAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void ISBNAttribute_CanBeInstantiated() { var attr = new ISBNAttribute(); attr.Should().NotBeNull(); }
-
-    [Fact]
-    public void VINAttribute_CanBeInstantiated() { var attr = new VINAttribute(); attr.Should().NotBeNull(); }
 }
+
+
 

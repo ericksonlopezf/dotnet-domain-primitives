@@ -1,3 +1,4 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,7 @@ internal static class GeneratorShared
     internal const string DatePrimitiveFqn    = "EricksonLopez.DomainPrimitives.DatePrimitiveAttribute";
     internal const string ValueObjectFqn      = "EricksonLopez.DomainPrimitives.ValueObjectAttribute";
     internal const string SmartEnumFqn        = "EricksonLopez.DomainPrimitives.SmartEnumAttribute`1";
+    internal const string DefaultsFqn         = "EricksonLopez.DomainPrimitives.DomainPrimitivesDefaultsAttribute";
 
     // String domain shortcut FQNs
     internal const string EmailFqn        = "EricksonLopez.DomainPrimitives.EmailAttribute";
@@ -79,7 +81,7 @@ internal static class GeneratorShared
     /// where the attribute matching is delegated to the Roslyn incremental framework.
     /// This predicate is O(1) and allocation-free; Roslyn's incremental pipeline caches its result.
     /// </summary>
-    public static bool IsReadonlyRecordStruct(SyntaxNode node, System.Threading.CancellationToken _)
+    public static bool IsReadonlyRecordStruct(SyntaxNode node, CancellationToken _)
     {
         if (node is not RecordDeclarationSyntax rds)
             return false;
@@ -88,3 +90,7 @@ internal static class GeneratorShared
         return rds.Modifiers.Any(SyntaxKind.ReadOnlyKeyword);
     }
 }
+
+
+
+

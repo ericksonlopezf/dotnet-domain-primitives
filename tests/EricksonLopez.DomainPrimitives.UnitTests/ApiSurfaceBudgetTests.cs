@@ -1,8 +1,9 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using EricksonLopez.DomainPrimitives.Tests.TestTypes;
+using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives.UnitTests.TestTypes;
 using Xunit;
 
@@ -10,19 +11,25 @@ namespace EricksonLopez.DomainPrimitives.UnitTests;
 
 /// <summary>
 /// Verifies that the API surface of generated types stays within the budgets defined in
-/// AUDIT.md §API SURFACE BUDGET BY CATEGORY.
+/// AUDIT.md §API SURFACE BUDGET BY CATEGORY (CRIT-V4-003) and documented in docs/api-surface-budget.md.
+/// 
+/// Traceability and Evidence:
+/// - AUDIT.md §API SURFACE BUDGET BY CATEGORY (CRIT-V4-003)
+/// - docs/api-surface-budget.md (Measurement Methodology and Category Breakdown)
+/// - adr-016: Target Runtime Primary vs Minimum (net10.0 primary measurement baseline)
+/// - rfc-0006: ValueObject Zero-Allocation Parsing and Formatter BCL Interface Standardization
 /// 
 /// Methodology: Count public methods, properties, and operators declared on each generated type,
-/// excluding members inherited from object (Equals(object), GetHashCode, GetType, ToString inherited),
+/// excluding members purely inherited from object (Equals(object), GetHashCode, GetType, ToString inherited),
 /// and excluding [EditorBrowsable(Never)] infrastructure members.
 /// 
-/// Budget (from spec):
-///   StringPrimitive  ≤ 25
-///   NumericPrimitive ≤ 27
-///   StrongId         ≤ 15
-///   DatePrimitive    ≤ 23
-///   ValueObject      ≤ 20 + N (N = number of user-defined properties)
-///   SmartEnum        ≤ 12 + M (M = number of static instances)
+/// Evidence-Based Budgets:
+///   StringPrimitive  &lt;= 35
+///   NumericPrimitive &lt;= 38 (&lt;= 42 with arithmetic operations enabled)
+///   StrongId         &lt;= 40
+///   DatePrimitive    &lt;= 37
+///   ValueObject      &lt;= 33 + N (N = number of user-defined properties, per rfc-0006)
+///   SmartEnum        &lt;= 29 + M (M = number of static instances)
 /// </summary>
 public sealed class ApiSurfaceBudgetTests
 {
@@ -158,25 +165,26 @@ public sealed class ApiSurfaceBudgetTests
             $"StrongId<int> (OrderNumber) has {count} visible public members. Budget: ≤ 40.");
     }
 
-    // ─── ValueObject ≤ 20 + N ────────────────────────────────────────────────
+    // ─── ValueObject ≤ 33 + N ────────────────────────────────────────────────
 
     [Fact]
     [Trait("Category", "ApiSurfaceBudget")]
     public void ValueObject_ApiSurface_IsWithinBudget()
     {
-        // MEASURED SURFACE (net10.0): 26 members (Address, N=4 properties)
-        // Spec budget was 20 + N = 24 — updated to 25 + N to account for readonly record struct members.
+        // MEASURED SURFACE (net10.0): 34 members (Address, N=4 properties)
+        // Spec budget was 25 + N — updated to 33 + N (rfc-0006) to account for full BCL interface stack:
+        // Parse/TryParse (string, Span<char>, Utf8Span) + TryFormat (Span<byte>) + IEqualityOperators.
         // Address: [ValueObject] with 4 user properties (Street, City, State, ZipCode)
-        // Budget = 25 + 4 = 29
+        // Budget = 33 + 4 = 37
         const int userPropertyCount = 4;
-        const int budget = 25 + userPropertyCount;
+        const int budget = 33 + userPropertyCount;
 
         var count = CountPublicSurface(typeof(Address));
 
         Assert.True(
             count <= budget,
             $"ValueObject (Address, N={userPropertyCount}) has {count} visible public members. " +
-            $"Budget: ≤ {budget} (25 + {userPropertyCount} user properties).");
+            $"Budget: ≤ {budget} (33 + {userPropertyCount} user properties).");
     }
 
     // ─── SmartEnum ≤ 12 + M ──────────────────────────────────────────────────
@@ -239,8 +247,8 @@ public sealed class ApiSurfaceBudgetTests
             ("NumericPrimitive+Ops (Distance)",              typeof(Distance),             42),
             ("StrongId<Guid> (CustomerId)",                  typeof(CustomerId),           40),
             ("StrongId<int> (OrderNumber)",                  typeof(OrderNumber),          40),
-            ("ValueObject N=4 (Address)",                    typeof(Address),              29),
-            ("SmartEnum M=3 (TestOrderStatus)",              typeof(TestOrderStatus),      28),
+            ("ValueObject N=4 (Address)",                    typeof(Address),              37),
+            ("SmartEnum M=3 (TestOrderStatus)",              typeof(TestOrderStatus),      32),
             ("DatePrimitive (RegistrationTimestamp)",        typeof(RegistrationTimestamp), 37),
         };
 
@@ -249,9 +257,19 @@ public sealed class ApiSurfaceBudgetTests
             var count = CountPublicSurface(type);
             var status = count <= budget ? "✅ OK" : $"❌ OVER BUDGET (+{count - budget})";
             Console.WriteLine($"  {status,-20} {name,-42} {count,3}/{budget}");
+            Assert.True(count <= budget, $"{name} exceeded budget of {budget}. Actual: {count}");
         }
+    }
 
-        // Always passes — this is a census, not a gate
-        Assert.True(true);
+    [Fact]
+    [Trait("Category", "ApiSurfaceBudget")]
+    public void GeneratedTypes_ImplementCoreDomainContracts()
+    {
+        typeof(FirstName).GetInterfaces().Should().Contain(typeof(IDomainPrimitive<FirstName, string>));
+        typeof(Score).GetInterfaces().Should().Contain(typeof(IDomainPrimitive<Score, int>));
+        typeof(CustomerId).GetInterfaces().Should().Contain(typeof(IDomainPrimitive<CustomerId, Guid>));
+        typeof(Address).GetInterfaces().Should().Contain(typeof(IEquatable<Address>));
     }
 }
+
+

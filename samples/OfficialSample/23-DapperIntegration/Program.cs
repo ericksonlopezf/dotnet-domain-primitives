@@ -1,5 +1,4 @@
-using System;
-using System.Threading.Tasks;
+// Copyright © Erickson Lopez. MIT License.
 // ============================================================================
 // CHAPTER 23: DAPPER INTEGRATION (TYPE HANDLERS & AUTO-DISCOVERY)
 // ============================================================================
@@ -16,12 +15,14 @@ using System.Threading.Tasks;
 //
 // LATER: use Dapper normally — primitives are mapped like any type.
 // ============================================================================
-
+using System;
 using System.Data;
+using System.Threading;
 using Chapter23;
 using Dapper;
 using EricksonLopez.DomainPrimitives.Dapper.Generated;
 using Microsoft.Data.Sqlite;
+using System.Threading.Tasks;
 
 Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 23: DAPPER INTEGRATION");
@@ -128,3 +129,5 @@ Console.WriteLine("  ✓ Auto-discovery: a single DomainPrimitivesDapperTypeHand
 Console.WriteLine("  ✓ Works with all primitives: StrongId, StringPrimitive, NumericPrimitive");
 
 Console.WriteLine("\n✅ CHAPTER 23 COMPLETED: Dapper Integration with Domain Primitives");
+
+

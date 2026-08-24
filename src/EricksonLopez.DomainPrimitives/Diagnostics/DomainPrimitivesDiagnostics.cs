@@ -1,47 +1,41 @@
+// Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
-#if NET5_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-#endif
+using System.Diagnostics.Metrics;
 
+#if NET5_0_OR_GREATER
+#endif
 namespace EricksonLopez.DomainPrimitives.Diagnostics;
 
 /// <summary>
 /// Provides <see cref="DiagnosticListener"/> integration and OpenTelemetry metrics for domain primitives.
 /// </summary>
 /// <remarks>
-/// Moved from <c>EricksonLopez.DomainPrimitives.Abstractions</c> to <c>EricksonLopez.DomainPrimitives</c> in v1.2.0.
-/// Abstractions should contain only: attributes, marker interfaces, and <c>PrimitiveError</c>.
-/// See BREAKING_CHANGES.md for migration details.
+/// Provides <see cref="DiagnosticListener"/> and <see cref="Meter"/> integration
+/// as part of <c>EricksonLopez.DomainPrimitives</c> (Core package).
+/// Abstractions contains only: attributes, marker interfaces, and <c>PrimitiveError</c>.
+/// This separation has been in place since v1.0.0.
 /// </remarks>
-[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 public static class DomainPrimitivesDiagnostics
 {
-    /// <summary>The name of the <see cref="DiagnosticListener"/> used for events.</summary>
+    /// <summary>Gets the name of the <see cref="DiagnosticListener"/> used for events.</summary>
     public static readonly string ListenerName = "EricksonLopez.DomainPrimitives";
     
-    private static readonly DiagnosticListener Source = new(ListenerName);
+    /// <summary>Gets the <see cref="DiagnosticListener"/> instance used for emitting events.</summary>
+    public static readonly DiagnosticListener Source = new(ListenerName);
     
-    /// <summary>The <see cref="Meter"/> used for domain primitive metrics.</summary>
+    /// <summary>Gets the <see cref="Meter"/> used for domain primitive metrics.</summary>
     public static readonly Meter Meter = new("EricksonLopez.DomainPrimitives", "1.0.0");
 
-    /// <summary>Payload carried by a validation failure diagnostic event.</summary>
+    /// <summary>Represents payload carried by a validation failure diagnostic event.</summary>
     /// <param name="PrimitiveName">The name of the domain primitive type that failed validation (e.g., <c>"EmailAddress"</c>).</param>
     /// <param name="ErrorType">The error code identifying the failure category (e.g., <c>"FORMAT"</c>, <c>"LENGTH"</c>).</param>
     /// <param name="ErrorMessage">The human-readable description of the validation failure.</param>
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public readonly record struct ValidationFailurePayload(string PrimitiveName, string ErrorType, string ErrorMessage);
 
-    /// <summary>Payload carried by a validation success diagnostic event.</summary>
+    /// <summary>Represents payload carried by a validation success diagnostic event.</summary>
     /// <param name="PrimitiveName">The name of the domain primitive type that was successfully validated (e.g., <c>"EmailAddress"</c>).</param>
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public readonly record struct ValidationSuccessPayload(string PrimitiveName);
 
     /// <summary>
@@ -79,3 +73,5 @@ public static class DomainPrimitivesDiagnostics
         DomainPrimitiveEventSource.NotifyValidationFailed(primitiveName, errorType, errorMessage);
     }
 }
+
+

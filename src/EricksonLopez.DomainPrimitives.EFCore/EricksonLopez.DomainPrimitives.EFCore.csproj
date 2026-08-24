@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>disable</ImplicitUsings>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <AssemblyName>EricksonLopez.DomainPrimitives.EFCore</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives.EFCore</RootNamespace>
@@ -9,7 +8,7 @@
     <IsPackable>true</IsPackable>
     <PackageId>EricksonLopez.DomainPrimitives.EFCore</PackageId>
     <Description>EF Core integration for EricksonLopez.DomainPrimitives. Automatically generates NativeAOT-ready ValueConverters for all domain primitives without reflection.</Description>
-    <PackageTags>$(PackageTags);efcore;entity-framework-core;orm</PackageTags>
+    <PackageTags>$(CommonPackageTags);efcore;entity-framework-core;value-converter;orm;database;persistence;native-aot</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">

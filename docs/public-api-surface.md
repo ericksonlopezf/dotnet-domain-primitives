@@ -48,4 +48,4 @@ A key differentiator of this library is its complete absence of runtime reflecti
 - `DapperDomainPrimitivesRegistration.RegisterAll()`: Auto-generated static method that registers `SqlMapper.TypeHandler` for all domain primitives in the assembly, bypassing reflection-based type handlers.
 
 > [!NOTE]
-> **FluentValidation integration removed.** The `EricksonLopez.DomainPrimitives.FluentValidation` package was removed per RFC-0004. Validation should be performed at the application boundary via `TryCreate`. If FluentValidation is used downstream, wrap the result of `TryCreate` in a FluentValidation rule manually.
+> **FluentValidation integration removed.** The `EricksonLopez.DomainPrimitives.FluentValidation` package was removed per rfc-0004. Validation should be performed at the application boundary via `TryCreate`. If FluentValidation is used downstream, wrap the result of `TryCreate` in a FluentValidation rule manually.

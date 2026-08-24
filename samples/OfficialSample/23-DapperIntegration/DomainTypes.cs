@@ -1,6 +1,9 @@
+// Copyright © Erickson Lopez. MIT License.
+using System;
+using EricksonLopez.Result;
+
 namespace Chapter23;
 
-using System;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Validation;
 
@@ -48,3 +51,6 @@ public readonly partial record struct Price;
 /// Dapper uses the registered TypeHandlers to map database columns directly.
 /// </summary>
 public record ProductRow(ProductId Id, ProductName Name, Price Price, EmailAddress OwnerEmail);
+
+
+
