@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>EricksonLopez.DomainPrimitives.Benchmarks.StructLayoutBenchmark-20260823-043144</title>
+<title>EricksonLopez.DomainPrimitives.Benchmarks.StructLayoutBenchmark-20260830-090935</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -14,30 +14,30 @@
 <body>
 <pre><code>
 BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
-INTEL XEON PLATINUM 8573C 2.30GHz, 1 CPU, 4 logical and 2 physical cores
+AMD EPYC 9V74 2.60GHz, 1 CPU, 4 logical and 2 physical cores
 .NET SDK 10.0.400
-  [Host]    : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v4
-  .NET 10.0 : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v4
-  .NET 8.0  : .NET 8.0.30 (8.0.30, 8.0.3026.36720), X64 RyuJIT x86-64-v4
-  .NET 9.0  : .NET 9.0.19 (9.0.19, 9.0.1926.36724), X64 RyuJIT x86-64-v4
+  [Host]    : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  .NET 10.0 : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v3
+  .NET 8.0  : .NET 8.0.30 (8.0.30, 8.0.3026.36720), X64 RyuJIT x86-64-v3
+  .NET 9.0  : .NET 9.0.19 (9.0.19, 9.0.1926.36724), X64 RyuJIT x86-64-v3
 </code></pre>
 <pre><code></code></pre>
 
 <table>
-<thead><tr><th>Method  </th><th>Job</th><th>Runtime</th><th>ArraySize</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Allocated</th><th>Alloc Ratio</th>
+<thead><tr><th>Method  </th><th>Job</th><th>Runtime</th><th>ArraySize</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>IterateDefault</td><td>.NET 10.0</td><td>.NET 10.0</td><td>10000</td><td>3.112 &mu;s</td><td>0.0471 &mu;s</td><td>0.0441 &mu;s</td><td>1.01</td><td>0.02</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateSize17</td><td>.NET 10.0</td><td>.NET 10.0</td><td>10000</td><td>3.127 &mu;s</td><td>0.0624 &mu;s</td><td>0.0613 &mu;s</td><td>1.01</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateDefault</td><td>.NET 8.0</td><td>.NET 8.0</td><td>10000</td><td>3.091 &mu;s</td><td>0.0547 &mu;s</td><td>0.0630 &mu;s</td><td>1.00</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateSize17</td><td>.NET 8.0</td><td>.NET 8.0</td><td>10000</td><td>3.087 &mu;s</td><td>0.0549 &mu;s</td><td>0.0514 &mu;s</td><td>1.00</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateDefault</td><td>.NET 9.0</td><td>.NET 9.0</td><td>10000</td><td>3.132 &mu;s</td><td>0.0618 &mu;s</td><td>0.0578 &mu;s</td><td>1.01</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateSize17</td><td>.NET 9.0</td><td>.NET 9.0</td><td>10000</td><td>3.128 &mu;s</td><td>0.0591 &mu;s</td><td>0.0580 &mu;s</td><td>1.01</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateDefault</td><td>.NET 10.0</td><td>.NET 10.0</td><td>100000</td><td>55.199 &mu;s</td><td>0.4087 &mu;s</td><td>0.3823 &mu;s</td><td>0.86</td><td>0.02</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateSize17</td><td>.NET 10.0</td><td>.NET 10.0</td><td>100000</td><td>55.610 &mu;s</td><td>1.0915 &mu;s</td><td>1.3405 &mu;s</td><td>0.86</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateDefault</td><td>.NET 8.0</td><td>.NET 8.0</td><td>100000</td><td>64.355 &mu;s</td><td>1.2564 &mu;s</td><td>1.4469 &mu;s</td><td>1.00</td><td>0.03</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateSize17</td><td>.NET 8.0</td><td>.NET 8.0</td><td>100000</td><td>61.206 &mu;s</td><td>0.8273 &mu;s</td><td>0.6459 &mu;s</td><td>0.95</td><td>0.02</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateDefault</td><td>.NET 9.0</td><td>.NET 9.0</td><td>100000</td><td>55.315 &mu;s</td><td>0.4192 &mu;s</td><td>0.3921 &mu;s</td><td>0.86</td><td>0.02</td><td>-</td><td>NA</td>
-</tr><tr><td>IterateSize17</td><td>.NET 9.0</td><td>.NET 9.0</td><td>100000</td><td>54.342 &mu;s</td><td>0.8590 &mu;s</td><td>0.7615 &mu;s</td><td>0.84</td><td>0.02</td><td>-</td><td>NA</td>
+</thead><tbody><tr><td>IterateDefault</td><td>.NET 10.0</td><td>.NET 10.0</td><td>10000</td><td>3.641 &mu;s</td><td>0.0049 &mu;s</td><td>0.0041 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 10.0</td><td>.NET 10.0</td><td>10000</td><td>3.642 &mu;s</td><td>0.0049 &mu;s</td><td>0.0043 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 8.0</td><td>.NET 8.0</td><td>10000</td><td>3.767 &mu;s</td><td>0.0039 &mu;s</td><td>0.0035 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 8.0</td><td>.NET 8.0</td><td>10000</td><td>3.763 &mu;s</td><td>0.0012 &mu;s</td><td>0.0010 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 9.0</td><td>.NET 9.0</td><td>10000</td><td>3.629 &mu;s</td><td>0.0013 &mu;s</td><td>0.0010 &mu;s</td><td>0.96</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 9.0</td><td>.NET 9.0</td><td>10000</td><td>3.634 &mu;s</td><td>0.0025 &mu;s</td><td>0.0021 &mu;s</td><td>0.96</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 10.0</td><td>.NET 10.0</td><td>100000</td><td>38.002 &mu;s</td><td>0.0203 &mu;s</td><td>0.0170 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 10.0</td><td>.NET 10.0</td><td>100000</td><td>37.924 &mu;s</td><td>0.1005 &mu;s</td><td>0.0940 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 8.0</td><td>.NET 8.0</td><td>100000</td><td>39.148 &mu;s</td><td>0.0135 &mu;s</td><td>0.0119 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 8.0</td><td>.NET 8.0</td><td>100000</td><td>39.305 &mu;s</td><td>0.0186 &mu;s</td><td>0.0165 &mu;s</td><td>1.00</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateDefault</td><td>.NET 9.0</td><td>.NET 9.0</td><td>100000</td><td>37.954 &mu;s</td><td>0.0248 &mu;s</td><td>0.0220 &mu;s</td><td>0.97</td><td>-</td><td>NA</td>
+</tr><tr><td>IterateSize17</td><td>.NET 9.0</td><td>.NET 9.0</td><td>100000</td><td>38.279 &mu;s</td><td>0.0987 &mu;s</td><td>0.0923 &mu;s</td><td>0.98</td><td>-</td><td>NA</td>
 </tr></tbody></table>
 </body>
 </html>
