@@ -58,6 +58,6 @@
     <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
     <PackageVersion Include="Verify.Xunit" Version="31.12.5" />
     <PackageVersion Include="xunit.extensibility.core" Version="2.9.0" />
-    <PackageVersion Include="Meziantou.Framework.StronglyTypedId" Version="3.0.3" />
+    <PackageVersion Include="Meziantou.Framework.StronglyTypedId" Version="3.0.4" />
   </ItemGroup>
 </Project>
