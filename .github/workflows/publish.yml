@@ -156,7 +156,7 @@ jobs:
       # Generates a cryptographically signed provenance attestation for every .nupkg
       # using Sigstore's keyless signing via GitHub's OIDC token.
       - name: Generate Sigstore Provenance Attestation
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: './nupkgs/*.nupkg'
 
