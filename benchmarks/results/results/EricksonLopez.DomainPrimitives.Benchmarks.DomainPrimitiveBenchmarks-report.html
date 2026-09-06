@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>EricksonLopez.DomainPrimitives.Benchmarks.DomainPrimitiveBenchmarks-20260830-090301</title>
+<title>EricksonLopez.DomainPrimitives.Benchmarks.DomainPrimitiveBenchmarks-20260906-080001</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -26,24 +26,24 @@ AMD EPYC 9V74 2.60GHz, 1 CPU, 4 logical and 2 physical cores
 <table>
 <thead><tr><th>Method                  </th><th>Job</th><th>Runtime</th><th>Mean </th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
 </tr>
-</thead><tbody><tr><td>RawGuid</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.3754 ns</td><td>0.0008 ns</td><td>0.0007 ns</td><td>1.06</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveGuid</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.9683 ns</td><td>0.0010 ns</td><td>0.0008 ns</td><td>2.74</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveGuid_TryParse</td><td>.NET 10.0</td><td>.NET 10.0</td><td>29.5231 ns</td><td>0.0989 ns</td><td>0.0877 ns</td><td>83.68</td><td>0.26</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_Create</td><td>.NET 10.0</td><td>.NET 10.0</td><td>117.5161 ns</td><td>0.1464 ns</td><td>0.1298 ns</td><td>333.09</td><td>0.55</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_JsonSerialize</td><td>.NET 10.0</td><td>.NET 10.0</td><td>226.2902 ns</td><td>0.2583 ns</td><td>0.2289 ns</td><td>641.41</td><td>1.02</td><td>0.0038</td><td>64 B</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_JsonDeserialize</td><td>.NET 10.0</td><td>.NET 10.0</td><td>240.9266 ns</td><td>0.2418 ns</td><td>0.2144 ns</td><td>682.90</td><td>1.03</td><td>0.0072</td><td>120 B</td><td>NA</td>
-</tr><tr><td>RawGuid</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3528 ns</td><td>0.0006 ns</td><td>0.0005 ns</td><td>1.00</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveGuid</td><td>.NET 8.0</td><td>.NET 8.0</td><td>1.3200 ns</td><td>0.0015 ns</td><td>0.0013 ns</td><td>3.74</td><td>0.01</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveGuid_TryParse</td><td>.NET 8.0</td><td>.NET 8.0</td><td>35.1199 ns</td><td>0.0883 ns</td><td>0.0738 ns</td><td>99.55</td><td>0.24</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_Create</td><td>.NET 8.0</td><td>.NET 8.0</td><td>231.4505 ns</td><td>0.1401 ns</td><td>0.1242 ns</td><td>656.04</td><td>0.89</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_JsonSerialize</td><td>.NET 8.0</td><td>.NET 8.0</td><td>380.7493 ns</td><td>0.3129 ns</td><td>0.2774 ns</td><td>1,079.22</td><td>1.55</td><td>0.0038</td><td>64 B</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_JsonDeserialize</td><td>.NET 8.0</td><td>.NET 8.0</td><td>396.2637 ns</td><td>0.5022 ns</td><td>0.4452 ns</td><td>1,123.19</td><td>1.86</td><td>0.0072</td><td>120 B</td><td>NA</td>
-</tr><tr><td>RawGuid</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.0734 ns</td><td>0.0066 ns</td><td>0.0059 ns</td><td>0.21</td><td>0.02</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveGuid</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.9681 ns</td><td>0.0010 ns</td><td>0.0008 ns</td><td>2.74</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveGuid_TryParse</td><td>.NET 9.0</td><td>.NET 9.0</td><td>31.0363 ns</td><td>0.0437 ns</td><td>0.0409 ns</td><td>87.97</td><td>0.16</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_Create</td><td>.NET 9.0</td><td>.NET 9.0</td><td>122.5614 ns</td><td>0.2286 ns</td><td>0.1785 ns</td><td>347.40</td><td>0.65</td><td>-</td><td>-</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_JsonSerialize</td><td>.NET 9.0</td><td>.NET 9.0</td><td>250.7668 ns</td><td>0.3290 ns</td><td>0.2747 ns</td><td>710.79</td><td>1.16</td><td>0.0038</td><td>64 B</td><td>NA</td>
-</tr><tr><td>PrimitiveEmail_JsonDeserialize</td><td>.NET 9.0</td><td>.NET 9.0</td><td>246.5670 ns</td><td>0.1512 ns</td><td>0.1263 ns</td><td>698.88</td><td>0.94</td><td>0.0072</td><td>120 B</td><td>NA</td>
+</thead><tbody><tr><td>RawGuid</td><td>.NET 10.0</td><td>.NET 10.0</td><td>0.3743 ns</td><td>0.0012 ns</td><td>0.0010 ns</td><td>1.06</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveGuid</td><td>.NET 10.0</td><td>.NET 10.0</td><td>1.3192 ns</td><td>0.0013 ns</td><td>0.0011 ns</td><td>3.74</td><td>0.01</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveGuid_TryParse</td><td>.NET 10.0</td><td>.NET 10.0</td><td>29.3916 ns</td><td>0.0279 ns</td><td>0.0248 ns</td><td>83.40</td><td>0.13</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_Create</td><td>.NET 10.0</td><td>.NET 10.0</td><td>119.1740 ns</td><td>0.1732 ns</td><td>0.1447 ns</td><td>338.14</td><td>0.60</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_JsonSerialize</td><td>.NET 10.0</td><td>.NET 10.0</td><td>228.0781 ns</td><td>0.1506 ns</td><td>0.1258 ns</td><td>647.15</td><td>0.94</td><td>0.0038</td><td>64 B</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_JsonDeserialize</td><td>.NET 10.0</td><td>.NET 10.0</td><td>222.5952 ns</td><td>0.2883 ns</td><td>0.2556 ns</td><td>631.59</td><td>1.10</td><td>0.0072</td><td>120 B</td><td>NA</td>
+</tr><tr><td>RawGuid</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.3524 ns</td><td>0.0006 ns</td><td>0.0005 ns</td><td>1.00</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveGuid</td><td>.NET 8.0</td><td>.NET 8.0</td><td>0.9694 ns</td><td>0.0028 ns</td><td>0.0025 ns</td><td>2.75</td><td>0.01</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveGuid_TryParse</td><td>.NET 8.0</td><td>.NET 8.0</td><td>35.1576 ns</td><td>0.0298 ns</td><td>0.0264 ns</td><td>99.76</td><td>0.15</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_Create</td><td>.NET 8.0</td><td>.NET 8.0</td><td>232.1980 ns</td><td>0.1168 ns</td><td>0.1035 ns</td><td>658.84</td><td>0.93</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_JsonSerialize</td><td>.NET 8.0</td><td>.NET 8.0</td><td>380.0364 ns</td><td>0.2871 ns</td><td>0.2545 ns</td><td>1,078.32</td><td>1.61</td><td>0.0038</td><td>64 B</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_JsonDeserialize</td><td>.NET 8.0</td><td>.NET 8.0</td><td>387.8222 ns</td><td>0.2756 ns</td><td>0.2578 ns</td><td>1,100.41</td><td>1.64</td><td>0.0072</td><td>120 B</td><td>NA</td>
+</tr><tr><td>RawGuid</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.0719 ns</td><td>0.0032 ns</td><td>0.0028 ns</td><td>0.20</td><td>0.01</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveGuid</td><td>.NET 9.0</td><td>.NET 9.0</td><td>0.9669 ns</td><td>0.0010 ns</td><td>0.0008 ns</td><td>2.74</td><td>0.00</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveGuid_TryParse</td><td>.NET 9.0</td><td>.NET 9.0</td><td>30.5752 ns</td><td>0.0304 ns</td><td>0.0269 ns</td><td>86.75</td><td>0.14</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_Create</td><td>.NET 9.0</td><td>.NET 9.0</td><td>127.3472 ns</td><td>0.2654 ns</td><td>0.2352 ns</td><td>361.34</td><td>0.81</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_JsonSerialize</td><td>.NET 9.0</td><td>.NET 9.0</td><td>248.0231 ns</td><td>0.2065 ns</td><td>0.1724 ns</td><td>703.74</td><td>1.06</td><td>0.0038</td><td>64 B</td><td>NA</td>
+</tr><tr><td>PrimitiveEmail_JsonDeserialize</td><td>.NET 9.0</td><td>.NET 9.0</td><td>242.0594 ns</td><td>0.6390 ns</td><td>0.5977 ns</td><td>686.82</td><td>1.88</td><td>0.0072</td><td>120 B</td><td>NA</td>
 </tr></tbody></table>
 </body>
 </html>
