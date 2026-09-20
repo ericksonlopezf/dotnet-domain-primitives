@@ -1,5 +1,6 @@
 {
   "stryker-config": {
+    "solution": "Stryker.slnx",
     "project": "EricksonLopez.DomainPrimitives.Abstractions.csproj",
     "test-projects": [
       "EricksonLopez.DomainPrimitives.Abstractions.UnitTests.csproj"

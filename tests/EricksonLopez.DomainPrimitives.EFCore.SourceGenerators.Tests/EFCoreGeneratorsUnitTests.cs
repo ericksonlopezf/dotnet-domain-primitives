@@ -262,6 +262,45 @@ public readonly partial struct MoneyVal { }
         generatedSource.Should().Contain("configurationBuilder.Properties<TestNamespace.Code1>()");
         generatedSource.Should().Contain("configurationBuilder.Properties<TestNamespace.MoneyVal>()");
     }
+
+    [Theory]
+    [InlineData("BirthDateAttribute", "global::System.DateOnly")]
+    [InlineData("ExpirationDateAttribute", "global::System.DateOnly")]
+    [InlineData("DateRangeAttribute", "global::System.DateOnly")]
+    [InlineData("BusinessDateAttribute", "global::System.DateOnly")]
+    [InlineData("TimeRangeAttribute", "global::System.TimeOnly")]
+    [InlineData("PriceAttribute", "decimal")]
+    [InlineData("TaxRateAttribute", "decimal")]
+    [InlineData("DiscountAttribute", "decimal")]
+    [InlineData("QuantityAttribute", "int")]
+    [InlineData("AgeAttribute", "int")]
+    [InlineData("MonthAttribute", "int")]
+    [InlineData("QuarterAttribute", "int")]
+    [InlineData("WeekAttribute", "int")]
+    [InlineData("FiscalYearAttribute", "int")]
+    [InlineData("RatingAttribute", "double")]
+    [InlineData("ScoreAttribute", "double")]
+    [InlineData("TemperatureAttribute", "double")]
+    [InlineData("WeightAttribute", "double")]
+    [InlineData("HeightAttribute", "double")]
+    [InlineData("DistanceAttribute", "double")]
+    [InlineData("LatitudeAttribute", "double")]
+    [InlineData("LongitudeAttribute", "double")]
+    public void Generator_WithShortcutAttribute_GeneratesExpectedBackingType(string attributeName, string expectedBackingType)
+    {
+        string source = $@"
+namespace TestNamespace;
+[EricksonLopez.DomainPrimitives.{attributeName}]
+public readonly partial struct MyTestPrimitive {{ }}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new EFCoreValueConverterGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain($"class MyTestPrimitiveValueConverter : ValueConverter<MyTestPrimitive, {expectedBackingType}>");
+    }
 }
 
 

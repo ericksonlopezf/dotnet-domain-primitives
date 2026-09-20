@@ -69,6 +69,34 @@ public readonly partial record struct ValidId {}
     }
 
     [Fact]
+    public async Task PublicConstructorBypassAnalyzer_GeneratedCode_DoesNotReportDiagnostic()
+    {
+        var analyzer = new PublicConstructorBypassAnalyzer();
+        var stubTree = CSharpSyntaxTree.ParseText(RoslynTestSnippets.CommonFrameworkStubs, new CSharpParseOptions(LanguageVersion.CSharp11));
+        var userTree = CSharpSyntaxTree.ParseText(@"
+using EricksonLopez.DomainPrimitives;
+[StrongId<global::System.Guid>]
+public readonly partial record struct OrderId;
+", new CSharpParseOptions(LanguageVersion.CSharp11), path: "OrderId.cs");
+        var genTree = CSharpSyntaxTree.ParseText(@"
+public readonly partial record struct OrderId
+{
+    public OrderId(global::System.Guid value) { }
+}
+", new CSharpParseOptions(LanguageVersion.CSharp11), path: "OrderId.g.cs");
+
+        var compilation = CSharpCompilation.Create(
+            "TestAssembly",
+            new[] { stubTree, userTree, genTree },
+            Basic.Reference.Assemblies.Net80.References.All,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+        var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        diags.Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task AttributeValidationAnalyzer_AllValidationRules_Covered()
     {
         var analyzer = new AttributeValidationAnalyzer();

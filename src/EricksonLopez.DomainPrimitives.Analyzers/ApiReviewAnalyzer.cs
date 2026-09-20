@@ -137,7 +137,7 @@ public sealed class ApiReviewAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static bool IsGeneratedMember(ISymbol symbol)
+    internal static bool IsGeneratedMember(ISymbol symbol)
     {
         foreach (var location in symbol.Locations)
         {

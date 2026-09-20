@@ -406,6 +406,34 @@ public readonly partial record struct UserId
         };
         await test.RunAsync();
     }
+
+    [Fact]
+    public async Task MembersInGeneratedFiles_AreIgnoredByAnalyzer()
+    {
+        var test = new CSharpAnalyzerTest
+        {
+            CompilerDiagnostics = CompilerDiagnostics.None
+        };
+        test.TestState.Sources.Add(("MyType.g.cs", @"
+namespace System.Runtime.CompilerServices { public class IsExternalInit { } }
+namespace EricksonLopez.DomainPrimitives { public class StringPrimitiveAttribute : System.Attribute {} }
+using EricksonLopez.DomainPrimitives;
+[StringPrimitive]
+public readonly partial record struct GeneratedUser
+{
+    public string Value { get; init; }
+}
+"));
+        test.TestState.Sources.Add(("AnotherType.generated.cs", @"
+using EricksonLopez.DomainPrimitives;
+[StringPrimitive]
+public readonly partial record struct AnotherGeneratedUser
+{
+    public string Value { get; init; }
+}
+"));
+        await test.RunAsync();
+    }
 }
 
 

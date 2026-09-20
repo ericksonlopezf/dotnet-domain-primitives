@@ -121,7 +121,7 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
         }
     }
 
-    private static PrimitiveInfo? GetPrimitiveInfoFromSymbol(INamedTypeSymbol symbol)
+    internal static PrimitiveInfo? GetPrimitiveInfoFromSymbol(INamedTypeSymbol symbol)
     {
         if (!symbol.IsValueType) return null;
 
@@ -221,13 +221,9 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
     /// This is intentionally name-based rather than interface-based for cross-assembly resilience:
     /// the Roslyn metadata symbol for the Result type may not be reachable from the generator.
     /// </summary>
-    private static bool IsResultType(ITypeSymbol returnType)
+    internal static bool IsResultType(ITypeSymbol returnType)
     {
-        var name = returnType.Name;
-        return name == "Result" || name.StartsWith("Result<", StringComparison.Ordinal)
-            || (returnType is INamedTypeSymbol namedType
-                && namedType.IsGenericType
-                && (namedType.Name == "Result" || namedType.OriginalDefinition.Name == "Result"));
+        return returnType.Name == "Result";
     }
 
     /// <summary>
@@ -235,7 +231,7 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
     /// a simple TypeHandler: string, Guid, numeric types, DateOnly, DateTime, DateTimeOffset, TimeOnly, bool.
     /// Excludes complex types (classes, other VOs) that would require compound mapping.
     /// </summary>
-    private static bool IsScalarType(ITypeSymbol type)
+    internal static bool IsScalarType(ITypeSymbol type)
     {
         if (type.SpecialType != SpecialType.None)
         {
@@ -258,11 +254,11 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
 
         // Covers System.Guid, System.DateOnly, System.DateTime, System.DateTimeOffset, System.TimeOnly
         var displayName = type.ToDisplayString();
-        return displayName is "System.Guid" or "global::System.Guid"
-            or "System.DateOnly" or "global::System.DateOnly"
-            or "System.DateTime" or "global::System.DateTime"
-            or "System.DateTimeOffset" or "global::System.DateTimeOffset"
-            or "System.TimeOnly" or "global::System.TimeOnly";
+        return displayName is "System.Guid"
+            or "System.DateOnly"
+            or "System.DateTime"
+            or "System.DateTimeOffset"
+            or "System.TimeOnly";
     }
 
     internal static bool IsDomainPrimitiveAttribute(AttributeData a)
@@ -360,9 +356,7 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
             if (!seenFullNames.Add(fullName))
                 continue;
 
-            var safeNamespace = primitive.Namespace == "<global namespace>"
-                ? "Global"
-                : primitive.Namespace.Replace(".", "_").Replace("<", "").Replace(">", "");
+            var safeNamespace = GetSafeNamespace(primitive.Namespace);
 
             var handlerClassName = seenTypeNames.Add(primitive.TypeName)
                 ? $"{primitive.TypeName}TypeHandler"
@@ -379,6 +373,11 @@ internal sealed class DapperTypeHandlerGenerator : IIncrementalGenerator
         var regCode = GenerateRegistration(handlerClasses);
         context.AddSource("DapperDomainPrimitivesRegistration.g.cs", SourceText.From(regCode, Encoding.UTF8));
     }
+
+    internal static string GetSafeNamespace(string ns) =>
+        ns == "<global namespace>"
+            ? "Global"
+            : ns.Replace(".", "_").Replace("<", "").Replace(">", "");
 
     internal static string GenerateTypeHandler(PrimitiveInfo primitive, string? handlerClassName = null)
     {

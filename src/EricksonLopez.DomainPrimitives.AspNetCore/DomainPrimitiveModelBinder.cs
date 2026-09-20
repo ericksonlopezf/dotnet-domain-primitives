@@ -17,68 +17,26 @@ namespace EricksonLopez.DomainPrimitives.AspNetCore;
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2090", Justification = "Fallback reflection binder for non-generated primitive model binding.")]
 public sealed class DomainPrimitiveModelBinder<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T> : IModelBinder
 {
-    private static readonly MethodInfo? Parse2ParamMethod = typeof(T).GetMethod(
-        "Parse",
-        BindingFlags.Public | BindingFlags.Static,
-        null,
-        new[] { typeof(string), typeof(IFormatProvider) },
-        null);
-
-    private static readonly MethodInfo? Parse1ParamMethod = typeof(T).GetMethod(
-        "Parse",
-        BindingFlags.Public | BindingFlags.Static,
-        null,
-        new[] { typeof(string) },
-        null);
-
-    private static readonly MethodInfo? CreateMethod = typeof(T).GetMethod(
-        "Create",
-        BindingFlags.Public | BindingFlags.Static,
-        null,
-        new[] { typeof(string) },
-        null);
-
     private static readonly Func<string, IFormatProvider?, T>? CompiledParse2 = CreateParse2Delegate();
     private static readonly Func<string, T>? CompiledParse1 = CreateParse1Delegate();
     private static readonly Func<string, T>? CompiledCreate = CreateCreateDelegate();
 
     private static Func<string, IFormatProvider?, T>? CreateParse2Delegate()
     {
-        if (Parse2ParamMethod is null) return null;
-        try
-        {
-            return (Func<string, IFormatProvider?, T>)Delegate.CreateDelegate(typeof(Func<string, IFormatProvider?, T>), Parse2ParamMethod);
-        }
-        catch
-        {
-            return null;
-        }
+        var m = typeof(T).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(IFormatProvider) }, null);
+        return m is null ? null : (Func<string, IFormatProvider?, T>)Delegate.CreateDelegate(typeof(Func<string, IFormatProvider?, T>), m);
     }
 
     private static Func<string, T>? CreateParse1Delegate()
     {
-        if (Parse1ParamMethod is null) return null;
-        try
-        {
-            return (Func<string, T>)Delegate.CreateDelegate(typeof(Func<string, T>), Parse1ParamMethod);
-        }
-        catch
-        {
-            return null;
-        }
+        var m = typeof(T).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
+        return m is null ? null : (Func<string, T>)Delegate.CreateDelegate(typeof(Func<string, T>), m);
     }
 
     private static Func<string, T>? CreateCreateDelegate()
     {
-        if (CreateMethod is null) return null;
-        try
-        {
-            return (Func<string, T>)Delegate.CreateDelegate(typeof(Func<string, T>), CreateMethod);
-        }
-        catch
-        {
-            return null;
-        }
+        var m = typeof(T).GetMethod("Create", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string) }, null);
+        return m is null ? null : (Func<string, T>)Delegate.CreateDelegate(typeof(Func<string, T>), m);
     }
 
     /// <inheritdoc />
@@ -113,12 +71,6 @@ public sealed class DomainPrimitiveModelBinder<[System.Diagnostics.CodeAnalysis.
                 bindingContext.Result = ModelBindingResult.Success(result);
                 return Task.CompletedTask;
             }
-            if (Parse2ParamMethod != null)
-            {
-                var result = (T)Parse2ParamMethod.Invoke(null, new object?[] { rawValue, valueProviderResult.Culture })!;
-                bindingContext.Result = ModelBindingResult.Success(result);
-                return Task.CompletedTask;
-            }
 
             if (CompiledParse1 != null)
             {
@@ -126,22 +78,10 @@ public sealed class DomainPrimitiveModelBinder<[System.Diagnostics.CodeAnalysis.
                 bindingContext.Result = ModelBindingResult.Success(result);
                 return Task.CompletedTask;
             }
-            if (Parse1ParamMethod != null)
-            {
-                var result = (T)Parse1ParamMethod.Invoke(null, new object?[] { rawValue })!;
-                bindingContext.Result = ModelBindingResult.Success(result);
-                return Task.CompletedTask;
-            }
 
             if (CompiledCreate != null)
             {
                 var result = CompiledCreate(rawValue);
-                bindingContext.Result = ModelBindingResult.Success(result);
-                return Task.CompletedTask;
-            }
-            if (CreateMethod != null)
-            {
-                var result = (T)CreateMethod.Invoke(null, new object?[] { rawValue })!;
                 bindingContext.Result = ModelBindingResult.Success(result);
                 return Task.CompletedTask;
             }
@@ -155,10 +95,6 @@ public sealed class DomainPrimitiveModelBinder<[System.Diagnostics.CodeAnalysis.
             }
 
             bindingContext.ModelState.TryAddModelError(modelName, $"The value '{rawValue}' is not valid for {typeof(T).Name}.");
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException is not null)
-        {
-            bindingContext.ModelState.TryAddModelError(modelName, ex.InnerException.Message);
         }
         catch (Exception ex)
         {

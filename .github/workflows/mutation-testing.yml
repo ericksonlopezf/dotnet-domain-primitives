@@ -38,6 +38,14 @@ on:
           - Standard
           - Advanced
   # Weekly scheduled execution (Monday 04:00 UTC) to catch regressions early
+  workflow_call:
+    inputs:
+      mutation-level:
+        description: "Stryker mutation level (Basic, Standard, Advanced)"
+        required: false
+        default: "Standard"
+        type: string
+  # Weekly scheduled execution
   schedule:
     - cron: "0 4 * * 1"
 
@@ -128,10 +136,10 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore EricksonLopez.DomainPrimitives.slnx
+        run: dotnet restore Stryker.slnx
 
       - name: Build (Release)
-        run: dotnet build EricksonLopez.DomainPrimitives.slnx --no-restore --configuration Release
+        run: dotnet build Stryker.slnx --no-restore --configuration Release
 
       - name: Install Stryker
         run: dotnet tool install --global dotnet-stryker
@@ -141,6 +149,7 @@ jobs:
         run: |
           set +e
           dotnet stryker \
+            --solution Stryker.slnx \
             --config-file ${{ matrix.config }} \
             --mutation-level ${{ inputs.mutation-level || 'Standard' }} \
             --output ${{ matrix.output-dir }}
@@ -151,7 +160,7 @@ jobs:
 
       - name: Upload Stryker report (${{ matrix.name }})
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ matrix.artifact-name }}-${{ github.run_id }}
           path: ${{ matrix.output-dir }}/
@@ -165,7 +174,7 @@ jobs:
 
       - name: Upload summary JSON (${{ matrix.name }})
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: stryker-summary-${{ matrix.name }}
           path: StrykerOutput/summary-${{ matrix.name }}.json
@@ -195,18 +204,28 @@ jobs:
 
       - name: Evaluate Consolidated Mutation Quality Gate
         id: eval-gate
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
 
             const summariesDir = path.join(process.cwd(), 'all-summaries');
-            let summaryFiles = [];
-            if (fs.existsSync(summariesDir)) {
-              summaryFiles = fs.readdirSync(summariesDir).filter(f => f.startsWith('summary-') && f.endsWith('.json'));
+            function findSummaryFiles(dir) {
+              let results = [];
+              if (!fs.existsSync(dir)) return results;
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                  results = results.concat(findSummaryFiles(fullPath));
+                } else if (entry.isFile() && entry.name.startsWith('summary-') && entry.name.endsWith('.json')) {
+                  results.push(fullPath);
+                }
+              }
+              return results;
             }
 
+            const summaryFiles = findSummaryFiles(summariesDir);
             console.log(`Found ${summaryFiles.length} summary files in ${summariesDir}`);
 
             const packages = [];
@@ -217,7 +236,7 @@ jobs:
 
             for (const file of summaryFiles) {
               try {
-                const data = JSON.parse(fs.readFileSync(path.join(summariesDir, file), 'utf8'));
+                const data = JSON.parse(fs.readFileSync(file, 'utf8'));
                 packages.push(data);
                 totalKilled += data.mutants_killed || data.killed || 0;
                 totalMutants += data.total_mutants || data.total || 0;

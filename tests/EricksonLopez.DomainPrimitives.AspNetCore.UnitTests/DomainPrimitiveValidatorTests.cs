@@ -45,7 +45,8 @@ public sealed class DomainPrimitiveValidatorTests
         // Assert
         results.Should().HaveCount(1);
         results[0].MemberNames.Should().Contain("FullName");
-        results[0].ErrorMessage.Should().NotBeNullOrEmpty();
+        FirstName.TryCreate(invalid, out _, out var expectedError);
+        results[0].ErrorMessage.Should().Be(expectedError.Message);
     }
 
     // ─── ValidateSingle<TPrimitive, TValue> ──────────────────────────────────
@@ -71,7 +72,8 @@ public sealed class DomainPrimitiveValidatorTests
         // Assert
         result.Should().NotBe(ValidationResult.Success);
         result!.MemberNames.Should().Contain("CustomerName");
-        result.ErrorMessage.Should().NotBeNullOrEmpty();
+        FirstName.TryCreate("", out _, out var expectedError);
+        result.ErrorMessage.Should().Be(expectedError.Message);
     }
 
     // ─── DomainPrimitiveValidationAttribute ──────────────────────────────────
@@ -132,5 +134,44 @@ public sealed class DomainPrimitiveValidatorTests
         // Assert
         result.Should().NotBe(ValidationResult.Success);
         result!.MemberNames.Should().Contain("PersonName");
+    }
+
+    // ─── Null Message Fallback ───────────────────────────────────────────────
+
+    [Fact]
+    public void Validate_WhenErrorMessageIsNull_UsesFallbackMessage()
+    {
+        var results = DomainPrimitiveValidator
+            .Validate<NullErrorMessagePrimitive, string>("any", "TestField")
+            .ToList();
+
+        results.Should().HaveCount(1);
+        results[0].MemberNames.Should().Contain("TestField");
+        results[0].ErrorMessage.Should().Be("The value is not a valid NullErrorMessagePrimitive.");
+    }
+
+    [Fact]
+    public void ValidateSingle_WhenErrorMessageIsNull_UsesFallbackMessage()
+    {
+        var result = DomainPrimitiveValidator
+            .ValidateSingle<NullErrorMessagePrimitive, string>("any", "TestField");
+
+        result.Should().NotBeNull();
+        result.Should().NotBe(ValidationResult.Success);
+        result!.MemberNames.Should().Contain("TestField");
+        result.ErrorMessage.Should().Be("The value is not a valid NullErrorMessagePrimitive.");
+    }
+
+    private readonly record struct NullErrorMessagePrimitive(string Value) : IDomainPrimitive<NullErrorMessagePrimitive, string>
+    {
+        public static string PrimitiveName => nameof(NullErrorMessagePrimitive);
+        public bool IsDefault => string.IsNullOrEmpty(Value);
+        public static NullErrorMessagePrimitive Create(string value) => new(value);
+        public static bool TryCreate(string value, out NullErrorMessagePrimitive result, out global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError validationError)
+        {
+            result = default;
+            validationError = new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError("CODE", null);
+            return false;
+        }
     }
 }

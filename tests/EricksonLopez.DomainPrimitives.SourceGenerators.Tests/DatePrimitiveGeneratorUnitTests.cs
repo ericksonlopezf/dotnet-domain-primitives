@@ -443,6 +443,30 @@ namespace EricksonLopez.DomainPrimitives
 
         code.Should().Contain(expectedValidation);
     }
+
+    [Fact]
+    public void GenerateDatePrimitive_DateTimeKind_EmitsUtcNormalizationSwitch()
+    {
+        var info = new DatePrimitiveTypeInfo(
+            Namespace: "TestNamespace",
+            TypeName: "CreatedAt",
+            BackingTypeName: "System.DateTime",
+            Accessibility: "public",
+            ContainingTypes: new EquatableArray<string>(ImmutableArray<string>.Empty),
+            Kind: "DateTime",
+            PastOnly: false,
+            FutureOnly: false,
+            MaxAge: null,
+            DomainShortcut: null,
+            CustomExceptionType: null);
+
+        var code = DatePrimitiveGenerator.GenerateDatePrimitive(info);
+
+        code.Should().Contain("value = value.Kind switch");
+        code.Should().Contain("DateTimeKind.Unspecified => DateTime.SpecifyKind(value, DateTimeKind.Utc),");
+        code.Should().Contain("DateTimeKind.Local => value.ToUniversalTime(),");
+        code.Should().Contain("_ => value");
+    }
 }
 
 
