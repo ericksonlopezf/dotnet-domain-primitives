@@ -14,10 +14,16 @@ internal static class ComparisonTemplate
         sb.AppendLine("/// Compares this instance with another. Default instances order before non-default instances.");
         sb.AppendLine("/// </summary>");
         sb.AppendLine("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+        sb.AppendLine($"public int CompareTo({typeName} other)");
+        sb.OpenBrace();
+        sb.AppendLine("if (IsDefault && other.IsDefault) return 0;");
+        sb.AppendLine("if (IsDefault) return -1;");
+        sb.AppendLine("if (other.IsDefault) return 1;");
         if (isStringBacked)
-            sb.AppendLine($"public int CompareTo({typeName} other) => string.Compare(_value, other._value, StringComparison.Ordinal);");
+            sb.AppendLine("return string.Compare(_value, other._value, StringComparison.Ordinal);");
         else
-            sb.AppendLine($"public int CompareTo({typeName} other) => _value.CompareTo(other._value);");
+            sb.AppendLine("return _value.CompareTo(other._value);");
+        sb.CloseBrace();
         sb.AppendLine();
 
         sb.AppendLine("public int CompareTo(object? obj) => obj switch");

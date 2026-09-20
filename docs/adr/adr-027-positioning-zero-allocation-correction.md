@@ -1,5 +1,11 @@
 # adr-027: Positioning Correction — "Zero-Allocation" Claim
 
+## Status
+Accepted
+
+## Date
+2026-08-10
+
 **Date:** 2026-08-10
 **Status:** Accepted
 **Authors:** Core maintainers

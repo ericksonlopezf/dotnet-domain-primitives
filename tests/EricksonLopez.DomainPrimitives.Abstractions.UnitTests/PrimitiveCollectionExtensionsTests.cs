@@ -7,47 +7,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Abstractions.UnitTests;
 
-public readonly struct TestPrimitive : IDomainPrimitive<TestPrimitive, int>
-{
-    private readonly int _value;
-    private readonly bool _isInitialized;
-    
-    public TestPrimitive(int value)
-    {
-        _value = value;
-        _isInitialized = true;
-    }
-
-    public int Value => _value;
-    
-    public static string PrimitiveName => "TestPrimitive";
-    
-    public bool IsDefault => !_isInitialized;
-
-    public static TestPrimitive Create(int value)
-    {
-        if (value < 0)
-        {
-            throw new DomainPrimitiveValidationException(new EricksonLopez.DomainPrimitives.Validation.PrimitiveError("Invalid", "Value cannot be negative."));
-        }
-        return new TestPrimitive(value);
-    }
-
-    public static bool TryCreate(int value, out TestPrimitive result, out EricksonLopez.DomainPrimitives.Validation.PrimitiveError validationError)
-    {
-        if (value < 0)
-        {
-            result = default;
-            validationError = new EricksonLopez.DomainPrimitives.Validation.PrimitiveError("TestPrimitive", "Must be positive");
-            return false;
-        }
-        result = new TestPrimitive(value);
-        validationError = EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;
-        return true;
-    }
-
-}
-
 public class PrimitiveCollectionExtensionsTests
 {
     [Fact]
@@ -96,8 +55,12 @@ public class PrimitiveCollectionExtensionsTests
         // Act
         Action act = () => values.ToDomainPrimitiveList<TestPrimitive, int>();
 
-        // Assert
-        act.Should().Throw<DomainPrimitiveValidationException>()
+        // Assert — LOW-04: InvalidValue wraps as ArgumentException with element index context.
+        // The outer exception includes the 0-based index of the offending element.
+        // The inner exception is the original DomainPrimitiveValidationException.
+        act.Should().Throw<ArgumentException>()
+           .WithMessage("Element at index 1 failed validation:*")
+           .WithInnerException<DomainPrimitiveValidationException>()
            .WithMessage("[Invalid] Value cannot be negative.*");
     }
 

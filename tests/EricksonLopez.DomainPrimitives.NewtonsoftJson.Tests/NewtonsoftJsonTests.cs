@@ -12,276 +12,276 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.NewtonsoftJson.Tests;
 
-#region Test Dummy Types for Edge Cases
-
-[StringPrimitive]
-public readonly record struct StringDummyVo { public string Value { get; init; } }
-
-[NumericPrimitive<int>]
-public readonly record struct NumericDummyVo { public int Value { get; init; } }
-
-[DatePrimitive]
-public readonly record struct DateDummyVo { public DateOnly Value { get; init; } }
-
-[StrongId<Guid>]
-public readonly record struct StrongIdDummyVo { public Guid Value { get; init; } }
-
-[SmartEnum<int>]
-public readonly record struct SmartEnumDummyVo { public int Value { get; init; } }
-
-[Email]
-public readonly record struct EmailDummyVo { public string Value { get; init; } }
-
-[Phone]
-public readonly record struct PhoneDummyVo { public string Value { get; init; } }
-
-[Url]
-public readonly record struct UrlDummyVo { public string Value { get; init; } }
-
-[Money]
-public readonly record struct MoneyDummyVo { public decimal Value { get; init; } }
-
-[Percentage]
-public readonly record struct PercentageDummyVo { public decimal Value { get; init; } }
-
-[BirthDate]
-public readonly record struct BirthDateDummyVo { public DateOnly Value { get; init; } }
-
-[ExpirationDate]
-public readonly record struct ExpirationDateDummyVo { public DateOnly Value { get; init; } }
-
-[Email]
-public readonly record struct CreateOnlyPrimitive
+public class NewtonsoftJsonTests
 {
-    public string Value { get; }
-    public CreateOnlyPrimitive(string value) => Value = value;
-    public static CreateOnlyPrimitive Create(string value)
-    {
-        if (value == "throw") throw new InvalidOperationException("Create failed");
-        return new CreateOnlyPrimitive(value);
-    }
-}
+    #region Test Dummy Types for Edge Cases
 
-[Email]
-public readonly record struct TryCreateOnlyPrimitive
-{
-    public string Value { get; }
-    public bool IsDefault => string.IsNullOrEmpty(Value);
-    public TryCreateOnlyPrimitive(string value) => Value = value;
-    public static bool TryCreate(string value, out TryCreateOnlyPrimitive result, out PrimitiveError validationError)
+    [StringPrimitive]
+    public readonly record struct StringDummyVo { public string Value { get; init; } }
+
+    [NumericPrimitive<int>]
+    public readonly record struct NumericDummyVo { public int Value { get; init; } }
+
+    [DatePrimitive]
+    public readonly record struct DateDummyVo { public DateOnly Value { get; init; } }
+
+    [StrongId<Guid>]
+    public readonly record struct StrongIdDummyVo { public Guid Value { get; init; } }
+
+    [SmartEnum<int>]
+    public readonly record struct SmartEnumDummyVo { public int Value { get; init; } }
+
+    [Email]
+    public readonly record struct EmailDummyVo { public string Value { get; init; } }
+
+    [Phone]
+    public readonly record struct PhoneDummyVo { public string Value { get; init; } }
+
+    [Url]
+    public readonly record struct UrlDummyVo { public string Value { get; init; } }
+
+    [Money]
+    public readonly record struct MoneyDummyVo { public decimal Value { get; init; } }
+
+    [Percentage]
+    public readonly record struct PercentageDummyVo { public decimal Value { get; init; } }
+
+    [BirthDate]
+    public readonly record struct BirthDateDummyVo { public DateOnly Value { get; init; } }
+
+    [ExpirationDate]
+    public readonly record struct ExpirationDateDummyVo { public DateOnly Value { get; init; } }
+
+    [Email]
+    public readonly record struct CreateOnlyPrimitive
     {
-        if (value == "invalid")
+        public string Value { get; }
+        public CreateOnlyPrimitive(string value) => Value = value;
+        public static CreateOnlyPrimitive Create(string value)
         {
-            result = default;
-            validationError = new PrimitiveError("TryCreateOnlyPrimitive", "Invalid value");
-            return false;
+            if (value == "throw") throw new InvalidOperationException("Create failed");
+            return new CreateOnlyPrimitive(value);
         }
-        result = new TryCreateOnlyPrimitive(value);
-        validationError = default;
-        return true;
     }
-}
 
-[Email]
-public readonly record struct NoFactoryPrimitive
-{
-    public string Value { get; init; }
-    public NoFactoryPrimitive() => Value = "constant";
-}
-
-[Email]
-public readonly record struct CustomDefaultPrimitive : IDomainPrimitive<CustomDefaultPrimitive, string>
-{
-    public static string PrimitiveName => "CustomDefaultPrimitive";
-    public string Value { get; }
-    public bool IsDefault { get; }
-    public CustomDefaultPrimitive(string value, bool isDefault) { Value = value; IsDefault = isDefault; }
-    public static CustomDefaultPrimitive Create(string value) => new(value, false);
-    public static bool TryCreate(string value, out CustomDefaultPrimitive result, out PrimitiveError validationError)
+    [Email]
+    public readonly record struct TryCreateOnlyPrimitive
     {
-        result = new CustomDefaultPrimitive(value, false);
-        validationError = default;
-        return true;
+        public string Value { get; }
+        public bool IsDefault => string.IsNullOrEmpty(Value);
+        public TryCreateOnlyPrimitive(string value) => Value = value;
+        public static bool TryCreate(string value, out TryCreateOnlyPrimitive result, out PrimitiveError validationError)
+        {
+            if (value == "invalid")
+            {
+                result = default;
+                validationError = new PrimitiveError("TryCreateOnlyPrimitive", "Invalid value");
+                return false;
+            }
+            result = new TryCreateOnlyPrimitive(value);
+            validationError = default;
+            return true;
+        }
     }
-}
 
-[ValueObject]
-public readonly record struct SingleParamParseVo
-{
-    public string Name { get; init; }
-    public static SingleParamParseVo Parse(string json)
+    [Email]
+    public readonly record struct NoFactoryPrimitive
     {
-        if (json.Contains("throw")) throw new InvalidOperationException("Single param parse failed");
-        return new SingleParamParseVo { Name = "Parsed" };
+        public string Value { get; init; }
+        public NoFactoryPrimitive() => Value = "constant";
     }
-}
 
-[ValueObject]
-public readonly record struct TwoParamParseVo
-{
-    public string Name { get; init; }
-    public static TwoParamParseVo Parse(string s, IFormatProvider? provider) => new TwoParamParseVo { Name = "TwoParam" };
-}
-
-[ValueObject]
-public record struct PropertyMatchingVo
-{
-    public string Title { get; set; }
-    public string? OptionalNote { get; set; }
-}
-
-[ValueObject]
-public record struct WritableIsDefaultVo
-{
-    public string Title { get; set; }
-    public bool IsDefault { get; set; }
-}
-
-[ValueObject]
-public partial record struct ReadOnlyPropVo
-{
-    public string Title { get; set; }
-    public int Calculated => Title?.Length ?? 0;
-    public bool IsDefault => string.IsNullOrEmpty(Title);
-}
-
-[Email]
-public readonly record struct NullValuePrimitive
-{
-    private readonly string? _val;
-    public NullValuePrimitive() => _val = null;
-    public string? Value => _val;
-}
-
-[Email]
-public readonly record struct NoValuePropertyPrimitive
-{
-    public static bool TryCreate(string a, string b, string c) => true;
-}
-
-[StringPrimitive]
-public readonly record struct InterfaceOnlyPrimitive : IDomainPrimitive<InterfaceOnlyPrimitive, string>
-{
-    public static string PrimitiveName => "InterfaceOnlyPrimitive";
-    public string Value { get; }
-    public bool IsDefault => string.IsNullOrEmpty(Value);
-    public InterfaceOnlyPrimitive(string value) => Value = value;
-    public static InterfaceOnlyPrimitive Create(string value) => new(value);
-    public static bool TryCreate(string value, out InterfaceOnlyPrimitive result, out PrimitiveError validationError)
+    [Email]
+    public readonly record struct CustomDefaultPrimitive : IDomainPrimitive<CustomDefaultPrimitive, string>
     {
-        result = new InterfaceOnlyPrimitive(value);
-        validationError = default;
-        return true;
+        public static string PrimitiveName => "CustomDefaultPrimitive";
+        public string Value { get; }
+        public bool IsDefault { get; }
+        public CustomDefaultPrimitive(string value, bool isDefault) { Value = value; IsDefault = isDefault; }
+        public static CustomDefaultPrimitive Create(string value) => new(value, false);
+        public static bool TryCreate(string value, out CustomDefaultPrimitive result, out PrimitiveError validationError)
+        {
+            result = new CustomDefaultPrimitive(value, false);
+            validationError = default;
+            return true;
+        }
     }
-}
 
-[Email]
-public readonly record struct Other3ParamMethodVo
-{
-    public string Value { get; }
-    public Other3ParamMethodVo(string value) => Value = value;
-    public static void Unrelated(int a, int b, int c) { }
-    public static Other3ParamMethodVo Create(string value) => new(value);
-}
-
-[ValueObject]
-public readonly record struct Other1ParamMethodVo
-{
-    public string Name { get; init; }
-    public static void Helper(int x) { }
-}
-
-[ValueObject]
-public readonly record struct VoWithOtherStringParamMethod
-{
-    public string Description { get; init; }
-    public static void OtherSingleParamMethod(string s) { }
-}
-
-public struct NonPrimitiveStruct
-{
-    public int X { get; set; }
-}
-
-public class CustomStringReader : JsonReader
-{
-    private readonly string _val;
-    private bool _read;
-    public CustomStringReader(string val) => _val = val;
-    public override bool Read()
+    [ValueObject]
+    public readonly record struct SingleParamParseVo
     {
-        if (_read) return false;
-        _read = true;
-        return true;
+        public string Name { get; init; }
+        public static SingleParamParseVo Parse(string json)
+        {
+            if (json.Contains("throw")) throw new InvalidOperationException("Single param parse failed");
+            return new SingleParamParseVo { Name = "Parsed" };
+        }
     }
-    public override JsonToken TokenType => JsonToken.String;
-    public override object? Value => _val;
-    public override Type? ValueType => typeof(string);
-}
 
-public class TestDto
-{
-    public EmailAddress Email { get; set; }
-    public Price Price { get; set; }
-    public string NormalText { get; set; } = string.Empty;
-}
-
-public class NullStringReader : JsonReader
-{
-    public override bool Read() => true;
-    public override JsonToken TokenType => JsonToken.String;
-    public override object? Value => null;
-}
-
-public class DateTimeOffsetReader : JsonReader
-{
-    private readonly DateTimeOffset _dto;
-    private bool _read;
-    public DateTimeOffsetReader(DateTimeOffset dto) => _dto = dto;
-    public override bool Read()
+    [ValueObject]
+    public readonly record struct TwoParamParseVo
     {
-        if (_read) return false;
-        _read = true;
-        return true;
+        public string Name { get; init; }
+        public static TwoParamParseVo Parse(string s, IFormatProvider? provider) => new TwoParamParseVo { Name = "TwoParam" };
     }
-    public override JsonToken TokenType => JsonToken.Date;
-    public override object? Value => _dto;
-}
 
-public class DateTimeReader : JsonReader
-{
-    private readonly DateTime _dt;
-    private bool _read;
-    public DateTimeReader(DateTime dt) => _dt = dt;
-    public override bool Read()
+    [ValueObject]
+    public record struct PropertyMatchingVo
     {
-        if (_read) return false;
-        _read = true;
-        return true;
+        public string Title { get; set; }
+        public string? OptionalNote { get; set; }
     }
-    public override JsonToken TokenType => JsonToken.Date;
-    public override object? Value => _dt;
-}
 
-public class NonDateTimeDateTokenReader : JsonReader
-{
-    private readonly object? _val;
-    private bool _read;
-    public NonDateTimeDateTokenReader(object? val) => _val = val;
-    public override bool Read()
+    [ValueObject]
+    public record struct WritableIsDefaultVo
     {
-        if (_read) return false;
-        _read = true;
-        return true;
+        public string Title { get; set; }
+        public bool IsDefault { get; set; }
     }
-    public override JsonToken TokenType => JsonToken.Date;
-    public override object? Value => _val;
-}
+
+    [ValueObject]
+    public partial record struct ReadOnlyPropVo
+    {
+        public string Title { get; set; }
+        public int Calculated => Title?.Length ?? 0;
+        public bool IsDefault => string.IsNullOrEmpty(Title);
+    }
+
+    [Email]
+    public readonly record struct NullValuePrimitive
+    {
+        private readonly string? _val;
+        public NullValuePrimitive() => _val = null;
+        public string? Value => _val;
+    }
+
+    [Email]
+    public readonly record struct NoValuePropertyPrimitive
+    {
+        public static bool TryCreate(string a, string b, string c) => true;
+    }
+
+    [StringPrimitive]
+    public readonly record struct InterfaceOnlyPrimitive : IDomainPrimitive<InterfaceOnlyPrimitive, string>
+    {
+        public static string PrimitiveName => "InterfaceOnlyPrimitive";
+        public string Value { get; }
+        public bool IsDefault => string.IsNullOrEmpty(Value);
+        public InterfaceOnlyPrimitive(string value) => Value = value;
+        public static InterfaceOnlyPrimitive Create(string value) => new(value);
+        public static bool TryCreate(string value, out InterfaceOnlyPrimitive result, out PrimitiveError validationError)
+        {
+            result = new InterfaceOnlyPrimitive(value);
+            validationError = default;
+            return true;
+        }
+    }
+
+    [Email]
+    public readonly record struct Other3ParamMethodVo
+    {
+        public string Value { get; }
+        public Other3ParamMethodVo(string value) => Value = value;
+        public static void Unrelated(int a, int b, int c) { }
+        public static Other3ParamMethodVo Create(string value) => new(value);
+    }
+
+    [ValueObject]
+    public readonly record struct Other1ParamMethodVo
+    {
+        public string Name { get; init; }
+        public static void Helper(int x) { }
+    }
+
+    [ValueObject]
+    public readonly record struct VoWithOtherStringParamMethod
+    {
+        public string Description { get; init; }
+        public static void OtherSingleParamMethod(string s) { }
+    }
+
+    public struct NonPrimitiveStruct
+    {
+        public int X { get; set; }
+    }
+
+    public class CustomStringReader : JsonReader
+    {
+        private readonly string _val;
+        private bool _read;
+        public CustomStringReader(string val) => _val = val;
+        public override bool Read()
+        {
+            if (_read) return false;
+            _read = true;
+            return true;
+        }
+        public override JsonToken TokenType => JsonToken.String;
+        public override object? Value => _val;
+        public override Type? ValueType => typeof(string);
+    }
+
+    public class TestDto
+    {
+        public EmailAddress Email { get; set; }
+        public Price Price { get; set; }
+        public string NormalText { get; set; } = string.Empty;
+    }
+
+    public class NullStringReader : JsonReader
+    {
+        public override bool Read() => true;
+        public override JsonToken TokenType => JsonToken.String;
+        public override object? Value => null;
+    }
+
+    public class DateTimeOffsetReader : JsonReader
+    {
+        private readonly DateTimeOffset _dto;
+        private bool _read;
+        public DateTimeOffsetReader(DateTimeOffset dto) => _dto = dto;
+        public override bool Read()
+        {
+            if (_read) return false;
+            _read = true;
+            return true;
+        }
+        public override JsonToken TokenType => JsonToken.Date;
+        public override object? Value => _dto;
+    }
+
+    public class DateTimeReader : JsonReader
+    {
+        private readonly DateTime _dt;
+        private bool _read;
+        public DateTimeReader(DateTime dt) => _dt = dt;
+        public override bool Read()
+        {
+            if (_read) return false;
+            _read = true;
+            return true;
+        }
+        public override JsonToken TokenType => JsonToken.Date;
+        public override object? Value => _dt;
+    }
+
+    public class NonDateTimeDateTokenReader : JsonReader
+    {
+        private readonly object? _val;
+        private bool _read;
+        public NonDateTimeDateTokenReader(object? val) => _val = val;
+        public override bool Read()
+        {
+            if (_read) return false;
+            _read = true;
+            return true;
+        }
+        public override JsonToken TokenType => JsonToken.Date;
+        public override object? Value => _val;
+    }
 
 #endregion
 
-public class NewtonsoftJsonTests
-{
     private readonly JsonSerializerSettings _settings = new JsonSerializerSettings().AddDomainPrimitives();
 
     #region String Primitives
@@ -311,11 +311,12 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void StringPrimitive_DeserializingNull_ReturnsDefaultInstance()
+    public void StringPrimitive_DeserializingNull_ThrowsJsonSerializationException()
     {
         var json = "null";
-        var deserialized = JsonConvert.DeserializeObject<EmailAddress>(json, _settings);
-        deserialized.IsDefault.Should().BeTrue();
+        var act = () => JsonConvert.DeserializeObject<EmailAddress>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -356,11 +357,12 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void NumericPrimitive_DeserializingNull_ReturnsDefaultInstance()
+    public void NumericPrimitive_DeserializingNull_ThrowsJsonSerializationException()
     {
         var json = "null";
-        var deserialized = JsonConvert.DeserializeObject<Price>(json, _settings);
-        deserialized.IsDefault.Should().BeTrue();
+        var act = () => JsonConvert.DeserializeObject<Price>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -414,11 +416,12 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void DatePrimitive_DeserializingNull_ReturnsDefaultInstance()
+    public void DatePrimitive_DeserializingNull_ThrowsJsonSerializationException()
     {
         var json = "null";
-        var deserialized = JsonConvert.DeserializeObject<CustomerBirthDate>(json, _settings);
-        deserialized.IsDefault.Should().BeTrue();
+        var act = () => JsonConvert.DeserializeObject<CustomerBirthDate>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -446,11 +449,12 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void TimePrimitive_DeserializingNull_ReturnsDefaultInstance()
+    public void TimePrimitive_DeserializingNull_ThrowsJsonSerializationException()
     {
         var json = "null";
-        var deserialized = JsonConvert.DeserializeObject<WorkShiftTime>(json, _settings);
-        deserialized.IsDefault.Should().BeTrue();
+        var act = () => JsonConvert.DeserializeObject<WorkShiftTime>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     #endregion
@@ -484,11 +488,12 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void GuidStrongId_DeserializingNull_ReturnsDefaultInstance()
+    public void GuidStrongId_DeserializingNull_ThrowsJsonSerializationException()
     {
         var json = "null";
-        var deserialized = JsonConvert.DeserializeObject<CustomerId>(json, _settings);
-        deserialized.IsDefault.Should().BeTrue();
+        var act = () => JsonConvert.DeserializeObject<CustomerId>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -552,11 +557,12 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void SmartEnum_DeserializingNull_ReturnsDefaultInstance()
+    public void SmartEnum_DeserializingNull_ThrowsJsonSerializationException()
     {
         var json = "null";
-        var deserialized = JsonConvert.DeserializeObject<TestOrderStatus>(json, _settings);
-        deserialized.IsDefault.Should().BeTrue();
+        var act = () => JsonConvert.DeserializeObject<TestOrderStatus>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -836,17 +842,19 @@ public class NewtonsoftJsonTests
     #region Custom Readers & Readers Edge Cases
 
     [Fact]
-    public void NullStringReader_ReturnsDefaultInstance()
+    public void NullStringReader_ThrowsJsonSerializationException()
     {
         var universal = new DomainPrimitiveUniversalNewtonsoftJsonConverter();
         var readerUni = new NullStringReader();
-        var resultUni = universal.ReadJson(readerUni, typeof(EmailAddress), null, JsonSerializer.CreateDefault());
-        resultUni.Should().Be(default(EmailAddress));
+        var actUni = () => universal.ReadJson(readerUni, typeof(EmailAddress), null, JsonSerializer.CreateDefault());
+        actUni.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
 
         var generic = new DomainPrimitiveNewtonsoftJsonConverter<EmailAddress, string>();
         var readerGen = new NullStringReader();
-        var resultGen = generic.ReadJson(readerGen, typeof(EmailAddress), default, false, JsonSerializer.CreateDefault());
-        resultGen.Should().Be(default(EmailAddress));
+        var actGen = () => generic.ReadJson(readerGen, typeof(EmailAddress), default, false, JsonSerializer.CreateDefault());
+        actGen.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -990,13 +998,14 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void GenericConverter_ReadJson_NullToken_ReturnsDefault()
+    public void GenericConverter_ReadJson_NullToken_ThrowsJsonSerializationException()
     {
         var genericConv = new DomainPrimitiveNewtonsoftJsonConverter<EmailAddress, string>();
         var reader = new JsonTextReader(new StringReader("null"));
         reader.Read();
-        var result = genericConv.ReadJson(reader, typeof(EmailAddress), default, false, JsonSerializer.CreateDefault());
-        result.IsDefault.Should().BeTrue();
+        var act = () => genericConv.ReadJson(reader, typeof(EmailAddress), default, false, JsonSerializer.CreateDefault());
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -1020,13 +1029,14 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void UniversalConverter_ReadJson_NullToken_ReturnsDefault()
+    public void UniversalConverter_ReadJson_NullToken_ThrowsJsonSerializationException()
     {
         var universal = new DomainPrimitiveUniversalNewtonsoftJsonConverter();
         var reader = new JsonTextReader(new StringReader("null"));
         reader.Read();
-        var result = universal.ReadJson(reader, typeof(EmailAddress), null, JsonSerializer.CreateDefault());
-        ((EmailAddress)result!).IsDefault.Should().BeTrue();
+        var act = () => universal.ReadJson(reader, typeof(EmailAddress), null, JsonSerializer.CreateDefault());
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -1076,13 +1086,14 @@ public class NewtonsoftJsonTests
     }
 
     [Fact]
-    public void GenericConverter_ReadJson_IntPrimitive_NullToken_ReturnsDefault()
+    public void GenericConverter_ReadJson_IntPrimitive_NullToken_ThrowsJsonSerializationException()
     {
         var genericConv = new DomainPrimitiveNewtonsoftJsonConverter<OrderNumber, int>();
         var reader = new JsonTextReader(new StringReader("null"));
         reader.Read();
-        var result = genericConv.ReadJson(reader, typeof(OrderNumber), default, false, JsonSerializer.CreateDefault());
-        result.IsDefault.Should().BeTrue();
+        var act = () => genericConv.ReadJson(reader, typeof(OrderNumber), default, false, JsonSerializer.CreateDefault());
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     [Fact]
@@ -1216,6 +1227,24 @@ public class NewtonsoftJsonTests
         universal.CanConvert(typeof(NonPrimitiveStruct)).Should().BeFalse();
         universal.CanConvert(typeof(string)).Should().BeFalse();
         universal.CanConvert(typeof(int)).Should().BeFalse();
+    }
+
+    [Fact]
+    public void GenericConverter_DeserializeNull_ThrowsJsonSerializationException()
+    {
+        var settings = CreateSettingsWithGenericConverter<EmailAddress, string>();
+        var act = () => JsonConvert.DeserializeObject<EmailAddress>("null", settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
+    }
+
+    [Fact]
+    public void UniversalConverter_DeserializeNull_ThrowsJsonSerializationException()
+    {
+        DomainPrimitiveUniversalNewtonsoftJsonConverter.ClearCache();
+        var act = () => JsonConvert.DeserializeObject<EmailAddress>("null", _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
     }
 
     #endregion

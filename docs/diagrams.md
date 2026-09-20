@@ -12,7 +12,7 @@ graph TD
         Abstractions["EricksonLopez.DomainPrimitives.Abstractions\n(Interfaces, PrimitiveError, PrimitiveBuilder,\nPrimitiveCollectionExtensions, Attributes)"]
         Core["EricksonLopez.DomainPrimitives\n(Validation pipeline, Normalizers,\nShortcut Attributes, DomainPrimitivesDefaults)"]
         Gen["EricksonLopez.DomainPrimitives.Generators\n(Roslyn Source Generator → emits partial structs)"]
-        Anl["EricksonLopez.DomainPrimitives.Analyzers\n(DP0001-DP0017 diagnostics, IDE enforcement)"]
+        Anl["EricksonLopez.DomainPrimitives.Analyzers\n(DP0001-DP0018 diagnostics, IDE enforcement)"]
     end
 
     subgraph Infra ["Infrastructure Packages"]

@@ -4,7 +4,7 @@
 **Author:** Core Maintainers  
 **Date:** 2026-08-19  
 **Target:** v2.0.0  
-**Related:** GAP-01 (AUDITORIA_PARIDAD_FUNCIONAL.md §11, §20, §23)  
+**Related:** GAP-01 (FUNCTIONAL_PARITY_AUDIT.md §11, §20, §23)  
 
 ---
 

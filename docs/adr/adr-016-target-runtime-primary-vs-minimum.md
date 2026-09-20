@@ -1,5 +1,11 @@
 # adr-016: Target Runtime — Primary vs Minimum Supported
 
+## Status
+Accepted
+
+## Date
+2026-08-10
+
 **Status:** Accepted  
 **Date:** 2026-08-10  
 **Authors:** Core maintainers  

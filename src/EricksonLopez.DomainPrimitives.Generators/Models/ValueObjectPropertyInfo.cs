@@ -6,4 +6,9 @@ namespace EricksonLopez.DomainPrimitives.Generators.Models;
 /// <summary>
 /// Information about a property on a value object.
 /// </summary>
-internal sealed record ValueObjectPropertyInfo(string Name, string TypeName, string CamelCaseName);
+internal sealed record ValueObjectPropertyInfo(
+    string Name,
+    string TypeName,
+    string CamelCaseName,
+    bool IsValueType = false,
+    bool IsNullable = false);

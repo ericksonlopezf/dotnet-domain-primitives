@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-023: Reject XML Serialization Support
 
 **Date:** 2026-08-10

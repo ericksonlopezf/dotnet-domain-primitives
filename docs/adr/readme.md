@@ -8,6 +8,7 @@ This directory documents all architectural decision records for `EricksonLopez.D
 
 | ADR | Title | Status |
 |---|---|---|
+| [ADR-000](adr-000-use-markdown-anywhere-architecture-decision-records.md) | Use Markdown Anywhere Architecture Decision Records | Accepted |
 | [ADR-001](adr-001-record-structs-for-domain-primitives.md) | Record Structs for Domain Primitives | Accepted |
 | [ADR-002](adr-002-use-source-generators-for-domain-primitives.md) | Roslyn Source Generators for Domain Primitives | Accepted |
 | [ADR-003](adr-003-trycreate-result-pattern.md) | TryCreate and Result Pattern Synergy | Accepted |
@@ -15,13 +16,13 @@ This directory documents all architectural decision records for `EricksonLopez.D
 | [ADR-005](adr-005-parse-iformatprovider-signature.md) | Parse with IFormatProvider Alignment | Accepted |
 | [ADR-006](adr-006-use-validation-error-instead-of-result.md) | ValidationError Design | Accepted |
 | [ADR-007](adr-007-zero-allocation-error-model.md) | Zero-Allocation Error Models | Accepted |
-| [ADR-008](adr-008-domain-primitive-format-exception.md) | DomainPrimitiveFormatException Design | Accepted |
+| [ADR-008](adr-008-domain-primitive-format-exception.md) | DomainPrimitiveFormatException Design | Deprecated (Superseded by RFC-0003) |
 | [ADR-009](adr-009-error-codes-canonicalization.md) | Canonical Error Code Taxonomy | Accepted |
 | [ADR-010](adr-010-strict-bcl-alignment.md) | Strict BCL Interface Alignment | Accepted |
 | [ADR-011](adr-011-json-inline-generation.md) | Inline JSON Converter Generation | Accepted |
 | [ADR-012](adr-012-security-gates.md) | DevSecOps Quality Gates | Accepted |
 | [ADR-013](adr-013-static-abstract-interfaces.md) | Static Abstract Generic Interfaces | Accepted |
-| [ADR-014](adr-014-mapster-integration.md) | Mapster Compile-Time Mapping Integration | Accepted |
+| [ADR-014](adr-014-mapster-integration.md) | Mapster Compile-Time Mapping Integration | Superseded by ADR-043 |
 | [ADR-015](adr-015-meta-package-target-frameworks.md) | Meta-Package Target Frameworks | Accepted |
 | [ADR-016](adr-016-target-runtime-primary-vs-minimum.md) | Target Runtime Primary vs Minimum Strategy | Accepted |
 | [ADR-017](adr-017-mapster-integration-rationale.md) | Mapster Integration Rationale | Accepted |
@@ -50,3 +51,6 @@ This directory documents all architectural decision records for `EricksonLopez.D
 | [ADR-040](adr-040-dual-paradigm-declarative-generators-vs-prepackaged-catalog.md) | Declarative Generators vs Prepackaged Primitives | Accepted |
 | [ADR-041](adr-041-publicapi-shipped-maintenance-policy.md) | PublicAPI Shipped Maintenance Policy | Accepted |
 | [ADR-042](adr-042-valueobject-dual-paradigm-documentation.md) | ValueObject Ecosystem Taxonomy | Accepted |
+| [ADR-043](adr-043-discontinue-mapster-package.md) | Discontinuation and Removal of Dedicated Mapster Packages | Accepted |
+| [ADR-044](adr-044-dapper-sourcegen-referenced-assembly-discovery-and-deny-list.md) | Dapper Source Generator Referenced Assembly Discovery & Deny-List | Accepted |
+| [ADR-045](adr-045-analyzer-dp0018-valueobject-collection-immutability.md) | Roslyn Analyzer DP0018 for ValueObject Collection Immutability | Accepted |

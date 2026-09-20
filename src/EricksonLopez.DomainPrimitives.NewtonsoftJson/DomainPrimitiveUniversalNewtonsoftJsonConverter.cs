@@ -110,7 +110,11 @@ public class DomainPrimitiveUniversalNewtonsoftJsonConverter : JsonConverter
     {
         if (reader.TokenType == JsonToken.Null)
         {
-            return Activator.CreateInstance(objectType);
+            if (objectType.IsValueType && Nullable.GetUnderlyingType(objectType) == null)
+            {
+                throw new JsonSerializationException($"Cannot deserialize null into non-nullable domain primitive '{objectType.Name}'.");
+            }
+            return null;
         }
 
         var meta = GetMetadata(objectType);
@@ -153,6 +157,34 @@ public class DomainPrimitiveUniversalNewtonsoftJsonConverter : JsonConverter
                     prop.SetValue(instance, propVal);
                 }
             }
+
+            // Enforce cross-property invariant validation
+            var validateMethod = objectType.GetMethod("Validate", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+            if (validateMethod is not null)
+            {
+                try
+                {
+                    var valParams = validateMethod.GetParameters();
+                    if (valParams.Length == 2)
+                    {
+                        var errorType = valParams[1].ParameterType.GetElementType() ?? valParams[1].ParameterType;
+                        var errorObj = Activator.CreateInstance(errorType);
+                        var invokeArgs = new object?[] { instance, errorObj };
+                        validateMethod.Invoke(null, invokeArgs);
+                        var errorProp = invokeArgs[1]?.GetType().GetProperty("IsError");
+                        if (errorProp?.GetValue(invokeArgs[1]) is true)
+                        {
+                            var msgProp = invokeArgs[1]?.GetType().GetProperty("Message");
+                            throw new JsonSerializationException($"Invalid {objectType.Name}: {msgProp?.GetValue(invokeArgs[1])}");
+                        }
+                    }
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException is not null)
+                {
+                    throw new JsonSerializationException($"Invalid {objectType.Name}: {ex.InnerException.Message}", ex.InnerException);
+                }
+            }
+
             return instance;
         }
 
@@ -175,6 +207,10 @@ public class DomainPrimitiveUniversalNewtonsoftJsonConverter : JsonConverter
 
         if (rawValue is null)
         {
+            if (objectType.IsValueType && Nullable.GetUnderlyingType(objectType) == null)
+            {
+                throw new JsonSerializationException($"Cannot deserialize null into non-nullable domain primitive '{objectType.Name}'.");
+            }
             return Activator.CreateInstance(objectType);
         }
 

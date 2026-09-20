@@ -20,7 +20,7 @@ public static class DapperDomainPrimitivesRegistration
     /// <remarks>
     /// <para><strong>BREAKING CHANGE (v3.0):</strong></para>
     /// <para>When Dapper encounters <c>DBNull.Value</c>, it will now throw a <c>DataException</c>
-    /// instead of falling back to <c>default(T)</c>, unless the target property is nullable.
+    /// instead of falling back to <c>default(T)</c>, unless the target property is nullable.</para>
     /// Ensure your database schemas match your domain primitive nullability.</para>
     /// </remarks>
     public static void RegisterAll()

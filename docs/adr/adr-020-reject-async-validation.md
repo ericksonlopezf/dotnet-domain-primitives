@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-020: Reject Async Validation and Async Factories
 
 **Date:** 2026-08-10

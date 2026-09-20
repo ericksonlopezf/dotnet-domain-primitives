@@ -1,5 +1,11 @@
 # adr-003: TryCreate Result Pattern and BCL Consistency
 
+## Status
+Rejected
+
+## Date
+2026-08-06
+
 **Date:** 2026-08-06  
 **Status:** Superseded by [adr-006](adr-006-use-validation-error-instead-of-result.md) (2026-08-09)
 

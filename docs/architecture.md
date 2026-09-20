@@ -2,7 +2,7 @@
 
 > **See also:** [system-overview.md](system-overview.md) for the system-level overview and dependency diagrams.  
 > [boundary.md](boundary.md) for the `Abstractions` package boundary specification.  
-> [docs/adr/](adr/) for all 41 Architecture Decision Records.
+> [docs/adr/](adr/) for all 46 Architecture Decision Records (ADR-000 through ADR-045).
 
 ---
 
@@ -63,7 +63,7 @@ A domain primitive must never misrepresent its validated state. Validation rules
 
 ## Source Generators & Integration Auto-Discovery
 
-The library relies on Roslyn Incremental Source Generators (`IIncrementalGenerator`) to emit zero-overhead integration code. All generators use `ForAttributeWithMetadataName` for precise, semantics-aware filtering. ([ADR-002](adr/adr-002-use-source-generators-for-domain-primitives.md), [ADR-014](adr/adr-014-mapster-integration.md), [ADR-032](adr/adr-032-exclude-source-generators-mutation-testing.md).)
+The library relies on Roslyn Incremental Source Generators (`IIncrementalGenerator`) to emit zero-overhead integration code. All generators use `ForAttributeWithMetadataName` for precise, semantics-aware filtering. ([ADR-002](adr/adr-002-use-source-generators-for-domain-primitives.md), [ADR-043](adr/adr-043-discontinue-mapster-package.md), [ADR-044](adr/adr-044-dapper-sourcegen-referenced-assembly-discovery-and-deny-list.md), [ADR-032](adr/adr-032-exclude-source-generators-mutation-testing.md).)
 
 **Integration auto-discovery principle:** Developers do not need to annotate domain models with integration-specific attributes. The integration generators (EFCore, Dapper, AspNetCore, OpenAPI) discover all types implementing `IDomainPrimitive<TSelf, TValue>` at compile time.
 
@@ -133,7 +133,7 @@ Exceeding the budget fails the build. New members require justification via the 
 
 - `Abstractions` and `Generators` packages: `IsAotCompatible=true`, `IsTrimmable=true`
 - Generated code: zero `Type.GetMethod()`, `Activator.CreateInstance()`, or runtime expression compilation
-- CI gate: `aot-smoke-test.yml` publishes the `AotProbe` project with `PublishAot=true` and executes the native binary on every push/PR
+- CI gate: `aot-smoke-test.yml` publishes the `AotSmokeTest` project with `PublishAot=true` and executes the native binary on every push/PR
 
 ---
 
@@ -141,7 +141,7 @@ Exceeding the budget fails the build. New members require justification via the 
 
 All significant architectural decisions are formally documented as Architecture Decision Records (ADRs):
 
-- [docs/adr/](adr/) — 41 ADRs covering primitives design, generator architecture, integration decisions, and rejected features
+- [docs/adr/](adr/) — 46 ADRs (ADR-000 to ADR-045) covering primitives design, generator architecture, integration decisions, and rejected features
 - [docs/rfcs/](rfcs/) — 12 RFCs covering API design changes (factory naming, exception standardization, multi-TFM strategy, etc.)
 
 Key decisions:
@@ -151,3 +151,6 @@ Key decisions:
 - [ADR-018](adr/adr-018-reject-class-based-primitives.md) — Reject class-based primitives (permanently)
 - [ADR-025](adr/adr-025-reject-result-as-primary-api.md) — Reject `Result<T>` as primary API
 - [ADR-040](adr/adr-040-dual-paradigm-declarative-generators-vs-prepackaged-catalog.md) — Dual paradigm (declarative generators + shortcut catalog)
+- [ADR-043](adr/adr-043-discontinue-mapster-package.md) — Discontinue dedicated Mapster packages (native operator conversion)
+- [ADR-044](adr/adr-044-dapper-sourcegen-referenced-assembly-discovery-and-deny-list.md) — Dapper SourceGen referenced assembly discovery and deny-list
+- [ADR-045](adr/adr-045-analyzer-dp0018-valueobject-collection-immutability.md) — Roslyn Analyzer DP0018 for ValueObject collection immutability

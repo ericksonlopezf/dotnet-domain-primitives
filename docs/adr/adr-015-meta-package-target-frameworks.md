@@ -1,5 +1,11 @@
 # adr-015: Meta-Package Target Framework Strategy
 
+## Status
+Accepted
+
+## Date
+2026-08-10
+
 **Status:** Accepted  
 **Date:** 2026-08-10  
 **Authors:** Core maintainers  

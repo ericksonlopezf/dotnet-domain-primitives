@@ -1,5 +1,11 @@
 # adr-006: Use ValidationError over Result for Domain Primitives
 
+## Status
+Accepted
+
+## Date
+2026-08-09
+
 **Date:** 2026-08-09  
 **Status:** Accepted  
 

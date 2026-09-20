@@ -8,7 +8,7 @@
     <IsPackable>true</IsPackable>
     <PackageId>EricksonLopez.DomainPrimitives.EFCore</PackageId>
     <Description>EF Core integration for EricksonLopez.DomainPrimitives. Automatically generates NativeAOT-ready ValueConverters for all domain primitives without reflection.</Description>
-    <PackageTags>$(CommonPackageTags);efcore;entity-framework-core;value-converter;orm;database;persistence;native-aot</PackageTags>
+    <PackageTags>$(CommonPackageTags);efcore;entity-framework-core;value-converter;orm;database;native-aot</PackageTags>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">

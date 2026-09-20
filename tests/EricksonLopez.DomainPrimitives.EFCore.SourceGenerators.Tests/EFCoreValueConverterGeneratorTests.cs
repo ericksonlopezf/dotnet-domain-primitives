@@ -114,9 +114,9 @@ public readonly partial struct BirthDate { }
     }
 
     [Theory]
-    [InlineData(1, "global::DateTime")]
-    [InlineData(2, "global::System.TimeOnly")]
-    [InlineData(3, "global::System.DateTimeOffset")]
+    [InlineData(1, "global::System.DateTime")]
+    [InlineData(2, "global::System.DateTimeOffset")]
+    [InlineData(3, "global::System.TimeOnly")]
     public void Generator_WithDatePrimitiveKinds_ShouldGenerateCorrectBackingType(int kind, string expectedType)
     {
         string source = $@"
@@ -607,9 +607,9 @@ public readonly partial struct DtoType { }
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
 
         var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
-        generatedSource.Should().Contain("ValueConverter<DtType, global::DateTime>");
-        generatedSource.Should().Contain("ValueConverter<ToType, global::System.TimeOnly>");
-        generatedSource.Should().Contain("ValueConverter<DtoType, global::System.DateTimeOffset>");
+        generatedSource.Should().Contain("ValueConverter<DtType, global::System.DateTime>");
+        generatedSource.Should().Contain("ValueConverter<ToType, global::System.DateTimeOffset>");
+        generatedSource.Should().Contain("ValueConverter<DtoType, global::System.TimeOnly>");
     }
 
     [Fact]

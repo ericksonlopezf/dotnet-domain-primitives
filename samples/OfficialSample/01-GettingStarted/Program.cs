@@ -41,7 +41,7 @@ var customerId = CustomerId.Create();
 var domainOrderId = OrderId.Create();
 
 // Method 1: TryCreate (Safe, returns Result<EmailAddress> without throwing exceptions)
-Result<EmailAddress> emailResult = EmailAddress.TryCreate("user@company.com", out var emailOut, out var error) ? emailOut : Error.Validation(error.Code, error.Message);
+Result<EmailAddress> emailResult = EmailAddress.TryCreate("user@company.com", out var emailOut, out var error) ? emailOut : Error.Validation(error.Code ?? "VALIDATION", error.Message ?? "Invalid email address");
 
 if (emailResult.IsSuccess)
 {

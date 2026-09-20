@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 String parsing and validation present vectors for performance degradation or DoS attacks (e.g. runaway regex, large string allocations, or stack explosion).
 

@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 Across different domain primitive generators (`String`, `Numeric`, `Date`, etc.), error codes for validation failures were historically inconsistent and often hardcoded per primitive (e.g., using the primitive name instead of a generic violation type).
 

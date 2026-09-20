@@ -243,7 +243,7 @@ public class DomainPrimitiveTypeHandlerTests
         handler.SetValue(parameter, defaultPrimitive);
 
         // Assert
-        parameter.Received().Value = null;
+        parameter.Received().Value = DBNull.Value;
     }
 
     private readonly struct DecimalStubPrimitive : IDomainPrimitive<DecimalStubPrimitive, decimal>

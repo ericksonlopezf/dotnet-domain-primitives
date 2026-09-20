@@ -13,8 +13,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
-    <PackageReference Update="xunit" VersionOverride="2.4.2" />
-    <PackageReference Update="xunit.runner.visualstudio" VersionOverride="2.4.5">
+    <PackageReference Update="xunit" VersionOverride="2.9.3" />
+    <PackageReference Update="xunit.runner.visualstudio" VersionOverride="4.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

@@ -62,7 +62,8 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
     /// Validates and constructs the domain primitive instance.
     /// </summary>
     /// <returns>A valid domain primitive instance.</returns>
-    /// <exception cref="DomainPrimitiveValidationException">Validation fails or the value was not provided</exception>
+    /// <exception cref="DomainPrimitiveValidationException">Thrown when validation fails or no value was configured via <see cref="WithValue"/>.</exception>
+    /// <exception cref="NotSupportedException">Thrown when the target framework is below .NET 7.0, as static abstract interface members are not supported on earlier runtimes.</exception>
     public TPrimitive BuildOrThrow()
     {
         if (_value is null)
@@ -91,6 +92,7 @@ public sealed class PrimitiveBuilder<TPrimitive, TValue>
     /// </summary>
     /// <param name="result">When this method returns <see langword="true"/>, contains the constructed domain primitive instance; otherwise, the default value for <typeparamref name="TPrimitive"/>.</param>
     /// <returns><see langword="true"/> if creation succeeded; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="NotSupportedException">Thrown when the target framework is below .NET 7.0, as static abstract interface members are not supported on earlier runtimes.</exception>
     public bool Build(out TPrimitive result)
     {
         if (_value is null)

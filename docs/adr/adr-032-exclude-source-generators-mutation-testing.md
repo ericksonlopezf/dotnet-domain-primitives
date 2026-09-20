@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 As part of our commitment to high code quality, we employ Stryker.NET for mutation testing to evaluate the effectiveness of our test suites. Our quality gates require mutation scores between 95% and 100%.
 

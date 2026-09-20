@@ -23,12 +23,12 @@ internal sealed class EFCoreValueConverterGenerator : IIncrementalGenerator
             .Where(static m => m.HasValue)
             .Select(static (m, _) => m!.Value);
 
-        // Collect all of them into a single compilation step
-        var compilationAndStructs = context.CompilationProvider.Combine(structDeclarations.Collect());
+        // Collect all of them into a single collection step
+        var collectedStructs = structDeclarations.Collect();
 
         // Generate the converters and the configuration extensions
-        context.RegisterSourceOutput(compilationAndStructs,
-            (spc, source) => Execute(source.Left, source.Right, spc));
+        context.RegisterSourceOutput(collectedStructs,
+            (spc, structs) => Execute(structs, spc));
     }
 
     internal static bool IsDomainPrimitiveAttribute(AttributeData a)
@@ -69,14 +69,30 @@ internal sealed class EFCoreValueConverterGenerator : IIncrementalGenerator
             var kindArg = primitiveAttr.NamedArguments.FirstOrDefault(kvp => kvp.Key == "Kind").Value;
             if (!kindArg.IsNull && kindArg.Value is int kindInt)
             {
-                if (kindInt == 1) backingType = "global::DateTime";
-                else if (kindInt == 2) backingType = "global::System.TimeOnly";
-                else if (kindInt == 3) backingType = "global::System.DateTimeOffset";
+                if (kindInt == 1) backingType = "global::System.DateTime";
+                else if (kindInt == 2) backingType = "global::System.DateTimeOffset";
+                else if (kindInt == 3) backingType = "global::System.TimeOnly";
             }
         }
-        else if (attrName is "MoneyAttribute" or "PercentageAttribute")
+        else if (attrName is "BirthDateAttribute" or "ExpirationDateAttribute" or "DateRangeAttribute" or "BusinessDateAttribute")
+        {
+            backingType = "global::System.DateOnly";
+        }
+        else if (attrName == "TimeRangeAttribute")
+        {
+            backingType = "global::System.TimeOnly";
+        }
+        else if (attrName is "MoneyAttribute" or "PercentageAttribute" or "PriceAttribute" or "TaxRateAttribute" or "DiscountAttribute")
         {
             backingType = "decimal";
+        }
+        else if (attrName is "QuantityAttribute" or "AgeAttribute" or "MonthAttribute" or "QuarterAttribute" or "WeekAttribute" or "FiscalYearAttribute")
+        {
+            backingType = "int";
+        }
+        else if (attrName is "RatingAttribute" or "ScoreAttribute" or "TemperatureAttribute" or "WeightAttribute" or "HeightAttribute" or "DistanceAttribute" or "LatitudeAttribute" or "LongitudeAttribute")
+        {
+            backingType = "double";
         }
         else if (attrName == "SmartEnumAttribute")
         {
@@ -206,7 +222,7 @@ internal sealed class EFCoreValueConverterGenerator : IIncrementalGenerator
         return sb.ToString();
     }
 
-    private static void Execute(Compilation compilation, ImmutableArray<PrimitiveInfo> primitives, SourceProductionContext context)
+    private static void Execute(ImmutableArray<PrimitiveInfo> primitives, SourceProductionContext context)
     {
         if (primitives.IsDefaultOrEmpty) return;
 

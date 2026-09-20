@@ -1,9 +1,15 @@
 # adr-038: SmartFlagEnum (Bitfield Enums) Decision
 
+## Status
+Rejected
+
+## Date
+2026-08-19
+
 **Date:** 2026-08-19  
 **Status:** Deferred / Rejected for v1.x (Subject to Community RFC for v2.x)  
 **Authors:** Core maintainers  
-**Related audit items:** GAP-05 (AUDITORIA_PARIDAD_FUNCIONAL.md §11, §19)  
+**Related audit items:** GAP-05 (FUNCTIONAL_PARITY_AUDIT.md §11, §19)  
 
 ---
 

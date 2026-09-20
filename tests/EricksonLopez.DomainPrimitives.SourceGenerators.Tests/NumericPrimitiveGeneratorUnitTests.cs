@@ -531,6 +531,8 @@ namespace EricksonLopez.DomainPrimitives
         var expectedValidation =
             "    private static global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError TryValidate(double value)\n" +
             "    {\n" +
+            "        if (double.IsNaN(value) || double.IsInfinity(value))\n" +
+            "            return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"RANGE\", $\"ExclusiveDoublePrim cannot be NaN or Infinity.\");\n" +
             "        if (value <= (double)10)\n" +
             "            return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"RANGE\", $\"ExclusiveDoublePrim must be greater than 10. Got {value}.\");\n" +
             "        if (value >= (double)100)\n" +
@@ -573,6 +575,8 @@ namespace EricksonLopez.DomainPrimitives
         var expectedValidation =
             "    private static global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError TryValidate(double value)\n" +
             "    {\n" +
+            "        if (double.IsNaN(value) || double.IsInfinity(value))\n" +
+            "            return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"RANGE\", $\"InclusiveStringDoublePrim cannot be NaN or Infinity.\");\n" +
             "        if (value < 5.5)\n" +
             "            return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"RANGE\", $\"InclusiveStringDoublePrim must be at least 5.5. Got {value}.\");\n" +
             "        if (value > 95.5)\n" +
@@ -728,7 +732,7 @@ namespace EricksonLopez.DomainPrimitives
         code.Should().Contain("        return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"RANGE\", $\"DecimalPrice must be greater than 0.01. Got {value}.\");");
         code.Should().Contain("if (value >= 99999.99m)");
         code.Should().Contain("        return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"RANGE\", $\"DecimalPrice must be less than 99999.99. Got {value}.\");");
-        code.Should().Contain("if (Math.Round((double)value, 2) != (double)value)");
+        code.Should().Contain("if (Math.Round(value, 2) != value)");
         code.Should().Contain("        return new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"FORMAT\", $\"DecimalPrice must have at most 2 decimal place(s).\");");
         code.Should().Contain("public static DecimalPrice operator +(DecimalPrice left, DecimalPrice right)");
         code.Should().Contain("public static DecimalPrice operator -(DecimalPrice left, DecimalPrice right)");

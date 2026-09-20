@@ -1,4 +1,5 @@
 // Copyright © Erickson Lopez. MIT License.
+using System;
 using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives.Validation;
 using Xunit;
@@ -56,6 +57,38 @@ public class DomainPrimitiveValidationExceptionTests
         ex.Error.Should().Be(PrimitiveError.None);
         ex.Message.Should().StartWith("[] ");
     }
+    [Fact]
+    public void Constructor_WithInnerException_ShouldPreserveInnerExceptionAndSetError()
+    {
+        // Arrange
+        var error = new PrimitiveError("TEST_CODE", "Test message");
+        var innerException = new InvalidOperationException("Inner error");
+
+        // Act
+        var ex = new DomainPrimitiveValidationException(error, innerException);
+
+        // Assert
+        ex.Error.Should().Be(error);
+        ex.Message.Should().StartWith("[TEST_CODE] Test message");
+        ex.ParamName.Should().Be("value");
+        ex.InnerException.Should().Be(innerException);
+    }
+
+    [Fact]
+    public void Constructor_WithCustomParamNameAndInnerException_ShouldPreserveBoth()
+    {
+        // Arrange
+        var error = new PrimitiveError("TEST_CODE", "Test message");
+        var innerException = new InvalidOperationException("Inner error");
+        var paramName = "customParam";
+
+        // Act
+        var ex = new DomainPrimitiveValidationException(error, innerException, paramName);
+
+        // Assert
+        ex.Error.Should().Be(error);
+        ex.Message.Should().StartWith("[TEST_CODE] Test message");
+        ex.ParamName.Should().Be(paramName);
+        ex.InnerException.Should().Be(innerException);
+    }
 }
-
-

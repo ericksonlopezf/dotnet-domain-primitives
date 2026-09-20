@@ -3,6 +3,9 @@
 ## Status
 Accepted — August 2026
 
+## Date
+2026-09-04
+
 ## Context
 Eliminating Primitive Obsession and modeling Value Objects across the `EricksonLopez.*` ecosystem follows two distinct architectural patterns:
 - **Declarative Generation**: Generating custom domain primitives on demand via Roslyn attributes (`[StrongId]`, `[SmartEnum]`).

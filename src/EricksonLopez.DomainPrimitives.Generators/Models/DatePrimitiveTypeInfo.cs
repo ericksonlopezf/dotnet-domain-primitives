@@ -17,4 +17,5 @@ internal sealed record DatePrimitiveTypeInfo(
     bool FutureOnly,
     int? MaxAge,
     string? DomainShortcut,
-    string? CustomExceptionType = null) : IEquatable<DatePrimitiveTypeInfo>;
+    string? CustomExceptionType = null,
+    int? MinYear = null) : IEquatable<DatePrimitiveTypeInfo>;

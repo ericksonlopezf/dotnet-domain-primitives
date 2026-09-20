@@ -6,8 +6,8 @@ namespace EricksonLopez.DomainPrimitives.Analyzers;
 internal static class DiagnosticDescriptors
 {
     // ── Diagnostic ID Range Reservation (TD-005) ───────────────────────────────
-    // DP0001–DP0016 : Correctness, Design, Performance, ApiReview rules (active)
-    // DP0017–DP0099 : Reserved for future user-facing analyzer rules
+    // DP0001–DP0017 : Correctness, Design, Performance, ApiReview rules (active)
+    // DP0018–DP0099 : Reserved for future user-facing analyzer rules
     // DP1001–DP1999 : Infrastructure / generator pipeline diagnostics (see AnalyzerReleases.Shipped.md)
     // DP2000+       : Reserved for future expansion
     // ──────────────────────────────────────────────────────────────────────────
@@ -183,4 +183,14 @@ internal static class DiagnosticDescriptors
         description: "Custom validation exception types specified in [assembly: DomainPrimitivesDefaults] must derive from Exception and have a constructor taking a single string argument.",
         customTags: new[] { WellKnownDiagnosticTags.CompilationEnd },
         helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0017.md");
+
+    public static readonly DiagnosticDescriptor DP0018_ValueObjectMutableCollection = new(
+        id: "DP0018",
+        title: "Value object property should not be a mutable collection or array",
+        messageFormat: "Property '{0}' on ValueObject '{1}' uses mutable type '{2}'. Use ImmutableArray<T> or a read-only collection to guarantee immutability.",
+        category: DiagnosticCategories.Design,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Value objects must be deeply immutable. Properties of type array (T[]) or mutable collections like List<T> allow mutation of internal state.",
+        helpLinkUri: "https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0018.md");
 }

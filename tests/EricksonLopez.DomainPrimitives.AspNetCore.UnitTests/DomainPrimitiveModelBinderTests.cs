@@ -396,71 +396,71 @@ public class DomainPrimitiveModelBinderTests
         public bool ContainsPrefix(string prefix) => true;
         public ValueProviderResult GetValue(string key) => new ValueProviderResult(new[] { (string?)null! }, _culture);
     }
-}
 
-public readonly struct TypeWith2ParamParseOnly
-{
-    public string Value { get; }
-    public IFormatProvider? Provider { get; }
-    public TypeWith2ParamParseOnly(string value, IFormatProvider? provider) { Value = value; Provider = provider; }
-    public static TypeWith2ParamParseOnly Parse(string s, IFormatProvider? provider) => new(s + ":2param", provider);
-}
-
-public readonly struct TypeWith1ParamParse
-{
-    public string Value { get; }
-    private TypeWith1ParamParse(string value) => Value = value;
-    public static TypeWith1ParamParse Parse(string value) => new(value);
-}
-
-public readonly struct TypeWith1ParamCreate
-{
-    public string Value { get; }
-    private TypeWith1ParamCreate(string value) => Value = value;
-    public static TypeWith1ParamCreate Create(string value) => new(value);
-}
-
-[System.ComponentModel.TypeConverter(typeof(CustomConverter))]
-public readonly struct TypeWithCustomConverter
-{
-    public string Value { get; }
-    public TypeWithCustomConverter(string value) => Value = value;
-
-    private sealed class CustomConverter : System.ComponentModel.TypeConverter
+    public readonly struct TypeWith2ParamParseOnly
     {
-        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, Type sourceType)
-            => sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+        public string Value { get; }
+        public IFormatProvider? Provider { get; }
+        public TypeWith2ParamParseOnly(string value, IFormatProvider? provider) { Value = value; Provider = provider; }
+        public static TypeWith2ParamParseOnly Parse(string s, IFormatProvider? provider) => new(s + ":2param", provider);
+    }
 
-        public override object? ConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, CultureInfo? culture, object value)
+    public readonly struct TypeWith1ParamParse
+    {
+        public string Value { get; }
+        private TypeWith1ParamParse(string value) => Value = value;
+        public static TypeWith1ParamParse Parse(string value) => new(value);
+    }
+
+    public readonly struct TypeWith1ParamCreate
+    {
+        public string Value { get; }
+        private TypeWith1ParamCreate(string value) => Value = value;
+        public static TypeWith1ParamCreate Create(string value) => new(value);
+    }
+
+    [System.ComponentModel.TypeConverter(typeof(CustomConverter))]
+    public readonly struct TypeWithCustomConverter
+    {
+        public string Value { get; }
+        public TypeWithCustomConverter(string value) => Value = value;
+
+        private sealed class CustomConverter : System.ComponentModel.TypeConverter
         {
-            if (value is string s) return new TypeWithCustomConverter("converted:" + s);
-            return base.ConvertFrom(context, culture, value);
+            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, Type sourceType)
+                => sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+
+            public override object? ConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, CultureInfo? culture, object value)
+            {
+                if (value is string s) return new TypeWithCustomConverter("converted:" + s);
+                return base.ConvertFrom(context, culture, value);
+            }
         }
     }
-}
 
-[System.ComponentModel.TypeConverter(typeof(FaultyConverter))]
-public readonly struct TypeWithFaultyConverter
-{
-    public string Value { get; }
-    public TypeWithFaultyConverter(string value) => Value = value;
-
-    private sealed class FaultyConverter : System.ComponentModel.TypeConverter
+    [System.ComponentModel.TypeConverter(typeof(FaultyConverter))]
+    public readonly struct TypeWithFaultyConverter
     {
-        public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, Type sourceType) => true;
-        public override object? ConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, CultureInfo? culture, object value)
-            => throw new FormatException("Faulty conversion failure");
+        public string Value { get; }
+        public TypeWithFaultyConverter(string value) => Value = value;
+
+        private sealed class FaultyConverter : System.ComponentModel.TypeConverter
+        {
+            public override bool CanConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, Type sourceType) => true;
+            public override object? ConvertFrom(System.ComponentModel.ITypeDescriptorContext? context, CultureInfo? culture, object value)
+                => throw new FormatException("Faulty conversion failure");
+        }
     }
-}
 
-public readonly struct TypeWithoutParseOrCreate
-{
-    public int X { get; }
-}
+    public readonly struct TypeWithoutParseOrCreate
+    {
+        public int X { get; }
+    }
 
-public readonly struct TypeThrowingError
-{
-    public static TypeThrowingError Create(string s) => throw new InvalidOperationException("Failed creation: " + s);
+    public readonly struct TypeThrowingError
+    {
+        public static TypeThrowingError Create(string s) => throw new InvalidOperationException("Failed creation: " + s);
+    }
 }
 
 

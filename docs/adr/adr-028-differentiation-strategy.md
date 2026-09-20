@@ -1,5 +1,11 @@
 # adr-028: Differentiation Strategy — BCL-Native + Security-by-Default
 
+## Status
+Accepted
+
+## Date
+2026-08-10
+
 **Date:** 2026-08-10
 **Status:** Accepted
 **Authors:** Core maintainers

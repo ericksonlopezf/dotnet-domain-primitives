@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 By default, failing a `Create()` validation check throws `DomainPrimitiveValidationException`. However, many organizations and Clean Architecture projects maintain their own base domain exception types (e.g., `DomainException` or `ValidationException`) that integrate directly with global exception filters, ProblemDetails factories, or logging middlewares.
 

@@ -202,7 +202,7 @@ namespace TestNamespace
 
         code.Should().Contain("namespace TestNamespace;\n");
         code.Should().Contain("readonly partial record struct StatusEnum :");
-        code.Should().Contain("public static readonly IReadOnlyList<StatusEnum> All = new StatusEnum[] { Pending, Active, Completed };");
+        code.Should().Contain("All = global::System.Array.AsReadOnly(new StatusEnum[] { Pending, Active, Completed });");
         code.Should().Contain("if (EqualityComparer<int>.Default.Equals(item.Value, value))");
         code.Should().Contain("throw new global::System.InvalidOperationException($\"No StatusEnum found with value {value}\");");
         code.Should().Contain("throw new global::System.InvalidOperationException($\"No StatusEnum found with name '{name}'\");");
@@ -213,7 +213,7 @@ namespace TestNamespace
         code.Should().Contain("public void Switch(Action whenPending, Action whenActive, Action whenCompleted)");
 
         // TryFormat
-        code.Should().Contain("var nameSpan = Name.AsSpan();");
+        code.Should().Contain("var nameSpan = (Name ?? string.Empty).AsSpan();");
         code.Should().Contain("if (nameSpan.Length <= destination.Length)");
 
         code.Should().EndWith("}\n\n");
@@ -233,7 +233,7 @@ namespace TestNamespace
         var code = SmartEnumGenerator.GenerateSmartEnum(info).Replace("\r\n", "\n");
 
         code.Should().NotContain("namespace ;");
-        code.Should().Contain("public static readonly IReadOnlyList<EmptyRefEnum> All = Array.Empty<EmptyRefEnum>();");
+        code.Should().Contain("All = global::System.Array.AsReadOnly(global::System.Array.Empty<EmptyRefEnum>());");
         code.Should().Contain("if (item.Value is not null && item.Value.Equals(value))");
         code.Should().Contain("throw new ArgumentException($\"No EmptyRefEnum found with value {value}\", nameof(value));");
         code.Should().Contain("throw new ArgumentException($\"No EmptyRefEnum found with name {name}\", nameof(name));");
@@ -244,10 +244,33 @@ namespace TestNamespace
         code.Should().NotContain("public void Switch");
 
         // Equality for reference type
-        code.Should().Contain("return Value is not null ? Value.Equals(other.Value) : other.Value is null;");
-        code.Should().Contain("return Value is not null ? Value.GetHashCode() : 0;");
+        code.Should().Contain("return _value is not null ? _value.Equals(other._value) : other._value is null;");
+        code.Should().Contain("return _value is not null ? _value.GetHashCode() : 0;");
+
+        // DP-FIND-002: Json converter for SmartEnum<string> must use reader.GetString() rather than TryParse(reader.ValueSpan)
+        code.Should().NotContain("EmptyRefEnum.TryParse(reader.ValueSpan");
+        code.Should().Contain("var stringValue = reader.GetString();");
+        code.Should().Contain("if (EmptyRefEnum.TryCreate(stringValue, out var result, out var err)) return result;");
 
         code.Should().EndWith("}\n\n");
+    }
+
+    [Fact]
+    public void GenerateSmartEnum_StringBacked_EmitsValidJsonConverterWithoutUtf8SpanParsable()
+    {
+        var info = new SmartEnumTypeInfo(
+            Namespace: "TestNamespace",
+            TypeName: "SeverityLevel",
+            BackingTypeName: "string",
+            MemberNames: new EquatableArray<string>(ImmutableArray.Create("Low", "High")),
+            IsReferenceType: true,
+            CustomExceptionType: null);
+
+        var code = SmartEnumGenerator.GenerateSmartEnum(info).Replace("\r\n", "\n");
+
+        code.Should().NotContain("SeverityLevel.TryParse(reader.ValueSpan");
+        code.Should().Contain("var stringValue = reader.GetString();");
+        code.Should().Contain("if (SeverityLevel.TryCreate(stringValue, out var result, out var err)) return result;");
     }
 }
 

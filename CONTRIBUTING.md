@@ -53,7 +53,7 @@ dotnet tool install -g dotnet-stryker
 dotnet-stryker
 ```
 
-Configuration is in [`stryker-config.json`](stryker-config.json) at the repository root. The mutation solution `Stryker.slnx` targets `net8.0` and covers 8 test projects: `Abstractions.UnitTests`, `UnitTests`, `Testing.UnitTests`, `Dapper.IntegrationTests`, `EFCore.UnitTests`, `AspNetCore.UnitTests`, `OpenApi.Tests`, and `NewtonsoftJson.Tests`.
+Configuration files (`stryker-*.json`) are located at the repository root. The mutation testing solution `Stryker.slnx` targets all 14 package projects and their companion test suites. In CI, mutation testing runs via `mutation-testing.yml` across a 14-job parallel matrix with a consolidated quality gate (score >= 95% break threshold, high >= 100%).
 
 ### Benchmarks
 

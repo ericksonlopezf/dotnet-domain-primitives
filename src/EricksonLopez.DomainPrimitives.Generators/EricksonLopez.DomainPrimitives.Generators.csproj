@@ -22,7 +22,7 @@
 
     <!-- Suppress nullable warnings for netstandard2.0 -->
     <Nullable>enable</Nullable>
-    <PackageTags>$(CommonPackageTags);source-generator;source-generators;roslyn;code-generation;incremental-generator;value-objects;strongly-typed-id;smart-enum;compile-time;zero-allocation</PackageTags>
+    <PackageTags>$(CommonPackageTags);source-generator;roslyn;code-generation;incremental-generator;value-object;strongly-typed-id;smart-enum</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,9 +41,21 @@
     <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
 
-  <ItemGroup>
-      </ItemGroup>
-
+  <!-- Source generators are compile-time Roslyn components running on netstandard2.0.
+       Prevent global AOT/trimming properties passed via CLI (e.g., -p:PublishAot=true) from triggering NETSDK1207 / NETSDK1124. -->
+  <Target Name="_DisableAotForGenerator"
+          BeforeTargets="ProcessFrameworkReferences;_ComputeToolPackInputsToProcessFrameworkReferences">
+    <PropertyGroup>
+      <PublishAot>false</PublishAot>
+      <PublishTrimmed>false</PublishTrimmed>
+      <SelfContained>false</SelfContained>
+      <_RequiresILLinkPack>false</_RequiresILLinkPack>
+      <EnableAotAnalyzer>false</EnableAotAnalyzer>
+      <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
+      <EnableSingleFileAnalyzer>false</EnableSingleFileAnalyzer>
+      <RuntimeIdentifier></RuntimeIdentifier>
+    </PropertyGroup>
+  </Target>
 </Project>
 
 

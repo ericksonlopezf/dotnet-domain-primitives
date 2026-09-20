@@ -73,7 +73,7 @@
     <Project Path="tests/EricksonLopez.DomainPrimitives.ArchitectureTests/EricksonLopez.DomainPrimitives.ArchitectureTests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.IntegrationTests/EricksonLopez.DomainPrimitives.IntegrationTests.csproj" />
     <Project Path="tests/EricksonLopez.DomainPrimitives.EndToEndTests/EricksonLopez.DomainPrimitives.EndToEndTests.csproj" />
-    <Project Path="tests/EricksonLopez.DomainPrimitives.AotProbe/EricksonLopez.DomainPrimitives.AotProbe.csproj" />
+    <Project Path="tests/EricksonLopez.DomainPrimitives.AotSmokeTest/EricksonLopez.DomainPrimitives.AotSmokeTest.csproj" />
 
   </Folder>
 

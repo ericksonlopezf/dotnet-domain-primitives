@@ -28,7 +28,7 @@ For the full roadmap with detailed rationale, pre-conditions, and strategic cont
 | LATER-001 | Discriminated Unions | LATER | 🟡 Could | High | adr-029, rfc-0007 | ⏳ Planned |
 | LATER-002 | `INumber<T>` for NumericPrimitive | LATER | 🟡 Could | Med | RFC needed | ⏳ Planned |
 | LATER-003 | Community infrastructure | LATER | 🟠 Should | Ongoing | — | ⏳ Planned |
-| LATER-004 | .NET 10 explicit feature targeting | LATER | 🟡 Could | Low | — | ⏳ Planned |
+| LATER-004 | .NET 10 specific API optimizations (net10.0 multi-targeting already shipped) | LATER | 🟡 Could | Low | — | ⏳ Planned |
 | LATER-005 | SuperStrong.Types competitive review | LATER | 🟡 Could | Ongoing | — | ⏳ Planned |
 
 ---
@@ -69,6 +69,7 @@ These items will never be implemented. See [`docs/rejected-features.md`](docs/re
 | `Result<T>` as primary API | [adr-025](docs/adr/adr-025-reject-result-as-primary-api.md) |
 | AutoMapper generated config | [adr-030](docs/adr/adr-030-reject-automapper-integration.md) |
 | Per-property validation on ValueObject | [adr-031](docs/adr/adr-031-reject-per-property-validation-on-valueobject.md) |
+| Dedicated Mapster mapping package | [adr-043](docs/adr/adr-043-discontinue-mapster-package.md) |
 
 ---
 

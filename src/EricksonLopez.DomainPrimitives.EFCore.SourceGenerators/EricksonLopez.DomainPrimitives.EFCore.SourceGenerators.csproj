@@ -19,7 +19,7 @@
     
     <PackageId>EricksonLopez.DomainPrimitives.EFCore.SourceGenerators</PackageId>
     <Description>Source Generators for EF Core integration with EricksonLopez.DomainPrimitives.</Description>
-    <PackageTags>$(CommonPackageTags);efcore;entity-framework-core;source-generator;source-generators;roslyn;value-converter;code-generation;orm</PackageTags>
+    <PackageTags>$(CommonPackageTags);efcore;entity-framework-core;source-generator;roslyn;code-generation;value-converter;orm</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

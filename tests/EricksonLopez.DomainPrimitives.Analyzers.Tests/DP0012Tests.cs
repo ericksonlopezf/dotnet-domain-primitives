@@ -191,14 +191,14 @@ public readonly partial record struct ImplicitEmailAddress;
     }
 
     [Fact]
-    public async Task ExplicitParameterlessConstructor_OnDomainPrimitive_NoDiagnostic()
+    public async Task ExplicitParameterlessConstructor_OnDomainPrimitive_ReportsDiagnostic_ForEmail()
     {
         var testCode = "using EricksonLopez.DomainPrimitives;\n" + AttributeStubs + @"
 
 [Email]
 public readonly partial record struct EmailWithExplicitDefaultCtor
 {
-    public EmailWithExplicitDefaultCtor() { }
+    public {|DP0012:EmailWithExplicitDefaultCtor|}() { }
 }
 ";
         var test = new CSharpAnalyzerTest
@@ -269,6 +269,43 @@ public readonly partial record struct OrderId
         };
         test.TestState.Sources.Add(("OrderId.cs", sourceCode));
         test.TestState.Sources.Add(("OrderId.g.cs", generatedCode));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task PublicParameterlessConstructor_InSource_TriggersDP0012()
+    {
+        var sourceCode = "using EricksonLopez.DomainPrimitives;\n" + AttributeStubs + @"
+
+[StrongId<Guid>]
+public readonly partial record struct OrderId
+{
+    public {|DP0012:OrderId|}() { }
+}
+";
+        var test = new CSharpAnalyzerTest
+        {
+            TestCode = sourceCode,
+            CompilerDiagnostics = CompilerDiagnostics.None
+        };
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task ImplicitParameterlessConstructor_InSource_NoDiagnostic()
+    {
+        var sourceCode = "using EricksonLopez.DomainPrimitives;\n" + AttributeStubs + @"
+
+[StrongId<Guid>]
+public readonly partial record struct OrderId;
+";
+        var test = new CSharpAnalyzerTest
+        {
+            TestCode = sourceCode,
+            CompilerDiagnostics = CompilerDiagnostics.None
+        };
 
         await test.RunAsync();
     }

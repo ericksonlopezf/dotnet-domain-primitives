@@ -12,58 +12,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.EFCore.IntegrationTests;
 
-[StrongId<Guid>]
-public readonly partial record struct CustomerId;
-
-[Email]
-public readonly partial record struct CustomerEmail;
-
-[Money]
-public readonly partial record struct Balance;
-
-[NumericPrimitive<int>]
-public readonly partial record struct LoyaltyPoints;
-
-[SmartEnum<int>]
-public readonly partial record struct MembershipTier
-{
-    public static readonly MembershipTier Standard = new(1, "Standard");
-    public static readonly MembershipTier Premium = new(2, "Premium");
-    public static readonly MembershipTier Vip = new(3, "Vip");
-}
-
-public sealed class CustomerEntity
-{
-    public CustomerId Id { get; set; }
-    public CustomerEmail Email { get; set; }
-    public Balance AccountBalance { get; set; }
-    public LoyaltyPoints Points { get; set; }
-    public MembershipTier Tier { get; set; }
-}
-
-public sealed class TestDbContext : DbContext
-{
-    private readonly SqliteConnection _connection;
-
-    public DbSet<CustomerEntity> Customers => Set<CustomerEntity>();
-
-    public TestDbContext(SqliteConnection connection)
-    {
-        _connection = connection;
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlite(_connection);
-    }
-
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        base.ConfigureConventions(configurationBuilder);
-        configurationBuilder.ConfigureDomainPrimitives();
-    }
-}
-
 public sealed class EFCoreIntegrationTests : IAsyncLifetime
 {
     private SqliteConnection _connection = null!;

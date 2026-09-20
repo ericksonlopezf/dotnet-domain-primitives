@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-030: Reject AutoMapper Generated Configuration
 
 **Date:** 2026-08-10

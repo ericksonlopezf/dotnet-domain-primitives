@@ -1,5 +1,11 @@
 # adr-025: Reject Result<T> as Primary Error API Pattern
 
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 **Date:** 2026-08-10
 **Status:** Accepted
 **Authors:** Core maintainers

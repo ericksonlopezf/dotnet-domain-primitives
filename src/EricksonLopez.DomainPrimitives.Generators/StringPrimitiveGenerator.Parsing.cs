@@ -1,11 +1,5 @@
 // Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using EricksonLopez.DomainPrimitives.Generators.Models;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
@@ -43,8 +37,18 @@ internal sealed partial class StringPrimitiveGenerator
         if (!info.LowerCase && !info.UpperCase && !info.NormalizeWhitespace)
         {
             if (info.Trim) sb.AppendLine("s = s.Trim();");
+            if (info.MaxLength.HasValue)
+            {
+                sb.AppendLine($"if (s.Length > {info.MaxLength.Value}) throw new System.FormatException(\"The span value is not valid.\");");
+            }
+            else
+            {
+                sb.AppendLine("if (s.Length > 1048576) throw new System.FormatException(\"The span value is not valid.\");");
+            }
             // SEC-004: NFC-normalize before validation.
-            sb.AppendLine("var normalized = s.ToString().Normalize(System.Text.NormalizationForm.FormC);");
+            sb.AppendLine("string normalized;");
+            sb.AppendLine("try { normalized = s.ToString().Normalize(System.Text.NormalizationForm.FormC); }");
+            sb.AppendLine("catch (ArgumentException ex) { throw new System.FormatException(\"The span value contains invalid Unicode code points.\", ex); }");
             sb.AppendLine("var error = TryValidateSpan(normalized.AsSpan());");
             sb.AppendLine($"if (error.IsError) throw new System.FormatException(error.Message);");
             sb.AppendLine($"return new {info.TypeName}(normalized);");
@@ -60,14 +64,24 @@ internal sealed partial class StringPrimitiveGenerator
         // TryParse(ReadOnlySpan<char>)
         sb.AppendLine($"public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out {info.TypeName} result)");
         sb.OpenBrace();
+        if (info.Trim) sb.AppendLine("s = s.Trim();");
+        if (info.MaxLength.HasValue)
+        {
+            sb.AppendLine($"if (s.Length > {info.MaxLength.Value}) {{ result = default; return false; }}");
+        }
+        else
+        {
+            sb.AppendLine("if (s.Length > 1048576) { result = default; return false; }");
+        }
         if (!info.LowerCase && !info.UpperCase && !info.NormalizeWhitespace)
         {
-            if (info.Trim) sb.AppendLine("s = s.Trim();");
             // SEC-004: Apply NFC normalization before validation. NFC normalization can change the
             // character count (combining chars → composed), so we must produce a string first.
             // This is the single unavoidable allocation on this path; the stored value must be a
             // System.String and must be in NFC form per the security gate SEC-004.
-            sb.AppendLine("var normalized = s.ToString().Normalize(System.Text.NormalizationForm.FormC);");
+            sb.AppendLine("string normalized;");
+            sb.AppendLine("try { normalized = s.ToString().Normalize(System.Text.NormalizationForm.FormC); }");
+            sb.AppendLine("catch (ArgumentException) { result = default; return false; }");
             sb.AppendLine("var error = TryValidateSpan(normalized.AsSpan());");
             sb.AppendLine("if (error.IsError)");
             sb.OpenBrace();
@@ -117,7 +131,9 @@ internal sealed partial class StringPrimitiveGenerator
                 }
                 // NFC normalization: .Normalize(FormC) may change length — we MUST go to string here.
                 // This is the single unavoidable allocation: the final stored string value.
-                sb.AppendLine("var normalized = buf.ToString().Normalize(System.Text.NormalizationForm.FormC);");
+                sb.AppendLine("string normalized;");
+                sb.AppendLine("try { normalized = buf.ToString().Normalize(System.Text.NormalizationForm.FormC); }");
+                sb.AppendLine("catch (ArgumentException) { result = default; return false; }");
                 sb.AppendLine("var spanError = TryValidate(normalized);");
                 sb.AppendLine("if (spanError.IsError) { result = default; return false; }");
                 sb.AppendLine($"result = new {info.TypeName}(normalized);");
@@ -134,7 +150,9 @@ internal sealed partial class StringPrimitiveGenerator
                 else
                     sb.AppendLine("MemoryExtensions.ToUpperInvariant(s, rentedSpan);");
                 // Single unavoidable allocation at storage time
-                sb.AppendLine("var normalized = rentedSpan.ToString().Normalize(System.Text.NormalizationForm.FormC);");
+                sb.AppendLine("string normalized;");
+                sb.AppendLine("try { normalized = rentedSpan.ToString().Normalize(System.Text.NormalizationForm.FormC); }");
+                sb.AppendLine("catch (ArgumentException) { result = default; return false; }");
                 sb.AppendLine("var spanError = TryValidate(normalized);");
                 sb.AppendLine("if (spanError.IsError) { result = default; return false; }");
                 sb.AppendLine($"result = new {info.TypeName}(normalized);");
@@ -142,7 +160,7 @@ internal sealed partial class StringPrimitiveGenerator
                 sb.CloseBrace();
                 sb.AppendLine("finally");
                 sb.OpenBrace();
-                sb.AppendLine("System.Buffers.ArrayPool<char>.Shared.Return(rented);");
+                sb.AppendLine("System.Buffers.ArrayPool<char>.Shared.Return(rented, clearArray: true);");
                 sb.CloseBrace();
                 sb.CloseBrace();
             }
@@ -159,6 +177,14 @@ internal sealed partial class StringPrimitiveGenerator
         sb.AppendLine("#if NET8_0_OR_GREATER");
         sb.AppendLine($"public static {info.TypeName} Parse(ReadOnlySpan<byte> utf8, IFormatProvider? provider)");
         sb.OpenBrace();
+        if (info.MaxLength.HasValue)
+        {
+            sb.AppendLine($"if (utf8.Length > {Math.Max(512, info.MaxLength.Value * 4)}) throw new System.FormatException(\"The span value is not valid.\");");
+        }
+        else
+        {
+            sb.AppendLine("if (utf8.Length > 1048576) throw new System.FormatException(\"The span value is not valid.\");");
+        }
         sb.AppendLine("// TD-003: Use GetMaxCharCount (O(1)) for the size guard — no traversal needed.");
         sb.AppendLine("// The real char count comes from GetChars() which returns the exact decoded length.");
         sb.AppendLine("int maxCount = System.Text.Encoding.UTF8.GetMaxCharCount(utf8.Length);");
@@ -179,7 +205,7 @@ internal sealed partial class StringPrimitiveGenerator
         sb.CloseBrace();
         sb.AppendLine("finally");
         sb.OpenBrace();
-        sb.AppendLine("System.Buffers.ArrayPool<char>.Shared.Return(rented);");
+        sb.AppendLine("System.Buffers.ArrayPool<char>.Shared.Return(rented, clearArray: true);");
         sb.CloseBrace();
         sb.CloseBrace();
         sb.CloseBrace();
@@ -188,6 +214,14 @@ internal sealed partial class StringPrimitiveGenerator
         // TryParse(ReadOnlySpan<byte>)
         sb.AppendLine($"public static bool TryParse(ReadOnlySpan<byte> utf8, IFormatProvider? provider, out {info.TypeName} result)");
         sb.OpenBrace();
+        if (info.MaxLength.HasValue)
+        {
+            sb.AppendLine($"if (utf8.Length > {Math.Max(512, info.MaxLength.Value * 4)}) {{ result = default; return false; }}");
+        }
+        else
+        {
+            sb.AppendLine("if (utf8.Length > 1048576) { result = default; return false; }");
+        }
         sb.AppendLine("int maxCount = System.Text.Encoding.UTF8.GetMaxCharCount(utf8.Length);");
         sb.AppendLine("if (maxCount <= 256)");
         sb.OpenBrace();
@@ -205,7 +239,7 @@ internal sealed partial class StringPrimitiveGenerator
         sb.CloseBrace();
         sb.AppendLine("finally");
         sb.OpenBrace();
-        sb.AppendLine("System.Buffers.ArrayPool<char>.Shared.Return(rented);");
+        sb.AppendLine("System.Buffers.ArrayPool<char>.Shared.Return(rented, clearArray: true);");
         sb.CloseBrace();
         sb.CloseBrace();
         sb.CloseBrace();

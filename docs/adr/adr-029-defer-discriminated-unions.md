@@ -1,9 +1,15 @@
 # adr-029: Discriminated Unions — Deferred to v2.x
 
+## Status
+Accepted
+
+## Date
+2026-08-10
+
 **Date:** 2026-08-10 (Revised: 2026-08-19)
 **Status:** Deferred
 **Authors:** Core maintainers
-**Related audit items:** GAP-001 (feature-gaps.md), AUDITORIA_PARIDAD_FUNCIONAL.md §19
+**Related audit items:** GAP-001 (feature-gaps.md), FUNCTIONAL_PARITY_AUDIT.md §19
 
 ---
 

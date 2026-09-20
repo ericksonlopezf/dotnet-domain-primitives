@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AwesomeAssertions;
 using Chapter19;
 using EricksonLopez.DomainPrimitives;
 using EricksonLopez.DomainPrimitives.Testing;
@@ -206,6 +207,32 @@ Console.WriteLine("      DomainPrimitiveVerifyExtensions.Initialize();");
 Console.WriteLine("      // Now Verify will serialize CustomerId as \"3fa85f64-...\"");
 Console.WriteLine("      // instead of {\"Value\": \"3fa85f64-...\"}");
 Console.WriteLine("  }");
+
+Console.WriteLine();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION 4: DomainPrimitiveAssertionsExtensions — AwesomeAssertions Extension Methods
+// ─────────────────────────────────────────────────────────────────────────────
+Console.WriteLine("--- 🧪 SECTION 4: DomainPrimitiveAssertionsExtensions ---\n");
+RunTest("DomainPrimitiveAssertionsExtensions verification", () =>
+{
+    Action badAct = () => TestEmail.Create("invalid-email");
+    badAct.Should().ThrowDomainPrimitiveException();
+    badAct.Should().ThrowDomainPrimitiveExceptionWithPrimitiveErrorCode("FORMAT");
+
+    DomainPrimitiveAssertionsExtensions.ShouldFailCreationWith<TestEmail, string>("invalid-email", "FORMAT");
+    var createdEmail = DomainPrimitiveAssertionsExtensions.ShouldSucceedCreation<TestEmail, string>("valid@example.com");
+
+    object validEmailObj = "valid@example.com";
+    validEmailObj.Should().ShouldBeValidPrimitive<TestEmail, string>();
+
+    object invalidEmailObj = "not-an-email";
+    invalidEmailObj.Should().ShouldHaveValidationPrimitiveError<TestEmail, string>("FORMAT");
+
+    object createdPrimitiveObj = createdEmail;
+    createdPrimitiveObj.Should().HavePrimitiveValue<TestEmail, string>("valid@example.com");
+    Console.WriteLine("    All 7 DomainPrimitiveAssertionsExtensions executed cleanly ✅");
+});
 
 Console.WriteLine();
 

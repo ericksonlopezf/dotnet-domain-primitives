@@ -168,6 +168,56 @@ public class NumericPrimitiveTests
             .WithMessage("*PrimitiveRangeScore must be at most 10*")
             .Where(e => e.Error.Code == "RANGE");
     }
+
+    [Fact]
+    public void ExplicitCast_DefaultInstance_ThrowsInvalidOperationException()
+    {
+        var defaultScore = default(Score);
+        defaultScore.IsDefault.Should().BeTrue();
+
+        Action act = () => { var _ = (int)defaultScore; };
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Cannot convert a default Score to int. Check IsDefault before casting.*");
+    }
+
+    [Fact]
+    public void ExplicitCast_ValidInstance_Succeeds()
+    {
+        var score = Score.Create(42);
+        var raw = (int)score;
+        raw.Should().Be(42);
+    }
+
+    [Fact]
+    public void MathIntScore_ScalarMultiplication_Overflow_ThrowsOverflowException()
+    {
+        var val = MathIntScore.Create(int.MaxValue);
+        Action act = () => { var _ = val * 2; };
+        act.Should().Throw<OverflowException>();
+    }
+
+    [Fact]
+    public void MathIntScore_UnaryNegation_MinValue_ThrowsOverflowException()
+    {
+        var min = MathIntScore.Create(int.MinValue);
+        Action act = () => { var _ = -min; };
+        act.Should().Throw<OverflowException>();
+    }
+
+    [Fact]
+    public void MathIntScore_ValidArithmetic_Succeeds()
+    {
+        var a = MathIntScore.Create(10);
+        var b = MathIntScore.Create(20);
+        var sum = a + b;
+        sum.Value.Should().Be(30);
+
+        var multiplied = a * 5;
+        multiplied.Value.Should().Be(50);
+
+        var negated = -a;
+        negated.Value.Should().Be(-10);
+    }
 }
 
 

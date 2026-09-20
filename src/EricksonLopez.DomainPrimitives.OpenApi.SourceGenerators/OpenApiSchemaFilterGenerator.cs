@@ -22,10 +22,10 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
             .Where(static m => m.HasValue)
             .Select(static (m, _) => m!.Value);
 
-        var compilationAndStructs = context.CompilationProvider.Combine(structDeclarations.Collect());
+        var collectedStructs = structDeclarations.Collect();
 
-        context.RegisterSourceOutput(compilationAndStructs,
-            static (spc, source) => Execute(source.Left, source.Right, spc));
+        context.RegisterSourceOutput(collectedStructs,
+            static (spc, structs) => Execute(structs, spc));
     }
 
     internal static bool IsDomainPrimitiveAttribute(AttributeData a)
@@ -102,7 +102,7 @@ internal sealed class OpenApiSchemaFilterGenerator : IIncrementalGenerator
         return new PrimitiveInfo(symbol.ContainingNamespace.ToDisplayString(), symbol.Name, openApiType, openApiFormat, isSmartEnum);
     }
 
-    private static void Execute(Compilation compilation, ImmutableArray<PrimitiveInfo> primitives, SourceProductionContext context)
+    private static void Execute(ImmutableArray<PrimitiveInfo> primitives, SourceProductionContext context)
     {
         if (primitives.IsDefaultOrEmpty) return;
 

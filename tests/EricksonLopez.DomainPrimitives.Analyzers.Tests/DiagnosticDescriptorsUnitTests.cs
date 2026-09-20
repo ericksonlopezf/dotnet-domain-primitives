@@ -256,4 +256,18 @@ public class DiagnosticDescriptorsUnitTests
         d.CustomTags.Should().Contain(WellKnownDiagnosticTags.CompilationEnd);
         d.HelpLinkUri.Should().Be("https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0017.md");
     }
+
+    [Fact]
+    public void DP0018_ValueObjectMutableCollection_HasExpectedMetadata()
+    {
+        var d = DiagnosticDescriptors.DP0018_ValueObjectMutableCollection;
+        d.Id.Should().Be("DP0018");
+        d.Title.ToString().Should().Be("Value object property should not be a mutable collection or array");
+        d.MessageFormat.ToString().Should().Be("Property '{0}' on ValueObject '{1}' uses mutable type '{2}'. Use ImmutableArray<T> or a read-only collection to guarantee immutability.");
+        d.Category.Should().Be(DiagnosticCategories.Design);
+        d.DefaultSeverity.Should().Be(DiagnosticSeverity.Warning);
+        d.IsEnabledByDefault.Should().BeTrue();
+        d.Description.ToString().Should().Be("Value objects must be deeply immutable. Properties of type array (T[]) or mutable collections like List<T> allow mutation of internal state.");
+        d.HelpLinkUri.Should().Be("https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/rules/dp0018.md");
+    }
 }

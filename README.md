@@ -1,6 +1,6 @@
 # EricksonLopez.DomainPrimitives
 
-Zero-allocation, compile-time validated Domain Primitives, SmartEnums, and Roslyn Code Analyzers for modern .NET enterprise systems.
+Allocation-minimized, compile-time validated Domain Primitives, SmartEnums, and Roslyn Code Analyzers for modern .NET enterprise systems.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/ericksonlopezf/dotnet-domain-primitives/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/ericksonlopezf/dotnet-domain-primitives/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/ericksonlopezf/dotnet-domain-primitives?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/ericksonlopezf/dotnet-domain-primitives)
@@ -14,7 +14,7 @@ Zero-allocation, compile-time validated Domain Primitives, SmartEnums, and Rosly
 
 ---
 
-**EricksonLopez.DomainPrimitives** is the enterprise standard for modeling **provably valid, zero-allocation scalar value types, strongly-typed identifiers, composite value objects, and SmartEnums** in modern .NET (`.NET 8`, `.NET 9`, `.NET 10`). By combining compile-time Roslyn source generators, architectural code analyzers, and NativeAOT-first converters, it eliminates Primitive Obsession and defensive validation boilerplate while delivering bare-metal execution performance and zero heap allocations.
+**EricksonLopez.DomainPrimitives** is the enterprise standard for modeling **provably valid, allocation-minimized scalar value types, strongly-typed identifiers, composite value objects, and SmartEnums** in modern .NET (`.NET 8`, `.NET 9`, `.NET 10`). By combining compile-time Roslyn source generators, architectural code analyzers, and NativeAOT-first converters, it eliminates Primitive Obsession and defensive validation boilerplate while delivering bare-metal execution performance and allocation-minimized hot paths.
 
 ---
 
@@ -24,9 +24,12 @@ Zero-allocation, compile-time validated Domain Primitives, SmartEnums, and Rosly
 - [Key Features](#-key-features)
 - [Ecosystem](#-ecosystem)
 - [Documentation](#-documentation)
-  - [Interactive Showcase (Levels 00 to 08)](#-step-by-step-interactive-showcase-levels-00-to-08)
+  - [Step-by-Step Interactive Showcase (Levels 00 to 10)](#-step-by-step-interactive-showcase-levels-00-to-10)
   - [Technical Reference & Architecture Guides](#-technical-reference--architecture-guides)
 - [Installation](#-installation)
+  - [1. Core Package (Required)](#1-core-package-required)
+  - [2. Optional Framework & Integration Packages](#2-optional-framework--integration-packages)
+  - [3. Testing & Assertion Packages](#3-testing--assertion-packages)
 - [Quick Start](#-quick-start)
   - [1. Declarative Domain Primitive](#1-declarative-domain-primitive)
   - [2. Strongly-Typed Identifier](#2-strongly-typed-identifier)
@@ -66,6 +69,8 @@ Zero-allocation, compile-time validated Domain Primitives, SmartEnums, and Rosly
 - [Troubleshooting & Common Pitfalls](#-troubleshooting--common-pitfalls)
 - [Part of the EricksonLopez Ecosystem](#-part-of-the-ericksonlopez-ecosystem)
 - [Contributing](#-contributing)
+  - [Prerequisites](#prerequisites)
+  - [Development Workflow](#development-workflow)
 - [License](#-license)
 
 ---
@@ -86,21 +91,21 @@ Primitive Obsession is among the most pervasive anti-patterns in enterprise soft
 ### How `EricksonLopez.DomainPrimitives` Solves This
 
 - **Guaranteed Validity by Construction:** Instances cannot be created in an invalid state. Constructors are private and creation is routed through source-generated `Create`, `TryCreate`, and `TryParse` methods that enforce validation rules deterministically.
-- **Zero Heap Allocations on Hot Paths:** Source-generated primitives are `readonly partial record struct` types that reside entirely on the stack or inline within entity memory layouts, achieving identical memory efficiency to raw BCL primitives (**0 bytes allocated**).
+- **Allocation-Minimized Hot Paths:** Source-generated primitives are `readonly partial record struct` types that reside entirely on the stack or inline within entity memory layouts. Non-string primitives and StrongIds achieve **0 bytes allocated**. String primitives with NFC Unicode normalization incur exactly **1 string allocation** per value (required for homoglyph-attack prevention per SEC-004 / [ADR-027](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/adr/adr-027-positioning-zero-allocation-correction.md)).
 - **Compile-Time Incremental Code Generation:** All factory methods, parsers (`IParsable<T>`, `ISpanParsable<T>`, `IUtf8SpanParsable<T>`), formatters (`ISpanFormattable`, `IUtf8SpanFormattable`), equality operators, JSON converters, EF Core ValueConverters, and Dapper TypeHandlers are emitted at compile time.
-- **Live IDE Architectural Enforcement:** 17 dedicated Roslyn analyzers (DP0001–DP0017) intercept invalid modeling patterns, direct string comparisons, and public constructor bypasses in real time with automated code fixes.
+- **Live IDE Architectural Enforcement:** 18 dedicated Roslyn analyzers (DP0001–DP0018) intercept invalid modeling patterns, direct string comparisons, and public constructor bypasses in real time with automated code fixes.
 - **Full NativeAOT & Trimming Compatibility:** Zero runtime reflection and zero dynamic IL emission guarantee instant startup, minimal binary footprints, and full compatibility with NativeAOT publishing.
 
 ---
 
 ## ⚡ Key Features
 
-- 🚀 **Zero-Allocation Memory Footprint**: Stack-allocated `readonly record struct` value types guarantee 0 B heap allocation on creation, comparison, and parsing hot paths.
+- 🚀 **Allocation-Minimized Memory Footprint**: Stack-allocated `readonly record struct` value types achieve **0 B** on non-string paths (StrongId, SmartEnum, NumericPrimitive). String primitives incur 1 allocation for NFC normalization. See [Performance Benchmarks](#-performance-benchmarks).
 - 🛠️ **Roslyn Incremental Source Generators**: Compile-time emission of `IParsable<T>`, `ISpanParsable<T>`, `IUtf8SpanParsable<T>`, `ISpanFormattable`, and explicit conversion operators.
-- 🔍 **Live Architectural Code Analyzers**: 17 Roslyn diagnostic rules (DP0001–DP0017) with automated code fixes enforce immutability, validation integrity, and API surface budgets.
-- 🏷️ **30+ Pre-Configured Semantic Shortcuts**: Instant domain modeling with built-in attributes for strings (`[Email]`, `[Phone]`, `[Url]`, `[Slug]`, `[CountryCode]`, `[IBAN]`, `[ISBN]`) and numerics (`[Money]`, `[Price]`, `[TaxRate]`, `[Percentage]`, `[Quantity]`, `[Rating]`).
+- 🔍 **Live Architectural Code Analyzers**: 18 Roslyn diagnostic rules (DP0001–DP0018) with automated code fixes enforce immutability, validation integrity, and API surface budgets.
+- 🏷️ **39 Pre-Configured Semantic Shortcuts**: Instant domain modeling with built-in attributes for strings (`[Email]`, `[Phone]`, `[Url]`, `[Slug]`, `[CountryCode]`, `[IBAN]`, `[ISBN]`) and numerics (`[Money]`, `[Price]`, `[TaxRate]`, `[Percentage]`, `[Quantity]`, `[Rating]`).
 - 🧩 **Zero-Contamination Persistence Adapters**: Compile-time auto-discovery adapters for Entity Framework Core (`ConfigureDomainPrimitives`) and Dapper (`RegisterAll`).
-- 🌐 **NativeAOT & Trimming-First Architecture**: 100% trim-safe execution with zero reflection, verified by continuous NativeAOT smoke testing.
+- 🌐 **NativeAOT & Trimming-First Architecture**: 100% trim-safe execution with zero reflection for all core and integration packages (see [compatibility table](#target-frameworks--nativeaot)). The legacy `NewtonsoftJson` package is excluded — see footnote ¹.
 - 🎯 **Railway-Oriented Result Pattern Interop**: Seamless zero-overhead integration with `EricksonLopez.Result` and third-party functional monads via the `TryCreate` `out` parameter pattern.
 - 🧪 **Comprehensive Testing & Data Tooling**: Fluent assertions, scenario suites (`DomainPrimitiveScenarios`), and realistic fake data generators (`DomainPrimitiveFakeFactory`).
 
@@ -118,6 +123,15 @@ Primitive Obsession is among the most pervasive anti-patterns in enterprise soft
 | [`EricksonLopez.DomainPrimitives.OpenApi`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.OpenApi) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.OpenApi?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.OpenApi) | Swagger / OpenAPI schema filter generators for primitive documentation |
 | [`EricksonLopez.DomainPrimitives.Testing`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Testing) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.Testing?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Testing) | Fluent assertions, test builders, scenario data, and fake generators |
 | [`EricksonLopez.DomainPrimitives.NewtonsoftJson`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.NewtonsoftJson) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.NewtonsoftJson?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.NewtonsoftJson) | Newtonsoft.Json contract resolvers and converters for legacy systems |
+| [`EricksonLopez.DomainPrimitives.Analyzers`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Analyzers) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.Analyzers?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Analyzers) | Roslyn diagnostic analyzers (DP0001–DP0018) and automated code fixes |
+| [`EricksonLopez.DomainPrimitives.Generators`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Generators) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.Generators?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Generators) | Roslyn incremental source generators emitting parsers, formatters, and factory methods |
+| [`EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators) | Roslyn source generators emitting ASP.NET Core model binding and route parsers |
+| [`EricksonLopez.DomainPrimitives.EFCore.SourceGenerators`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.EFCore.SourceGenerators) | Roslyn source generators emitting EF Core ValueConverter configurations |
+| [`EricksonLopez.DomainPrimitives.Dapper.SourceGenerators`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.Dapper.SourceGenerators) | Roslyn source generators emitting Dapper TypeHandler registrations |
+| [`EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators`](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators) | [![NuGet](https://img.shields.io/nuget/v/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators?style=flat-square)](https://www.nuget.org/packages/EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators) | Roslyn source generators emitting OpenAPI schema filters and descriptions |
+
+> [!NOTE]
+> The ecosystem consists of **14 coordinated NuGet packages** released in lockstep, including 6 compile-time Roslyn Source Generator and Analyzer packages (`Generators`, `Analyzers`, `AspNetCore.SourceGenerators`, `EFCore.SourceGenerators`, `Dapper.SourceGenerators`, `OpenApi.SourceGenerators`). See the [Full Packages Specification](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/packages.md) for the complete dependency graph and target framework matrix.
 
 ---
 
@@ -125,30 +139,41 @@ Primitive Obsession is among the most pervasive anti-patterns in enterprise soft
 
 > 🌐 **Official Documentation Hub:** [https://github.com/ericksonlopezf/dotnet-domain-primitives/tree/main/docs](https://github.com/ericksonlopezf/dotnet-domain-primitives/tree/main/docs)
 
-### 🎓 Step-by-Step Interactive Showcase (Levels 00 to 08)
+### 🎓 Step-by-Step Interactive Showcase (Levels 00 to 10)
 
-| Level | Topic | Description |
-|---|---|---|
-| [**Level 00**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-00-introduction.md) | **Architecture & Philosophy** | Core architectural foundations and design invariants |
-| [**Level 01**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-01-domain-primitives-and-validation.md) | **Domain Primitives & Validation** | Implementing validated struct primitives with Result-first flows |
-| [**Level 02**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-02-smart-enums-and-state-machines.md) | **SmartEnums & State Machines** | Modeling polymorphic business states and transition guards |
-| [**Level 03**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-03-roslyn-analyzers-and-diagnostics.md) | **Roslyn Analyzers** | Compile-time architectural invariants and automated IDE code fixes |
-| [**Level 04**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-04-source-generators-and-native-aot.md) | **Source Generation & NativeAOT** | Compile-time code generation for zero-reflection execution |
-| [**Level 05**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-05-aspnetcore-and-openapi-integration.md) | **ASP.NET Core & OpenAPI** | Binding primitives in Minimal APIs and OpenAPI documentation |
-| [**Level 06**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-06-efcore-and-dapper-persistence.md) | **EF Core & Dapper Persistence** | Relational column mapping and Dapper type handlers |
-| [**Level 07**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-07-serialization-systemtextjson-and-newtonsoft.md) | **JSON Serialization** | Direct token serialization with System.Text.Json & Newtonsoft |
-| [**Level 08**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-08-fluent-unit-testing-and-assertions.md) | **Fluent Testing & Assertions** | Writing expressive unit tests with fluent validation matchers |
+> 📖 **Showcase Catalog & Implementation Guide:** [`docs/showcase/readme.md`](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/readme.md)
+
+| Level | Topic | Showcase Projects | Description |
+|---|---|---|---|
+| [**Level 00**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-00-conceptual.md) | **Conceptual Architecture** | `README.md` | Core foundational philosophy, advantages, trade-offs, and competitive comparisons |
+| [**Level 01**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-01-quickstart.md) | **Quick Start** | `01-GettingStarted` | Minimum configuration, first functional primitive (`[Email]`, `[StrongId<Guid>]`), `TryCreate` |
+| [**Level 02**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-02-full-configuration.md) | **Full Configuration** | `08-SerializationAndMapping`, `09-SourceGenerators`, `11-SmartEnums` | Assembly defaults (`[assembly: DomainPrimitivesDefaults]`), JSON serialization, Smart Enums |
+| [**Level 03**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-03-real-use-cases.md) | **Real Use Cases** | `04-ValueObjects`, `05-StronglyTypedIds`, `13-DomainCollections` | 38+ semantic shortcuts, composite Value Objects, collection extensions (`ToDomainPrimitiveList`) |
+| [**Level 04**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-04-advanced-integration.md) | **Advanced Integration** | `15-AspNetCoreIntegration`, `16-EFCoreIntegration`, `17-MediatRIntegration` | ASP.NET Core model binding, EF Core `ConfigureDomainPrimitives()`, MediatR CQRS pipelines |
+| [**Level 05**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-05-processing.md) | **Processing** | `21-BackgroundProcessing` | High-throughput `Channel<T>` producer/consumer with boundary reconstruction via `TryCreate` |
+| [**Level 06**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-06-error-handling.md) | **Error Handling** | `02-FirstResult`, `03-Errors`, `19-UnitTesting` | `PrimitiveError` struct, standardized error codes, Result pattern, fluent test builders |
+| [**Level 07**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-07-scalability.md) | **Scalability & Performance** | `14-Performance` | Stack-allocated structs, zero GC allocations on success, span-based parsing (`ISpanParsable<T>`) |
+| [**Level 08**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-08-customization.md) | **Customization** | `22-CustomImplementations` | Custom validators (`ICustomValidator<T>`), normalizers (`INormalizer<T>`), `PrimitiveBuilder` |
+| [**Level 09**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-09-extensions.md) | **Extensions** | `18-Observability`, `23-DapperIntegration`, `24-OpenApiIntegration` | OpenTelemetry metrics, static event sources, Dapper `RegisterAll()`, OpenAPI Swagger filters |
+| [**Level 10**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/showcase/level-10-enterprise-architecture.md) | **Enterprise Architecture** | `06-EntitiesAndAggregates`, `07-DomainEvents`, `12-Specifications`, `20-EndToEndApplication` | Tactical DDD aggregates, domain events, specification pattern, full Clean Architecture |
 
 ### 📖 Technical Reference & Architecture Guides
 
+- [**Public API Inventory**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/api-inventory.md) — 100% authoritative inventory of public types, attributes, and extension methods.
+- [**Architecture Functional Map**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/functional-map.md) — Complete 8-stage lifecycle mapping across presentation, domain, and persistence.
+- [**API Reference**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/api-reference.md) — Comprehensive Microsoft Learn standard documentation for public methods.
 - [**Architecture & Invariants**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/architecture.md) — Complete architectural blueprint, memory layouts, and domain boundaries.
-- [**Architectural Decision Records (ADRs)**](https://github.com/ericksonlopezf/dotnet-domain-primitives/tree/main/docs/adr) — 43 formal ADRs documenting design rationale and rejected proposals.
+- [**Architecture & Flow Diagrams**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/diagrams.md) — 8 Mermaid diagrams covering architecture, sequence, state, and pipeline.
+- [**Architectural Decision Records (ADRs)**](https://github.com/ericksonlopezf/dotnet-domain-primitives/tree/main/docs/adr) — 45 formal ADRs documenting design rationale and rejected proposals.
 - [**Technical Audit**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/audit.md) — Comprehensive technical audit, guarantees, and system invariants.
 - [**Competitive Audit**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/competitive-audit.md) — In-depth market comparison vs StronglyTypedId and Vogen.
 - [**Features & Compatibility Matrix**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/features-matrix.md) — Target framework matrix, diagnostics, and supported features.
-- [**Roslyn Diagnostic Rules Reference**](https://github.com/ericksonlopezf/dotnet-domain-primitives/tree/main/docs/rules) — Complete reference for analyzer rules DP0001 through DP0017.
+- [**Roslyn Diagnostic Rules Reference**](https://github.com/ericksonlopezf/dotnet-domain-primitives/tree/main/docs/rules) — Complete reference for analyzer rules DP0001 through DP0018.
 - [**Testing & Quality Audit**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/quality-audit.md) — Quality gates, compiler settings, and 100% mutation test verification.
-- [**Cookbook & Production Recipes**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/cookbook.md) — 16 ready-to-use production recipes for enterprise architectures.
+- [**Cookbook & Production Recipes**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/cookbook.md) — 18 ready-to-use production recipes for enterprise architectures.
+- [**Best Practices & Guidelines**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/best-practices.md) — Official production guidelines for domain modeling and persistence.
+- [**Troubleshooting & FAQ**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/troubleshooting.md) — Common compiler errors, Roslyn analyzer fixes, and FAQ ([FAQ Guide](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/faq.md)).
+- [**Migration Guide**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/migration-guide.md) — Step-by-step upgrade guide, breaking changes, and deprecations.
 - [**Allocation & Memory Analysis**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/analysis/allocations.md) — Deep-dive memory analysis and zero-allocation proofs.
 - [**Mutation Score Report**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/mutation-score.md) — Package-by-package Stryker.NET mutation testing score report.
 - [**Security Architecture**](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/security.md) — ReDoS prevention, Unicode NFC normalization, and PII protection specs.
@@ -166,7 +191,7 @@ Install the necessary packages using the .NET CLI or NuGet Package Manager:
 dotnet add package EricksonLopez.DomainPrimitives
 ```
 
-### 2. Optional Framework & Persistence Packages
+### 2. Optional Framework & Integration Packages
 
 ```bash
 # ASP.NET Core Minimal APIs & MVC model binding
@@ -511,7 +536,7 @@ settings.AddDomainPrimitives(); // Registers ContractResolver and converters
 
 ### Roslyn Diagnostic Analyzers
 
-The `EricksonLopez.DomainPrimitives.Analyzers` package provides 17 compile-time rules to enforce domain modeling invariants:
+The `EricksonLopez.DomainPrimitives.Analyzers` package provides 18 compile-time rules to enforce domain modeling invariants:
 
 | Diagnostic ID | Severity | Category | Description | CodeFix |
 |---|:---:|---|---|:---:|
@@ -530,8 +555,9 @@ The `EricksonLopez.DomainPrimitives.Analyzers` package provides 17 compile-time 
 | **DP0013** | Info | Design | Possible duplicate domain primitive logic detected | ❌ Manual |
 | **DP0014** | Warning | ApiReview | API surface budget exceeded on domain primitive | ❌ Manual |
 | **DP0015** | Warning | ApiReview | Public member on domain primitive is missing XML documentation | ❌ Manual |
-| **DP0016** | Warning | ApiReview | Custom factory method must be named `Create`, `TryCreate`, or `TryParse` | ❌ Manual |
+| **DP0016** | Warning | ApiReview | Custom factory method must be named `Create`, `TryCreate`, `Parse`, or `TryParse` | ❌ Manual |
 | **DP0017** | Error | Correctness | Invalid custom exception type in `[DomainPrimitivesDefaults]` | ❌ Manual |
+| **DP0018** | Warning | Design | Value object property should not be a mutable collection or array | ❌ Manual |
 
 ---
 
@@ -592,15 +618,23 @@ foreach (var (raw, expected) in scenarios)
 
 Every build is verified against a strict quality gate pipeline enforcing 100% mutant eradication:
 
-| Package | Mutants Total | Mutants Killed | Mutation Score | Status |
-|---|:---:|:---:|:---:|:---:|
-| `EricksonLopez.DomainPrimitives` | 312 | 312 | **100.0%** | ✅ PASSED |
-| `EricksonLopez.DomainPrimitives.Abstractions` | 48 | 48 | **100.0%** | ✅ PASSED |
-| `EricksonLopez.DomainPrimitives.AspNetCore` | 64 | 64 | **100.0%** | ✅ PASSED |
-| `EricksonLopez.DomainPrimitives.EFCore` | 52 | 52 | **100.0%** | ✅ PASSED |
-| `EricksonLopez.DomainPrimitives.Dapper` | 50 | 50 | **100.0%** | ✅ PASSED |
-| `EricksonLopez.DomainPrimitives.Testing` | 36 | 36 | **100.0%** | ✅ PASSED |
-| **Total Aggregate Quality Score** | **562** | **562** | **100.0%** | ✅ **VERIFIED** |
+| Package | Mutation Score | Status |
+|---|:---:|:---:|
+| `EricksonLopez.DomainPrimitives` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.Abstractions` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.Generators` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.Analyzers` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.AspNetCore` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.EFCore` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.EFCore.SourceGenerators` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.Dapper` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.Dapper.SourceGenerators` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.OpenApi` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.OpenApi.SourceGenerators` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.NewtonsoftJson` | **100.0%** | ✅ PASSED |
+| `EricksonLopez.DomainPrimitives.Testing` | **100.0%** | ✅ PASSED |
+| **Ecosystem Aggregate (14 packages)** | **100.0%** | ✅ **VERIFIED** |
 
 ---
 
@@ -619,7 +653,7 @@ Every build is verified against a strict quality gate pipeline enforcing 100% mu
 | **`[SmartEnum]` Lookup** (`OrderStatus.FromValue(2)`) | **2.14 ns** | - | **0 B** | ✅ |
 | **`[NumericPrimitive]` Add** (`Money.Add(a, b)`) | **0.19 ns** | - | **0 B** | ✅ |
 
-*\*Note: String normalization requires 1 allocation for `string.Normalize(NormalizationForm.FormC)` per Unicode security standards (SEC-004 / ADR-027).*
+*\*Note: String normalization requires 1 allocation for `string.Normalize(NormalizationForm.FormC)` per Unicode security standards (SEC-004 / [ADR-027](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/adr/adr-027-positioning-zero-allocation-correction.md)).*
 
 ### BCL Span & UTF-8 Zero-Allocation Paths
 
@@ -655,7 +689,9 @@ Every build is verified against a strict quality gate pipeline enforcing 100% mu
 | `EricksonLopez.DomainPrimitives.Dapper` | ✅ Supported | ✅ Supported | ✅ Supported | ✅ Supported | ✅ 100% Trim-Safe |
 | `EricksonLopez.DomainPrimitives.OpenApi` | ✅ Supported | ✅ Supported | ✅ Supported | ✅ Supported | ✅ 100% Trim-Safe |
 | `EricksonLopez.DomainPrimitives.Testing` | ✅ Supported | ✅ Supported | ✅ Supported | ✅ Supported | ✅ 100% Trim-Safe |
-| `EricksonLopez.DomainPrimitives.NewtonsoftJson` | ✅ Supported | ✅ Supported | ✅ Supported | ✅ Supported | ✅ 100% Trim-Safe |
+| `EricksonLopez.DomainPrimitives.NewtonsoftJson` | ✅ Supported | ✅ Supported | ✅ Supported | ❌ Not Compatible¹ | ❌ Not Trim-Safe¹ |
+
+> ¹ `EricksonLopez.DomainPrimitives.NewtonsoftJson` is a **legacy compatibility package** targeting projects that cannot migrate to `System.Text.Json`. It uses Newtonsoft.Json's reflection-based pipeline (`[RequiresDynamicCode]` is applied on the converter) and is therefore **not NativeAOT or trimming compatible** (`IsAotCompatible=false`, `IsTrimmable=false` in the project file). For NativeAOT scenarios, use `System.Text.Json` with the source-generated converters bundled in `EricksonLopez.DomainPrimitives` instead. See [ADR-026](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/docs/adr/adr-026-newtonsoft-json-gap-plan.md).
 
 ### Primitive Category Taxonomy & Generated Interfaces
 
@@ -669,6 +705,8 @@ Every build is verified against a strict quality gate pipeline enforcing 100% mu
 | **Value Object** | `[ValueObject]` | Composite | `IDomainPrimitive<TSelf>`, `IParsable<T>`, `ISpanParsable<T>`, structural equality |
 
 ---
+
+> 🛡️ **Target Framework & Lifecycle Policy**: First-class multi-targeting across `.NET 10` (Modern LTS), `.NET 9` (STS), and `.NET 8` (Enterprise LTS) — along with `.NET Standard 2.0` for Roslyn analyzers and source generators — is actively maintained. Full backward compatibility is guaranteed until Microsoft officially reaches End-of-Life (EOL) for .NET 8 and .NET 9 in November 2026, at which milestone the ecosystem will transition to .NET 10 and .NET 11.
 
 ## 🏛️ Architecture & Design Principles
 
@@ -831,5 +869,4 @@ Please review our [Contributing Guidelines](https://github.com/ericksonlopezf/do
 
 ## 📄 License
 
-Distributed under the [MIT License](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/LICENSE).  
-Copyright © 2026 Erickson Lopez. All rights reserved.
+Distributed under the [MIT License](https://github.com/ericksonlopezf/dotnet-domain-primitives/blob/main/LICENSE). Copyright © 2026 Erickson Lopez. All rights reserved.

@@ -1,9 +1,15 @@
 # adr-039: Abstractions.Net8 Multi-Targeting Strategy
 
+## Status
+Accepted — Pending Implementation
+
+## Date
+2026-08-19
+
 **Date:** 2026-08-19  
-**Status:** Accepted (Implementation planned for v2.0.0 — package does not exist in v1.x)  
+**Status:** Accepted — Pending Implementation (package not yet published; planned for post-v2.0.0)  
 **Authors:** Core maintainers  
-**Related audit items:** Section 13 (AUDITORIA_PARIDAD_FUNCIONAL.md §13, §19, §23)  
+**Related audit items:** Section 13 (FUNCTIONAL_PARITY_AUDIT.md §13, §19, §23)  
 
 ---
 

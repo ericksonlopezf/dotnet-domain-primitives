@@ -5,14 +5,15 @@
     <AssemblyName>EricksonLopez.DomainPrimitives.Abstractions</AssemblyName>
     <RootNamespace>EricksonLopez.DomainPrimitives</RootNamespace>
     <!-- NativeAOT and trimming compatibility -->
-    <NoWarn>$(NoWarn);RS0016;RS0017;RS0024</NoWarn>
-    <PackageTags>$(CommonPackageTags);abstractions;attributes;contracts;value-objects;strongly-typed-id;smart-enum;validation;native-aot</PackageTags>
+    <PackageTags>$(CommonPackageTags);abstractions;attributes;contracts;value-object;strongly-typed-id;smart-enum;validation;native-aot</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <IsTrimmable>true</IsTrimmable>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <!-- In netstandard2.0, static abstract interface members and span extensions are omitted -->
+    <NoWarn>$(NoWarn);RS0017</NoWarn>
     <PublishAot>false</PublishAot>
     <IsAotCompatible>false</IsAotCompatible>
     <EnableAotAnalyzer>false</EnableAotAnalyzer>

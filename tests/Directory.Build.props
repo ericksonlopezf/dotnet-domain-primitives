@@ -7,7 +7,7 @@
     <IsTestProject>true</IsTestProject>
     <SonarQubeTestProject>true</SonarQubeTestProject>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <NoWarn>CS1574;CA1859;$(NoWarn);CA1707;CA1001;CA1861;CA1305;CA1825;CA1018</NoWarn>
+    <NoWarn>CS1574;CA1859;$(NoWarn);CA1001;CA1861;CA1825;CA1018</NoWarn>
     <EnableTrimAnalyzer Condition="'$(PublishAot)' != 'true'">false</EnableTrimAnalyzer>
   </PropertyGroup>
 

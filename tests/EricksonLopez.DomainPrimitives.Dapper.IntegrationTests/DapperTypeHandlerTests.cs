@@ -12,15 +12,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Dapper.Tests;
 
-[StrongId<Guid>]
-public readonly partial record struct UserId;
-
-[StringPrimitive]
-public readonly partial record struct EmailAddress;
-
-[NumericPrimitive<int>]
-public readonly partial record struct Points;
-
 public class DapperTypeHandlerTests : IAsyncLifetime
 {
     private SqliteConnection _connection = null!;

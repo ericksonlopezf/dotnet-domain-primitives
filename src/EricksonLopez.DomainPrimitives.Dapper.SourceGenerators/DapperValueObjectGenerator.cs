@@ -45,7 +45,20 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
             if (member.DeclaredAccessibility != Accessibility.Public) continue;
 
             string typeName = member.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            properties.Add(new ValueObjectProperty(member.Name, typeName));
+            string? backingType = null;
+
+            if (member.Type is INamedTypeSymbol namedType)
+            {
+                var primitiveInterface = namedType.AllInterfaces.FirstOrDefault(i =>
+                    i.Name == "IDomainPrimitive" && i.TypeArguments.Length == 2);
+
+                if (primitiveInterface != null)
+                {
+                    backingType = primitiveInterface.TypeArguments[1].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+            }
+
+            properties.Add(new ValueObjectProperty(member.Name, typeName, backingType));
         }
 
         return new ValueObjectInfo(
@@ -92,7 +105,14 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
         sb.AppendLine("    {");
         foreach (var prop in info.Properties.Values)
         {
-            sb.AppendLine($"        parameters.Add($\"{{prefix}}{prop.Name}\", value.{prop.Name});");
+            if (prop.BackingType != null)
+            {
+                sb.AppendLine($"        parameters.Add($\"{{prefix}}{prop.Name}\", value.{prop.Name}.IsDefault ? (object)global::System.DBNull.Value : value.{prop.Name}.Value);");
+            }
+            else
+            {
+                sb.AppendLine($"        parameters.Add($\"{{prefix}}{prop.Name}\", value.{prop.Name});");
+            }
         }
         sb.AppendLine("    }");
         sb.AppendLine();
@@ -113,7 +133,14 @@ internal sealed class DapperValueObjectGenerator : IIncrementalGenerator
             foreach (var prop in info.Properties.Values)
             {
                 sb.AppendLine($"        var idx_{prop.Name} = record.GetOrdinal($\"{{prefix}}{prop.Name}\");");
-                sb.AppendLine($"        var val_{prop.Name} = record.IsDBNull(idx_{prop.Name}) ? default : ({prop.Type})record.GetValue(idx_{prop.Name});");
+                if (prop.BackingType != null)
+                {
+                    sb.AppendLine($"        var val_{prop.Name} = record.IsDBNull(idx_{prop.Name}) ? default : {prop.Type}.Create(({prop.BackingType})record.GetValue(idx_{prop.Name}));");
+                }
+                else
+                {
+                    sb.AppendLine($"        var val_{prop.Name} = record.IsDBNull(idx_{prop.Name}) ? default : ({prop.Type})record.GetValue(idx_{prop.Name});");
+                }
             }
 
             var args = string.Join(", ", info.Properties.Values.Select(p => $"val_{p.Name}!"));

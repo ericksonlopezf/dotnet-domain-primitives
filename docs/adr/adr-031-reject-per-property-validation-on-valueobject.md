@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-031: Reject Per-Property Validation Attributes on ValueObject
 
 **Date:** 2026-08-10

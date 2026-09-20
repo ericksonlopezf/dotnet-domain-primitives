@@ -1,1 +1,6 @@
 #nullable enable
+EricksonLopez.DomainPrimitives.AspNetCore.DomainPrimitiveValidationAttribute<TPrimitive, TValue>
+EricksonLopez.DomainPrimitives.AspNetCore.DomainPrimitiveValidationAttribute<TPrimitive, TValue>.DomainPrimitiveValidationAttribute() -> void
+EricksonLopez.DomainPrimitives.AspNetCore.DomainPrimitiveValidator
+static EricksonLopez.DomainPrimitives.AspNetCore.DomainPrimitiveValidator.Validate<TPrimitive, TValue>(TValue rawValue, string memberName) -> System.Collections.Generic.IEnumerable<System.ComponentModel.DataAnnotations.ValidationResult!>!
+static EricksonLopez.DomainPrimitives.AspNetCore.DomainPrimitiveValidator.ValidateSingle<TPrimitive, TValue>(TValue rawValue, string memberName) -> System.ComponentModel.DataAnnotations.ValidationResult?

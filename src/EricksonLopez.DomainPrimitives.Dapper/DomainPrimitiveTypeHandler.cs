@@ -23,6 +23,12 @@ public class DomainPrimitiveTypeHandler<TPrimitive, TValue> : global::Dapper.Sql
     public override void SetValue(IDbDataParameter parameter, TPrimitive value)
     {
 #if NET7_0_OR_GREATER
+        if (value.IsDefault)
+        {
+            parameter.Value = DBNull.Value;
+            return;
+        }
+
         parameter.Value = value.Value;
 #else
         throw new NotSupportedException("DomainPrimitiveTypeHandler requires .NET 7.0 or greater.");

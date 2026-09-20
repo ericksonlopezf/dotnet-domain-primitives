@@ -8,32 +8,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Testing.UnitTests;
 
-[Email]
-public readonly partial record struct ScenarioEmail;
-
-[Phone]
-public readonly partial record struct ScenarioPhone;
-
-[Slug]
-public readonly partial record struct ScenarioSlug;
-
-[StringPrimitive]
-[Trim]
-[Regex(@"^[a-z0-9]+(?:-[a-z0-9]+)*$")]
-public readonly partial record struct ScenarioStrictSlug;
-
-[StrongId<Guid>]
-public readonly partial record struct ScenarioGuidId;
-
-[Age]
-public readonly partial record struct ScenarioAge;
-
-[Percentage]
-public readonly partial record struct ScenarioPercentage;
-
-[CountryCode]
-public readonly partial record struct ScenarioCountryCode;
-
 public class DomainPrimitiveScenariosTests
 {
     [Theory]

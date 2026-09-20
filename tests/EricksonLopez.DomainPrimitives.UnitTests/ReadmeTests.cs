@@ -5,10 +5,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.UnitTests;
 
-[StringPrimitive]
-[Trim, UpperCase, Length(2, 2)]
-public readonly partial record struct CountryIsoCode;
-
 public class ReadmeTests
 {
     [Fact]

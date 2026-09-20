@@ -10,7 +10,7 @@
     <!-- CA1711: ValidationFailureEventArgs uses 'EventArgs' suffix intentionally — it IS
          event arguments for OnValidationFailed. Suppressed to match pre-migration Abstractions behavior. -->
     <NoWarn>$(NoWarn);RS0016;RS0017;CA1711</NoWarn>
-    <PackageTags>$(CommonPackageTags);value-objects;strongly-typed-id;smart-enum;primitive-obsession;validation;source-generator;roslyn-analyzers;zero-allocation;clean-architecture;native-aot</PackageTags>
+    <PackageTags>$(CommonPackageTags);value-object;strongly-typed-id;smart-enum;primitive-obsession;validation;source-generator;analyzers;clean-architecture;native-aot</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">

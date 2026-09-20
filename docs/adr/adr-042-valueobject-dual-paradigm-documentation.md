@@ -1,5 +1,11 @@
 # adr-042: ValueObject Dual Paradigm — Abstract Base Class vs Source-Generated Attribute
 
+## Status
+Accepted
+
+## Date
+2026-08-24
+
 **Date:** 2026-08-24  
 **Status:** Accepted  
 **Authors:** Core maintainers  

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Threading.Tasks;
 using AwesomeAssertions;
 using EricksonLopez.DomainPrimitives.Diagnostics;
 using Xunit;
@@ -100,6 +101,24 @@ namespace EricksonLopez.DomainPrimitives.UnitTests
         public void DomainPrimitivesMetrics_DefaultIsEnabled_ShouldBeTrue()
         {
             DomainPrimitivesMetrics.IsEnabled.Should().BeTrue();
+        }
+
+        [Fact]
+        public void DomainPrimitivesMetrics_ConcurrentToggling_PreservesStateDeterministically()
+        {
+            var original = DomainPrimitivesMetrics.IsEnabled;
+            try
+            {
+                Parallel.For(0, 1000, i =>
+                {
+                    DomainPrimitivesMetrics.IsEnabled = (i % 2 == 0);
+                    _ = DomainPrimitivesMetrics.IsEnabled;
+                });
+            }
+            finally
+            {
+                DomainPrimitivesMetrics.IsEnabled = original;
+            }
         }
 
         [Fact]

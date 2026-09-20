@@ -26,6 +26,7 @@ namespace EricksonLopez.DomainPrimitives
         public string Format { get; set; }
     }
     public class ValueObjectAttribute : Attribute {}
+    public abstract record class ValueObject;
     public class SmartEnumAttribute<T> : Attribute {}
     public class EmailAttribute : Attribute {}
     public interface IDomainPrimitive {}

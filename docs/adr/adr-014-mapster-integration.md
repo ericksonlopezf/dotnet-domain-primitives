@@ -1,7 +1,10 @@
 # adr-009: Mapster Integration via Separate Package
 
 ## Status
-Accepted
+Superseded by [ADR-043](adr-043-discontinue-mapster-package.md) — packages removed in v2.0.0 (BC-001)
+
+## Date
+2026-09-04
 
 ## Context
 The v4.0 Specification indicates that domain primitives do not require a separate Mapster integration package because they provide explicit and implicit cast operators to map between primitive types and their raw backing values seamlessly.
@@ -13,3 +16,4 @@ We maintain `EricksonLopez.DomainPrimitives.Mapster` as a separate, optional int
 - **Positive**: Consumers can use `TypeAdapterConfig.GlobalSettings.Scan(typeof(DomainPrimitivesRegister).Assembly)` to automatically configure their mappers to avoid mapping errors involving primitives.
 - **Positive**: The core generators remain dependency-free.
 - **Negative**: Adds a small amount of overhead to maintain the Mapster integrations package, but it serves power-users effectively.
+

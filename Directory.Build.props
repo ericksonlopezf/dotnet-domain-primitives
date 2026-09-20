@@ -1,12 +1,13 @@
 <Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="Exists($([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')))" />
 
   <PropertyGroup>
-    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionPrefix>3.0.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 
     <!-- NuGet package metadata -->
     <Authors>Erickson Lopez</Authors>
-    <Company>EricksonLopez</Company>
+    <Company>Erickson Lopez</Company>
     <Copyright>Copyright © 2026 Erickson Lopez</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://ericksonlopez.dev/domain-primitives</PackageProjectUrl>
@@ -16,6 +17,10 @@
     <PackageIcon>icon.png</PackageIcon>
     <CommonPackageTags>dotnet;csharp;ddd;domain-driven-design;domain-primitives</CommonPackageTags>
     <PackageTags>$(CommonPackageTags)</PackageTags>
+
+    <!-- DP-CFG-001: Explicit Solution disambiguation for Verify when multiple solution files exist (e.g. Stryker.slnx) -->
+    <SolutionName Condition="'$(SolutionName)' == ''">EricksonLopez.DomainPrimitives</SolutionName>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)</SolutionDir>
 
     <!-- Build settings -->
     <LangVersion>14</LangVersion>
@@ -51,11 +56,11 @@
     
     <!-- Validation -->
     <EnablePackageValidation Condition="'$(IsPackable)' == 'true'">true</EnablePackageValidation>
-    <PackageValidationBaselineVersion>1.0.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>2.0.0</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('src'))">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" Condition="'$(ContinuousIntegrationBuild)' == 'true'" />
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="All" />
     <AdditionalFiles Include="PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI.Unshipped.txt" />

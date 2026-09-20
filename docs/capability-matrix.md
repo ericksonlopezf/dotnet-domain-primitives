@@ -50,19 +50,19 @@
 
 | Interface | String | Numeric | Date | StrongId | ValueObject |
 |---|---|---|---|---|---|
-| `IDomainPrimitive<T>` | ✅ | ✅ | ✅ | ✅ (IStrongId) | 🔧✅ |
-| `IParsable<T>` | ✅ | ✅ | ✅ | ✅ | ❌ (planned v2.0) |
-| `ISpanParsable<T>` | ✅ | ✅ | ✅ | ✅ | ❌ (planned v2.0) |
-| `IUtf8SpanParsable<T>` | ✅ | ✅ | ✅ | ✅ | ❌ (planned v2.0) |
-| `IFormattable` | ✅ | ✅ | ✅ | ✅ | 🔧✅ |
-| `ISpanFormattable` | ✅ | ✅ | ✅ | ✅ | 🔧✅ |
-| `IUtf8SpanFormattable` | ✅ | ✅ | ✅ | ✅ | ❌ (planned v2.0) |
+| `IDomainPrimitive<T>` | ✅ | ✅ | ✅ | ✅ (IStrongId) | ✅ |
+| `IParsable<T>` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `ISpanParsable<T>` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `IUtf8SpanParsable<T>` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `IFormattable` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `ISpanFormattable` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `IUtf8SpanFormattable` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `IComparable<T>` | ✅ | ✅ | ✅ | ✅ | ❌ (N/A — composite types have no natural order) |
-| `IEqualityOperators` | ✅ | ✅ | ✅ | ✅ | 🔧✅ |
+| `IEqualityOperators` | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `IComparisonOperators` | ✅ | ✅ | ✅ | ✅ | ❌ (N/A — no natural order for composite types) |
-| `TypeConverter` | ✅ | ✅ | ✅ | ✅ | 🔧✅ |
-| `IsDefault` | ✅ | ✅ | ✅ | ✅ | 🔧✅ |
-| `STJ JsonConverter` | ✅ | ✅ | ✅ | ✅ | 🔧✅ |
+| `TypeConverter` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `IsDefault` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `STJ JsonConverter` | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 > **Note:** `IComparable<T>` and `IComparisonOperators` are intentionally NOT implemented for
 > `ValueObject` because composite value objects have no canonical ordering unless the domain
@@ -96,7 +96,7 @@
 
 | Capability | Status | Notes |
 |---|---|---|
-| Roslyn Analyzers (DP0001–DP0017) | ✅ | 17 diagnostics implemented (DP0001–DP0016 user-facing; DP0017 validates `ExceptionType` in `[assembly: DomainPrimitivesDefaults]`) |
+| Roslyn Analyzers (DP0001–DP0018) | ✅ | 18 diagnostics implemented (DP0001–DP0017 user-facing and configuration; DP0018 enforces collection immutability in ValueObjects per [adr-045](adr/adr-045-analyzer-dp0018-valueobject-collection-immutability.md)) |
 | `[assembly: DomainPrimitivesDefaults]` global configuration | ✅ | Supports `Trim`, `NotEmpty`, `MaxLength`, `ExceptionType`; all generators read assembly-level defaults; per-type takes precedence. [adr-033](adr/adr-033-global-assembly-configuration.md) |
 | Configurable `ExceptionType` + DP0017 | ✅ | Generator emits custom throw site; DP0017 enforces `System.Exception` derivation and `(string message)` constructor at compile time. [adr-034](adr/adr-034-configurable-exception-type.md) |
 | SmartEnum exhaustive `Switch`/`Map`/`Match` | ✅ | Generated `Match<TResult>`, `Map<TResult>`, `Switch` with one parameter per declared member. [adr-035](adr/adr-035-smartenum-exhaustive-switch-map.md) |
@@ -122,9 +122,9 @@ This section audits every public claim in the README against implementation real
 | "Allocation-minimized hot paths" | ✅ ACCURATE (README rewritten 2026-08-10) | README now shows per-path allocation table: 0 allocs success (no normalization), 1 alloc success (NFC), 1 alloc failure, 1 alloc TryParse(span). JSON ValueSpan path VERIFIED (GeneratorHelpers.cs:45-51, NET8+). Old claim "zero-allocation" was inaccurate — removed. |
 | "NativeAOT-ready" | ✅ IMPLEMENTED | `IsAotCompatible=true`, `[DynamicDependency]` not used, zero reflection in generators. CI gate validates publish. |
 | "Zero reflection" | ✅ IMPLEMENTED | All generation is compile-time. No `Type.GetMethod()`, `Expression<>`, or Activator calls in hot paths. |
-| "BCL-conventional API" | ⚠️ PARTIALLY_IMPLEMENTED | FormatException standardization complete (rfc-0003). ValueObject interfaces added (CRIT-004). ValueObject still missing `IComparable<T>` — intentionally N/A for composites. |
+| "BCL-conventional API" | ✅ IMPLEMENTED | FormatException standardization complete (rfc-0003). ValueObject interfaces fully implemented. ValueObject intentionally omits `IComparable<T>` as composites have no natural order. |
 | "Source-generated — no runtime overhead" | ✅ IMPLEMENTED | All types are generated at compile time with `IIncrementalGenerator`. |
-| "Roslyn Analyzers enforce correct usage" | ✅ IMPLEMENTED | DP0001–DP0016 active. DP0016 covers factory naming. |
+| "Roslyn Analyzers enforce correct usage" | ✅ IMPLEMENTED | DP0001–DP0018 active. DP0018 covers ValueObject collection immutability. |
 | "15-year design horizon (2026–2041)" | ⚠️ UNVERIFIED | Planning risks documented in `planning-risks.md`. Spec v4.0 is the governing document. No forward-compat tests yet beyond NET10. |
 | "STJ integration is inline (no extra package)" | ✅ IMPLEMENTED | Generated converter is a private nested class. No `EricksonLopez.DomainPrimitives.Json` package. |
 | "Supports netstandard2.0" | ⚠️ PARTIALLY_IMPLEMENTED | `Abstractions` targets `netstandard2.0`. `Core`/generators target `net8.0+` only. See MED-006. |

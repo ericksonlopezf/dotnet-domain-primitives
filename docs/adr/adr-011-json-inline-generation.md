@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 The v4.0 Specification stipulates that `EricksonLopez.DomainPrimitives.Json` must not exist as a separate package. STJ is part of the Base Class Library, meaning domain primitives can natively integrate STJ serialization attributes and converters without external dependencies.
 

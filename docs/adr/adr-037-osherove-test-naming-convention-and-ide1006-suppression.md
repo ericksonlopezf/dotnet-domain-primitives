@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 In standard .NET and Microsoft C# coding guidelines, methods are required to adhere to `PascalCase` without underscores. This rule is enforced by the Roslyn analyzer rule `IDE1006: Naming rule violation`. In production assemblies (`src/`), this convention ensures consistency, clean API surfaces, and seamless interoperability.
 

@@ -16,7 +16,7 @@ tests/
 │
 ├── 2. Roslyn Generators & Analyzers
 │   ├── EricksonLopez.DomainPrimitives.SourceGenerators.Tests/   → Incremental generators (String, Numeric, Date, Id, VO)
-│   ├── EricksonLopez.DomainPrimitives.Analyzers.Tests/          → Roslyn Analyzers (DP0001–DP0017) & CodeFixes
+│   ├── EricksonLopez.DomainPrimitives.Analyzers.Tests/          → Roslyn Analyzers (DP0001–DP0018) & CodeFixes
 │   ├── EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.Tests/
 │   ├── EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.Tests/
 │   ├── EricksonLopez.DomainPrimitives.Dapper.SourceGenerators.Tests/   → Snapshot baseline tests with Verify.Xunit
@@ -37,7 +37,7 @@ tests/
     ├── EricksonLopez.DomainPrimitives.ArchitectureTests/        → NetArchTest dependency rules & clean boundaries
     ├── EricksonLopez.DomainPrimitives.IntegrationTests/         → Cross-package smoke tests
     ├── EricksonLopez.DomainPrimitives.EndToEndTests/            → Serialization & lifecycle roundtrip
-    └── EricksonLopez.DomainPrimitives.AotProbe/                 → Native AOT compilation & trimming probe
+    └── EricksonLopez.DomainPrimitives.AotSmokeTest/             → Native AOT compilation & trimming smoke test
 ```
 
 ---

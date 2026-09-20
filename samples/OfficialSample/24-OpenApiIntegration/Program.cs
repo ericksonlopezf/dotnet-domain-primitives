@@ -102,7 +102,7 @@ app.MapPost("/products", (ProductRequest req) =>
 
 // GET /enums/order-statuses — SmartEnum shown as string enum in Swagger
 app.MapGet("/enums/order-statuses", () =>
-    Results.Ok(new { Statuses = new[] { "Pending", "Processing", "Completed" }, Note = "OrderStatus smart enum values" }))
+    Results.Ok(new { Statuses = SampleConstants.OrderStatusValues, Note = "OrderStatus smart enum values" }))
 .WithName("GetOrderStatuses")
 .WithSummary("List all SmartEnum order status values");
 
@@ -126,6 +126,11 @@ namespace Chapter24
 {
     using EricksonLopez.DomainPrimitives;
     using EricksonLopez.DomainPrimitives.Validation;
+
+    internal static class SampleConstants
+    {
+        public static readonly string[] OrderStatusValues = ["Pending", "Processing", "Completed"];
+    }
 
     // Domain Primitives — the source generator creates OpenAPI schema filters for these:
 

@@ -11,7 +11,7 @@
     <IsTestProject>false</IsTestProject>
     <EnableTrimAnalyzer>false</EnableTrimAnalyzer>
     <PackageType>TestingTooling</PackageType>
-    <PackageTags>$(CommonPackageTags);testing;unit-testing;assertions;fluent-assertions;fakes;test-doubles;test-data;fake-data</PackageTags>
+    <PackageTags>$(CommonPackageTags);unit-testing;testing;assertions;fluent-assertions;test-doubles;test-data</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

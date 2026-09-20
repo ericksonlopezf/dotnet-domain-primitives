@@ -19,7 +19,7 @@
     
     <PackageId>EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators</PackageId>
     <Description>Source Generators for ASP.NET Core integration with EricksonLopez.DomainPrimitives.</Description>
-    <PackageTags>$(CommonPackageTags);aspnetcore;source-generator;source-generators;roslyn;model-binding;code-generation;minimal-apis</PackageTags>
+    <PackageTags>$(CommonPackageTags);aspnetcore;source-generator;roslyn;code-generation;model-binding;minimal-apis</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

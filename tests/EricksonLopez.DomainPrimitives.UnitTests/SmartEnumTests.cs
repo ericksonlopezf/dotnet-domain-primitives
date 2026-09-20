@@ -171,6 +171,41 @@ public class SmartEnumTests
         TestOrderStatus.TryFromValue(outOfRangeValue, out var status).Should().BeFalse();
         status.Should().Be(default(TestOrderStatus));
     }
+
+    [Fact]
+    public void DefaultStruct_ValueAccess_ThrowsInvalidOperationException()
+    {
+        var defaultStatus = default(TestOrderStatus);
+        defaultStatus.IsDefault.Should().BeTrue();
+
+        Action act = () => { var _ = defaultStatus.Value; };
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Value accessed on a default instance of TestOrderStatus. Check IsDefault before accessing Value.*");
+    }
+
+    [Fact]
+    public void DefaultStruct_EqualityAndHashCode_DoNotThrow()
+    {
+        var defaultStatus1 = default(TestOrderStatus);
+        var defaultStatus2 = default(TestOrderStatus);
+        var validStatus = TestOrderStatus.Pending;
+
+        defaultStatus1.Equals(defaultStatus2).Should().BeTrue();
+        defaultStatus1.Equals(validStatus).Should().BeFalse();
+        validStatus.Equals(defaultStatus1).Should().BeFalse();
+
+        Action actHash = () => { var _ = defaultStatus1.GetHashCode(); };
+        actHash.Should().NotThrow();
+        defaultStatus1.GetHashCode().Should().Be(0);
+    }
+
+    [Fact]
+    public void InitializedMember_ValueAccess_ReturnsUnderlyingValue()
+    {
+        var status = TestOrderStatus.Pending;
+        status.IsDefault.Should().BeFalse();
+        status.Value.Should().Be(1);
+    }
 }
 
 

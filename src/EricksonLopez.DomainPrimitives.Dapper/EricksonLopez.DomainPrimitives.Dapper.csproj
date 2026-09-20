@@ -9,7 +9,7 @@
     <PackageId>EricksonLopez.DomainPrimitives.Dapper</PackageId>
     <Description>Dapper integration for EricksonLopez.DomainPrimitives. Automatically generates NativeAOT-ready SqlMapper.TypeHandler implementations for all domain primitives without reflection.</Description>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
-    <PackageTags>$(CommonPackageTags);dapper;micro-orm;type-handler;sql;database;persistence;native-aot</PackageTags>
+    <PackageTags>$(CommonPackageTags);dapper;micro-orm;type-handler;database;sql;native-aot</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

@@ -83,6 +83,7 @@ public sealed class ApiReviewAnalyzer : DiagnosticAnalyzer
         var publicMembers = namedTypeSymbol.GetMembers().Where(m =>
             m.DeclaredAccessibility == Accessibility.Public &&
             !m.IsImplicitlyDeclared &&
+            !IsGeneratedMember(m) &&
             m.Kind is SymbolKind.Method or SymbolKind.Property or SymbolKind.Field).ToList();
 
         int maxBudget = primitiveType switch
@@ -134,6 +135,19 @@ public sealed class ApiReviewAnalyzer : DiagnosticAnalyzer
                 }
             }
         }
+    }
+
+    private static bool IsGeneratedMember(ISymbol symbol)
+    {
+        foreach (var location in symbol.Locations)
+        {
+            var filePath = location.SourceTree?.FilePath;
+            if (filePath != null && (filePath.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase) || filePath.EndsWith(".generated.cs", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 

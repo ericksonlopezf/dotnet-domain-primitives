@@ -75,12 +75,12 @@ flowchart TD
 This repository utilizes **Central Package Management** via `Directory.Packages.props`. This ensures that all projects within the solution resolve exactly the same version of shared dependencies.
 
 Key pinned versions include:
-- `Microsoft.CodeAnalysis.CSharp`: `4.11.0` (ensures Source Generators are built against a stable API)
+- `Microsoft.CodeAnalysis.CSharp`: `4.14.0` (ensures Source Generators are built against a stable API)
 - `Microsoft.EntityFrameworkCore`: `8.0.11` / `9.0.0` / `10.0.0` (per TFM, via conditional `PackageVersion`)
 - `Newtonsoft.Json`: `13.0.4`
-- `Dapper`: `2.1.35`
+- `Dapper`: `2.1.79`
 - `Swashbuckle.AspNetCore`: `6.6.2`
-- `xunit`: `2.9.0`
-- `AwesomeAssertions`: `9.5.0`
+- `xunit`: `2.9.3`
+- `AwesomeAssertions`: `9.6.0`
 - `BenchmarkDotNet`: `0.15.8`
-- `coverlet.collector`: `6.0.1`
+- `coverlet.collector`: `10.0.1`

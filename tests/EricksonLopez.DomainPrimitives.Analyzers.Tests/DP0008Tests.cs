@@ -152,6 +152,46 @@ public partial record struct AddressWithSuffix
 ";
         await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
     }
+
+    [Fact]
+    public async Task ValueObject_DerivedRecordClass_WithSet_TriggersDP0008()
+    {
+        var testCode = @"
+" + AttributeCode + @"
+public sealed record Money(decimal Amount) : ValueObject
+{
+    public decimal {|DP0008:Rate|} { get; set; }
+}
+";
+        await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
+    }
+
+    [Fact]
+    public async Task ValueObject_DerivedRecordClass_WithInit_DoesNotTriggerDP0008()
+    {
+        var testCode = @"
+" + AttributeCode + @"
+public sealed record Money(decimal Amount) : ValueObject
+{
+    public decimal Rate { get; init; }
+}
+namespace System.Runtime.CompilerServices { public class IsExternalInit {} }
+";
+        await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
+    }
+
+    [Fact]
+    public async Task ValueObject_DerivedRecord_WithSet_TriggersDP0008()
+    {
+        var testCode = @"
+" + AttributeCode + @"
+public record Address : ValueObject
+{
+    public string {|DP0008:Street|} { get; set; }
+}
+";
+        await new CSharpAnalyzerTest { TestCode = testCode }.RunAsync();
+    }
 }
 
 

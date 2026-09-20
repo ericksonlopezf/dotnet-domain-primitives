@@ -1,30 +1,30 @@
 
-BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.4 LTS (Noble Numbat)
-INTEL XEON PLATINUM 8573C 2.30GHz, 1 CPU, 4 logical and 2 physical cores
-.NET SDK 10.0.400
-  [Host]    : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v4
-  .NET 10.0 : .NET 10.0.11 (10.0.11, 10.0.1126.37416), X64 RyuJIT x86-64-v4
-  .NET 8.0  : .NET 8.0.30 (8.0.30, 8.0.3026.36720), X64 RyuJIT x86-64-v4
-  .NET 9.0  : .NET 9.0.19 (9.0.19, 9.0.1926.36724), X64 RyuJIT x86-64-v4
+BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.5 LTS (Noble Numbat)
+AMD EPYC 7763 2.45GHz, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 10.0.401
+  [Host]    : .NET 10.0.12 (10.0.12, 10.0.1226.42308), X64 RyuJIT x86-64-v3
+  .NET 10.0 : .NET 10.0.12 (10.0.12, 10.0.1226.42308), X64 RyuJIT x86-64-v3
+  .NET 8.0  : .NET 8.0.31 (8.0.31, 8.0.3126.42015), X64 RyuJIT x86-64-v3
+  .NET 9.0  : .NET 9.0.20 (9.0.20, 9.0.2026.41315), X64 RyuJIT x86-64-v3
 
 
- Method                         | Job       | Runtime   | Mean        | Error     | StdDev    | Median      | Ratio     | RatioSD | Gen0   | Allocated | Alloc Ratio |
-------------------------------- |---------- |---------- |------------:|----------:|----------:|------------:|----------:|--------:|-------:|----------:|------------:|
- RawGuid                        | .NET 10.0 | .NET 10.0 |   0.0023 ns | 0.0088 ns | 0.0098 ns |   0.0000 ns |     0.008 |    0.04 |      - |         - |          NA |
- PrimitiveGuid                  | .NET 10.0 | .NET 10.0 |   0.3186 ns | 0.0486 ns | 0.0477 ns |   0.3188 ns |     1.161 |    0.22 |      - |         - |          NA |
- PrimitiveGuid_TryParse         | .NET 10.0 | .NET 10.0 |  20.2692 ns | 0.4170 ns | 0.3900 ns |  20.1322 ns |    73.841 |    8.85 |      - |         - |          NA |
- PrimitiveEmail_Create          | .NET 10.0 | .NET 10.0 |  81.6516 ns | 1.3379 ns | 1.2514 ns |  81.7315 ns |   297.457 |   35.49 |      - |         - |          NA |
- PrimitiveEmail_JsonSerialize   | .NET 10.0 | .NET 10.0 | 171.2978 ns | 3.1486 ns | 2.9452 ns | 171.5351 ns |   624.038 |   74.60 | 0.0007 |      64 B |          NA |
- PrimitiveEmail_JsonDeserialize | .NET 10.0 | .NET 10.0 | 176.1892 ns | 3.3448 ns | 3.2850 ns | 176.0915 ns |   641.857 |   76.85 | 0.0014 |     120 B |          NA |
- RawGuid                        | .NET 8.0  | .NET 8.0  |   0.2783 ns | 0.0355 ns | 0.0332 ns |   0.2848 ns |     1.014 |    0.17 |      - |         - |          NA |
- PrimitiveGuid                  | .NET 8.0  | .NET 8.0  |   0.2823 ns | 0.0363 ns | 0.0340 ns |   0.2761 ns |     1.029 |    0.17 |      - |         - |          NA |
- PrimitiveGuid_TryParse         | .NET 8.0  | .NET 8.0  |  26.0644 ns | 0.3806 ns | 0.3560 ns |  26.2169 ns |    94.953 |   11.31 |      - |         - |          NA |
- PrimitiveEmail_Create          | .NET 8.0  | .NET 8.0  | 179.5954 ns | 3.1544 ns | 3.8739 ns | 179.3279 ns |   654.266 |   78.62 |      - |         - |          NA |
- PrimitiveEmail_JsonSerialize   | .NET 8.0  | .NET 8.0  | 287.4184 ns | 3.9239 ns | 3.6704 ns | 288.2607 ns | 1,047.065 |  124.61 | 0.0005 |      64 B |          NA |
- PrimitiveEmail_JsonDeserialize | .NET 8.0  | .NET 8.0  | 328.5293 ns | 6.3430 ns | 6.7870 ns | 328.2909 ns | 1,196.832 |  143.66 | 0.0014 |     120 B |          NA |
- RawGuid                        | .NET 9.0  | .NET 9.0  |   0.0027 ns | 0.0079 ns | 0.0077 ns |   0.0000 ns |     0.010 |    0.03 |      - |         - |          NA |
- PrimitiveGuid                  | .NET 9.0  | .NET 9.0  |   0.3116 ns | 0.0497 ns | 0.0510 ns |   0.3063 ns |     1.135 |    0.23 |      - |         - |          NA |
- PrimitiveGuid_TryParse         | .NET 9.0  | .NET 9.0  |  21.4301 ns | 0.4137 ns | 0.3667 ns |  21.4466 ns |    78.070 |    9.33 |      - |         - |          NA |
- PrimitiveEmail_Create          | .NET 9.0  | .NET 9.0  |  87.9859 ns | 1.8123 ns | 1.6065 ns |  87.5506 ns |   320.533 |   38.37 |      - |         - |          NA |
- PrimitiveEmail_JsonSerialize   | .NET 9.0  | .NET 9.0  | 188.6612 ns | 3.7038 ns | 3.6376 ns | 188.0449 ns |   687.293 |   82.36 | 0.0007 |      64 B |          NA |
- PrimitiveEmail_JsonDeserialize | .NET 9.0  | .NET 9.0  | 207.5604 ns | 4.1122 ns | 3.8465 ns | 208.3953 ns |   756.143 |   90.53 | 0.0014 |     120 B |          NA |
+ Method                         | Job       | Runtime   | Mean        | Error     | StdDev    | Ratio    | RatioSD | Gen0   | Allocated | Alloc Ratio |
+------------------------------- |---------- |---------- |------------:|----------:|----------:|---------:|--------:|-------:|----------:|------------:|
+ RawGuid                        | .NET 10.0 | .NET 10.0 |   0.3144 ns | 0.0014 ns | 0.0013 ns |     0.97 |    0.03 |      - |         - |          NA |
+ PrimitiveGuid                  | .NET 10.0 | .NET 10.0 |   0.8883 ns | 0.0139 ns | 0.0130 ns |     2.74 |    0.09 |      - |         - |          NA |
+ PrimitiveGuid_TryParse         | .NET 10.0 | .NET 10.0 |  31.6576 ns | 0.1824 ns | 0.1617 ns |    97.82 |    3.12 |      - |         - |          NA |
+ PrimitiveEmail_Create          | .NET 10.0 | .NET 10.0 | 110.6973 ns | 0.3320 ns | 0.2592 ns |   342.06 |   10.79 |      - |         - |          NA |
+ PrimitiveEmail_JsonSerialize   | .NET 10.0 | .NET 10.0 | 224.5843 ns | 0.9490 ns | 0.7925 ns |   693.97 |   21.96 | 0.0038 |      64 B |          NA |
+ PrimitiveEmail_JsonDeserialize | .NET 10.0 | .NET 10.0 | 215.3248 ns | 1.1278 ns | 0.9998 ns |   665.36 |   21.14 | 0.0072 |     120 B |          NA |
+ RawGuid                        | .NET 8.0  | .NET 8.0  |   0.3239 ns | 0.0111 ns | 0.0104 ns |     1.00 |    0.04 |      - |         - |          NA |
+ PrimitiveGuid                  | .NET 8.0  | .NET 8.0  |   0.8823 ns | 0.0074 ns | 0.0065 ns |     2.73 |    0.09 |      - |         - |          NA |
+ PrimitiveGuid_TryParse         | .NET 8.0  | .NET 8.0  |  35.9053 ns | 0.3970 ns | 0.3714 ns |   110.95 |    3.66 |      - |         - |          NA |
+ PrimitiveEmail_Create          | .NET 8.0  | .NET 8.0  | 243.5859 ns | 1.5480 ns | 1.3723 ns |   752.68 |   24.03 |      - |         - |          NA |
+ PrimitiveEmail_JsonSerialize   | .NET 8.0  | .NET 8.0  | 405.1888 ns | 2.7075 ns | 2.5326 ns | 1,252.04 |   40.10 | 0.0038 |      64 B |          NA |
+ PrimitiveEmail_JsonDeserialize | .NET 8.0  | .NET 8.0  | 412.7487 ns | 0.3665 ns | 0.3060 ns | 1,275.40 |   40.14 | 0.0072 |     120 B |          NA |
+ RawGuid                        | .NET 9.0  | .NET 9.0  |   0.1142 ns | 0.0081 ns | 0.0075 ns |     0.35 |    0.03 |      - |         - |          NA |
+ PrimitiveGuid                  | .NET 9.0  | .NET 9.0  |   0.8520 ns | 0.0069 ns | 0.0058 ns |     2.63 |    0.08 |      - |         - |          NA |
+ PrimitiveGuid_TryParse         | .NET 9.0  | .NET 9.0  |  33.5394 ns | 0.2656 ns | 0.2484 ns |   103.64 |    3.34 |      - |         - |          NA |
+ PrimitiveEmail_Create          | .NET 9.0  | .NET 9.0  | 119.2990 ns | 0.5995 ns | 0.5607 ns |   368.64 |   11.72 |      - |         - |          NA |
+ PrimitiveEmail_JsonSerialize   | .NET 9.0  | .NET 9.0  | 283.8833 ns | 1.7314 ns | 1.6195 ns |   877.20 |   28.01 | 0.0038 |      64 B |          NA |
+ PrimitiveEmail_JsonDeserialize | .NET 9.0  | .NET 9.0  | 256.8344 ns | 1.2895 ns | 1.1431 ns |   793.62 |   25.20 | 0.0072 |     120 B |          NA |

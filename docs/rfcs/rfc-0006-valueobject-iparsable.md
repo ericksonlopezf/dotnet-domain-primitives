@@ -4,7 +4,7 @@
 **Author:** Audit v4.0  
 **Date:** 2026-08-10 (Approved: 2026-08-19)  
 **Target:** v2.0.0 (Pre-implemented in v1.2.0 for BCL parity)  
-**Related:** TD-006, TD-013, AUDITORIA_PARIDAD_FUNCIONAL.md §19  
+**Related:** TD-006, TD-013, FUNCTIONAL_PARITY_AUDIT.md §19  
 
 ---
 

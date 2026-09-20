@@ -2,12 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using Microsoft.CodeAnalysis;
-using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
 
@@ -66,7 +62,7 @@ internal static class GeneratorHelpers
         return new Models.AssemblyDefaultsInfo(trim, notEmpty, maxLength, exceptionTypeFullName);
     }
 
-    public static void GenerateJsonConverter(SourceBuilder sb, string typeName, string backingType)
+    public static void GenerateJsonConverter(SourceBuilder sb, string typeName, string backingType, bool supportsUtf8Span = true, bool rejectsNull = false)
     {
         sb.AppendLine("// ─── JSON Serialization ───────────────────────────────────────────────");
         sb.AppendLine();
@@ -74,31 +70,72 @@ internal static class GeneratorHelpers
         sb.OpenBrace();
         sb.AppendLine($"public override {typeName} Read(ref global::System.Text.Json.Utf8JsonReader reader, global::System.Type typeToConvert, global::System.Text.Json.JsonSerializerOptions options)");
         sb.OpenBrace();
+        if (rejectsNull)
+        {
+            sb.AppendLine($"if (reader.TokenType == global::System.Text.Json.JsonTokenType.Null) throw new global::System.Text.Json.JsonException($\"Cannot deserialize null into non-nullable domain primitive '{typeName}'.\");");
+        }
+        else
+        {
+            sb.AppendLine("if (reader.TokenType == global::System.Text.Json.JsonTokenType.Null) return default;");
+        }
+        sb.AppendLine();
         
         if (backingType == "string")
         {
-            // Zero-allocation hot path: reads UTF-8 bytes directly from the reader span.
-            // HasValueSequence is true only for extremely large JSON strings (>16KB) that straddle
-            // multiple buffer segments — an exceedingly rare scenario in practice.
-            sb.AppendLine("#if NET8_0_OR_GREATER");
-            sb.AppendLine("// Hot path: zero-allocation via ValueSpan (only fires when HasValueSequence=false).");
-            sb.AppendLine("if (!reader.HasValueSequence)");
-            sb.OpenBrace();
-            sb.AppendLine($"if ({typeName}.TryParse(reader.ValueSpan, null, out var spanResult)) return spanResult;");
-            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: unable to parse value.\");");
-            sb.CloseBrace();
-            sb.AppendLine("// Rare fallback: value spans multiple segments (>16KB JSON string). Accepts one allocation.");
-            sb.AppendLine("var stringValue = reader.GetString();");
-            sb.AppendLine("if (stringValue is null) return default;");
-            sb.AppendLine($"if ({typeName}.TryCreate(stringValue, out var result, out var err)) return result;");
-            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
-            sb.AppendLine("#else");
-            sb.AppendLine("// Fallback for older TFMs: allocates a string.");
-            sb.AppendLine("var stringValue = reader.GetString();");
-            sb.AppendLine("if (stringValue is null) return default;");
-            sb.AppendLine($"if ({typeName}.TryCreate(stringValue, out var result, out var err)) return result;");
-            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
-            sb.AppendLine("#endif");
+            if (supportsUtf8Span)
+            {
+                // Zero-allocation hot path: reads UTF-8 bytes directly from the reader span.
+                // HasValueSequence is true only for extremely large JSON strings (>16KB) that straddle
+                // multiple buffer segments — an exceedingly rare scenario in practice.
+                // ValueIsEscaped is true when JSON contains escape sequences like \u0040.
+                sb.AppendLine("#if NET8_0_OR_GREATER");
+                sb.AppendLine("// Hot path: zero-allocation via ValueSpan (only fires when HasValueSequence=false and !ValueIsEscaped).");
+                sb.AppendLine("if (!reader.HasValueSequence && !reader.ValueIsEscaped)");
+                sb.OpenBrace();
+                sb.AppendLine($"if ({typeName}.TryParse(reader.ValueSpan, null, out var spanResult)) return spanResult;");
+                sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: unable to parse value.\");");
+                sb.CloseBrace();
+                sb.AppendLine("// Fallback: value contains escape sequences or spans multiple segments.");
+                sb.AppendLine("var stringValue = reader.GetString();");
+                if (rejectsNull)
+                {
+                    sb.AppendLine($"if (stringValue is null) throw new global::System.Text.Json.JsonException($\"Cannot deserialize null into non-nullable domain primitive '{typeName}'.\");");
+                }
+                else
+                {
+                    sb.AppendLine("if (stringValue is null) return default;");
+                }
+                sb.AppendLine($"if ({typeName}.TryCreate(stringValue, out var result, out var err)) return result;");
+                sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+                sb.AppendLine("#else");
+                sb.AppendLine("// Fallback for older TFMs: allocates a string.");
+                sb.AppendLine("var stringValue = reader.GetString();");
+                if (rejectsNull)
+                {
+                    sb.AppendLine($"if (stringValue is null) throw new global::System.Text.Json.JsonException($\"Cannot deserialize null into non-nullable domain primitive '{typeName}'.\");");
+                }
+                else
+                {
+                    sb.AppendLine("if (stringValue is null) return default;");
+                }
+                sb.AppendLine($"if ({typeName}.TryCreate(stringValue, out var result, out var err)) return result;");
+                sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+                sb.AppendLine("#endif");
+            }
+            else
+            {
+                sb.AppendLine("var stringValue = reader.GetString();");
+                if (rejectsNull)
+                {
+                    sb.AppendLine($"if (stringValue is null) throw new global::System.Text.Json.JsonException($\"Cannot deserialize null into non-nullable domain primitive '{typeName}'.\");");
+                }
+                else
+                {
+                    sb.AppendLine("if (stringValue is null) return default;");
+                }
+                sb.AppendLine($"if ({typeName}.TryCreate(stringValue, out var result, out var err)) return result;");
+                sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+            }
         }
         else if (backingType == "int")
         {
@@ -136,6 +173,32 @@ internal static class GeneratorHelpers
             sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
             sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
         }
+        else if (backingType is "DateOnly" or "global::DateOnly" or "System.DateOnly" or "global::System.DateOnly")
+        {
+            sb.AppendLine("#if NET8_0_OR_GREATER");
+            sb.AppendLine("var stringValue = reader.GetString();");
+            sb.AppendLine($"if (stringValue is null || !global::System.DateOnly.TryParse(stringValue, global::System.Globalization.CultureInfo.InvariantCulture, global::System.Globalization.DateTimeStyles.None, out var value)) throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: expected valid DateOnly ISO-8601 string.\");");
+            sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
+            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+            sb.AppendLine("#else");
+            sb.AppendLine($"var value = global::System.Text.Json.JsonSerializer.Deserialize<{backingType}>(ref reader, options);");
+            sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
+            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+            sb.AppendLine("#endif");
+        }
+        else if (backingType is "TimeOnly" or "global::TimeOnly" or "System.TimeOnly" or "global::System.TimeOnly")
+        {
+            sb.AppendLine("#if NET8_0_OR_GREATER");
+            sb.AppendLine("var stringValue = reader.GetString();");
+            sb.AppendLine($"if (stringValue is null || !global::System.TimeOnly.TryParse(stringValue, global::System.Globalization.CultureInfo.InvariantCulture, global::System.Globalization.DateTimeStyles.None, out var value)) throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: expected valid TimeOnly ISO-8601 string.\");");
+            sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
+            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+            sb.AppendLine("#else");
+            sb.AppendLine($"var value = global::System.Text.Json.JsonSerializer.Deserialize<{backingType}>(ref reader, options);");
+            sb.AppendLine($"if ({typeName}.TryCreate(value, out var result, out var err)) return result;");
+            sb.AppendLine($"throw new global::System.Text.Json.JsonException($\"Invalid {typeName}: {{err.Message}}\");");
+            sb.AppendLine("#endif");
+        }
         else
         {
             // Fallback for types that STJ doesn't have direct Read methods for
@@ -150,11 +213,40 @@ internal static class GeneratorHelpers
         
         sb.AppendLine($"public override void Write(global::System.Text.Json.Utf8JsonWriter writer, {typeName} value, global::System.Text.Json.JsonSerializerOptions options)");
         sb.OpenBrace();
+        sb.AppendLine("if (value.IsDefault)");
+        sb.OpenBrace();
+        sb.AppendLine("writer.WriteNullValue();");
+        sb.AppendLine("return;");
+        sb.CloseBrace();
         if (backingType == "string")
         {
             sb.AppendLine("writer.WriteStringValue(value.Value);");
         }
-        else if (backingType == "int" || backingType == "long" || backingType == "decimal" || backingType == "float" || backingType == "double")
+        else if (backingType is "Guid" or "global::Guid" or "System.Guid" or "global::System.Guid")
+        {
+            // MED-05: WriteStringValue(Guid) overload added in .NET 8.
+            // Guard with #if to ensure compatibility if the consuming project targets net7 or earlier.
+            sb.AppendLine("#if NET8_0_OR_GREATER");
+            sb.AppendLine("writer.WriteStringValue(value.Value);");
+            sb.AppendLine("#else");
+            sb.AppendLine("writer.WriteStringValue(value.Value.ToString(\"D\"));");
+            sb.AppendLine("#endif");
+        }
+        else if (backingType is "DateTime" or "global::DateTime" or "System.DateTime" or "global::System.DateTime"
+            or "DateTimeOffset" or "global::DateTimeOffset" or "System.DateTimeOffset" or "global::System.DateTimeOffset")
+        {
+            sb.AppendLine("writer.WriteStringValue(value.Value);");
+        }
+        else if (backingType is "DateOnly" or "global::DateOnly" or "System.DateOnly" or "global::System.DateOnly"
+            or "TimeOnly" or "global::TimeOnly" or "System.TimeOnly" or "global::System.TimeOnly")
+        {
+            sb.AppendLine("#if NET8_0_OR_GREATER");
+            sb.AppendLine("writer.WriteStringValue(value.Value.ToString(\"O\", global::System.Globalization.CultureInfo.InvariantCulture));");
+            sb.AppendLine("#else");
+            sb.AppendLine("global::System.Text.Json.JsonSerializer.Serialize(writer, value.Value, options);");
+            sb.AppendLine("#endif");
+        }
+        else if (backingType is "int" or "long" or "decimal" or "float" or "double" or "byte" or "sbyte" or "short" or "ushort" or "uint" or "ulong")
         {
             sb.AppendLine("writer.WriteNumberValue(value.Value);");
         }

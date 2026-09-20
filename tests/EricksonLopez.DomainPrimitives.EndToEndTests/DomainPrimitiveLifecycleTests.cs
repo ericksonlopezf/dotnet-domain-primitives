@@ -8,35 +8,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.EndToEndTests;
 
-[StrongId<Guid>]
-public readonly partial record struct AccountId;
-
-[Email]
-public readonly partial record struct AccountEmail;
-
-[Money]
-public readonly partial record struct AccountBalance;
-
-[BirthDate]
-public readonly partial record struct OwnerBirthDate;
-
-[SmartEnum<int>]
-public readonly partial record struct AccountTier
-{
-    public static readonly AccountTier Bronze = new(1, "Bronze");
-    public static readonly AccountTier Silver = new(2, "Silver");
-    public static readonly AccountTier Gold = new(3, "Gold");
-}
-
-public sealed record UserAccountAggregate
-{
-    public AccountId Id { get; init; }
-    public AccountEmail Email { get; init; }
-    public AccountBalance Balance { get; init; }
-    public OwnerBirthDate BirthDate { get; init; }
-    public AccountTier Tier { get; init; }
-}
-
 public class DomainPrimitiveLifecycleTests
 {
     [Fact]

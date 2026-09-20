@@ -402,6 +402,154 @@ public struct TestAttributesType { }
         DapperTypeHandlerGenerator.IsDomainPrimitiveAttribute(customAttr).Should().BeFalse();
         DapperTypeHandlerGenerator.IsDomainPrimitiveAttribute(serializableAttr).Should().BeFalse();
     }
+
+    [Fact]
+    public void Execute_DiscoversInterfaceAndConventionStrongIds()
+    {
+        string source = @"
+namespace Domain.Common
+{
+    public interface IEntityId<TSelf> { }
+    public interface IStrongId<TSelf, TValue> { }
+}
+
+namespace Domain.Ordering
+{
+    using Domain.Common;
+    using System;
+
+    public readonly record struct OrderId(Guid Value) : IEntityId<OrderId>;
+    public readonly record struct CustomVendorId(string Value) : IStrongId<CustomVendorId, string>;
+    // ProductCodeId has no static Create(int) method, so it is correctly excluded by the generator.
+    // Convention-based discovery requires a Create(T) factory to ensure the generated TypeHandler compiles.
+    public readonly record struct ProductCodeId(int Value);
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+
+        var runResult = driver.GetRunResult();
+        runResult.GeneratedTrees.Should().NotBeEmpty();
+
+        var generatedCode = string.Join("\n", runResult.GeneratedTrees.Select(t => t.ToString()));
+        generatedCode.Should().Contain("OrderIdTypeHandler");
+        generatedCode.Should().Contain("CustomVendorIdTypeHandler");
+        // ProductCodeId is correctly NOT generated: it lacks a static Create(int) method.
+        // The generator requires Create(T) to avoid emitting non-compilable TypeHandlers.
+        generatedCode.Should().NotContain("ProductCodeIdTypeHandler");
+        generatedCode.Should().Contain("SqlMapper.AddTypeHandler(new OrderIdTypeHandler());");
+    }
+
+    [Fact]
+    public void Execute_DiscoversValueObjectConvention_WithResultReturningCreate()
+    {
+        string source = @"
+namespace Domain.Common
+{
+    public readonly struct Result<T>
+    {
+        public bool IsFailure => false;
+        public T Value => default!;
+    }
+}
+
+namespace Domain.ValueObjects
+{
+    using Domain.Common;
+    using System;
+
+    public readonly partial record struct Rnc
+    {
+        public string Value { get; }
+        private Rnc(string value) => Value = value;
+        public static Result<Rnc> Create(string value) => default;
+    }
+
+    public readonly partial record struct PhoneNumber
+    {
+        public string Value { get; }
+        private PhoneNumber(string value) => Value = value;
+        public static Result<PhoneNumber> Create(string value) => default;
+    }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
+
+        var runResult = driver.GetRunResult();
+        var generatedCode = string.Join("\n", runResult.GeneratedTrees.Select(t => t.ToString()));
+
+        generatedCode.Should().Contain("RncTypeHandler");
+        generatedCode.Should().Contain("PhoneNumberTypeHandler");
+        generatedCode.Should().Contain("SqlMapper.AddTypeHandler(new RncTypeHandler());");
+        generatedCode.Should().Contain("SqlMapper.AddTypeHandler(new PhoneNumberTypeHandler());");
+    }
+
+    [Fact]
+    public void Execute_DiscoversValueObjectConvention_InReferencedAssembly()
+    {
+        string domainSource = @"
+namespace Domain.Common
+{
+    public readonly struct Result<T>
+    {
+        public bool IsFailure => false;
+        public T Value => default!;
+    }
+}
+
+namespace Domain.ValueObjects
+{
+    using Domain.Common;
+    using System;
+
+    public readonly partial record struct Rnc
+    {
+        public string Value { get; }
+        private Rnc(string value) => Value = value;
+        public static Result<Rnc> Create(string value) => default;
+    }
+}
+";
+        var references = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(a => !a.IsDynamic && !string.IsNullOrWhiteSpace(a.Location))
+            .Select(a => MetadataReference.CreateFromFile(a.Location))
+            .Cast<MetadataReference>()
+            .ToArray();
+
+        var domainCompilation = CSharpCompilation.Create("Domain",
+            new[] { CSharpSyntaxTree.ParseText(domainSource) },
+            references,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        using var ms = new MemoryStream();
+        var emitResult = domainCompilation.Emit(ms);
+        emitResult.Success.Should().BeTrue();
+        ms.Seek(0, SeekOrigin.Begin);
+        var domainRef = MetadataReference.CreateFromStream(ms);
+
+        string consumerSource = @"
+namespace Infrastructure;
+public class Dummy { }
+";
+        var consumerCompilation = CSharpCompilation.Create("Infrastructure",
+            new[] { CSharpSyntaxTree.ParseText(consumerSource) },
+            references.Concat(new[] { domainRef }),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        var generator = new DapperTypeHandlerGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        driver = driver.RunGeneratorsAndUpdateCompilation(consumerCompilation, out var outputCompilation, out var diagnostics);
+
+        var runResult = driver.GetRunResult();
+        var generatedCode = string.Join("\n", runResult.GeneratedTrees.Select(t => t.ToString()));
+
+        generatedCode.Should().Contain("RncTypeHandler");
+    }
 }
 
 

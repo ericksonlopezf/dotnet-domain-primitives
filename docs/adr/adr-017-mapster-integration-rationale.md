@@ -1,6 +1,12 @@
 # adr-017: Mapster Integration â€” Package Rationale and Scope
 
-**Status:** Accepted  
+## Status
+Superseded by [ADR-043](adr-043-discontinue-mapster-package.md) — packages removed in v2.0.0 (BC-001)
+
+## Date
+2026-08-10
+
+**Status:** Superseded by ADR-043 — packages removed in v2.0.0 (BC-001)  
 **Date:** 2026-08-10  
 **Authors:** Core maintainers  
 **Linked audit item:** CRIT-V4-002 (Audit v4.0)
@@ -93,3 +99,4 @@ The spec wording is updated to reflect this nuance instead of the absolute "DOES
 - **Negative**: The spec Â§MAPSTER POSITION required a corrigendum â€” this ADR documents it.
 - **Action**: The README is updated to distinguish "simple mapping (no package needed)" from
   "composite VO mapping (add EricksonLopez.DomainPrimitives.Mapster)".
+

@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-024: Reject Mutable Primitives
 
 **Date:** 2026-08-10

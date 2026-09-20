@@ -11,13 +11,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.Dapper.Tests;
 
-[ValueObject]
-public readonly partial record struct Address
-{
-    public string Street { get; init; }
-    public string City { get; init; }
-}
-
 public class DapperValueObjectTests : IAsyncLifetime
 {
     private SqliteConnection _connection = null!;

@@ -79,7 +79,7 @@ public sealed class PublicConstructorBypassAnalyzer : DiagnosticAnalyzer
         // Check for public constructors declared in source (not generated)
         foreach (var constructor in typeSymbol.Constructors)
         {
-            if (constructor.DeclaredAccessibility != Accessibility.Public || constructor.Parameters.Length == 0)
+            if (constructor.DeclaredAccessibility != Accessibility.Public || constructor.IsImplicitlyDeclared)
                 continue;
 
             foreach (var location in constructor.Locations)

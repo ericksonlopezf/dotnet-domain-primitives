@@ -4,11 +4,11 @@
 
 | Version | Supported | Notes |
 | ------- | --------- | ----- |
-| 1.1.x   | :white_check_mark: | Current release |
+| 2.0.x   | :white_check_mark: | Current release |
 | 1.0.x   | :white_check_mark: | Security patches only |
 | < 1.0   | :x: | Pre-release; not supported |
 
-> Only the latest minor version receives active maintenance. The previous minor version (`1.0.x`) receives critical security patches only. Users are encouraged to stay on the latest release.
+> Only the latest major/minor version receives active feature maintenance. The previous stable version (`1.0.x`) receives critical security patches only. Users are strongly encouraged to stay on the latest release.
 
 ## Reporting a Vulnerability
 

@@ -216,7 +216,75 @@ public class DatePrimitiveTests
         futureTs.IsDefault.Should().BeTrue();
         futureErr.Code.Should().Be("TEMPORAL");
     }
+
+    [Fact]
+    public void CustomerBirthDate_ExplicitCast_DefaultInstance_ThrowsInvalidOperationException()
+    {
+        var defaultBirthDate = default(CustomerBirthDate);
+        defaultBirthDate.IsDefault.Should().BeTrue();
+
+        Action act = () => { var _ = (DateOnly)defaultBirthDate; };
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Cannot convert a default CustomerBirthDate to *DateOnly. Check IsDefault before casting.*");
+    }
+
+    [Fact]
+    public void CustomerBirthDate_ExplicitCast_ValidInstance_Succeeds()
+    {
+        var validDate = new DateOnly(2000, 1, 1);
+        var birthDate = CustomerBirthDate.Create(validDate);
+        var raw = (DateOnly)birthDate;
+        raw.Should().Be(validDate);
+    }
+
+    [Fact]
+    public void CompanyFiscalYear_ValidYear_Succeeds()
+    {
+        var valid = new DateOnly(2025, 1, 1);
+        var fy = CompanyFiscalYear.Create(valid);
+        fy.Value.Should().Be(valid);
+    }
+
+    [Fact]
+    public void CompanyFiscalYear_YearBeforeMinYear_ThrowsValidationException()
+    {
+        var invalid = new DateOnly(1899, 12, 31);
+        Action act = () => CompanyFiscalYear.Create(invalid);
+        act.Should().Throw<DomainPrimitiveValidationException>()
+            .WithMessage("*CompanyFiscalYear year must be >= 1900.*")
+            .Where(e => e.Error.Code == "TEMPORAL");
+    }
+
+    [Fact]
+    public void WorkShiftTime_Midnight_IsDefaultIsFalse_AndValueSucceeds()
+    {
+        var midnight = TimeOnly.MinValue; // 00:00:00
+        var shift = WorkShiftTime.Create(midnight);
+
+        shift.IsDefault.Should().BeFalse();
+        shift.Value.Should().Be(midnight);
+
+        var json = System.Text.Json.JsonSerializer.Serialize(shift);
+        json.Should().Contain("00:00:00");
+
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<WorkShiftTime>(json);
+        deserialized.IsDefault.Should().BeFalse();
+        deserialized.Value.Should().Be(midnight);
+        deserialized.Should().Be(shift);
+    }
+
+    [Fact]
+    public void WorkShiftTime_DefaultInstance_IsDefaultIsTrue()
+    {
+        var def = default(WorkShiftTime);
+        def.IsDefault.Should().BeTrue();
+        Action act = () => { var _ = def.Value; };
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*Value accessed on a default instance of WorkShiftTime*");
+    }
 }
+
+
 
 
 

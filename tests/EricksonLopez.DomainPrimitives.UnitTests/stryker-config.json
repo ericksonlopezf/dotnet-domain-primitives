@@ -12,6 +12,6 @@
       "progress"
     ],
     "target-framework": "net8.0",
-    "concurrency": 4
+    "concurrency": 2
   }
 }

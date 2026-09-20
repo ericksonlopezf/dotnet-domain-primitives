@@ -9,31 +9,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.EFCore.UnitTests;
 
-[Email]
-public readonly partial record struct EFCoreTestEmail;
-
-[StrongId<Guid>]
-public readonly partial record struct EFCoreTestCustomerId;
-
-[StrongId<int>]
-public readonly partial record struct EFCoreTestOrderId;
-
-[NumericPrimitive<int>]
-public readonly partial record struct EFCoreTestScore;
-
-[Money]
-public readonly partial record struct EFCoreTestMoney;
-
-[Percentage]
-public readonly partial record struct EFCoreTestPercentage;
-
-[SmartEnum<int>]
-public readonly partial record struct EFCoreTestStatus
-{
-    public static readonly EFCoreTestStatus Pending = new(1, "Pending");
-    public static readonly EFCoreTestStatus Completed = new(2, "Completed");
-}
-
 public class EFCoreValueConverterUnitTests
 {
     [Fact]

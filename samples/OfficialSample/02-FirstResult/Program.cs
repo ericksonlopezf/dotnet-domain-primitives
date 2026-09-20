@@ -47,7 +47,7 @@ Console.WriteLine();
 Console.WriteLine("--- ✅ AFTER (RESULT PATTERN WITH ZERO STACKTRACE ALLOCATIONS) ---");
 
 // Creating the primitive via TryCreate returns a Result<Money>
-Result<Money> moneyResult = Money.TryCreate(150.00m, out var money, out var error) ? money : Error.Validation(error.Code, error.Message);
+Result<Money> moneyResult = Money.TryCreate(150.00m, out var money, out var error) ? money : Error.Validation(error.Code ?? "VALIDATION", error.Message ?? "Invalid money amount");
 
 // Monadic Composition via Railway-Oriented Programming (Match)
 string message = moneyResult.Match(
@@ -60,7 +60,7 @@ Console.WriteLine(message);
 Console.WriteLine("\n--- 🔄 MONADIC COMPOSITION (MAP AND BIND) ---");
 
 // Attempt to process an invalid deposit using ROP chaining
-Result<Money> firstResult = Money.TryCreate(-20m, out var money2, out var error2) ? Result.Success(money2) : Result.Failure<Money>(Error.Validation(error2.Code, error2.Message));
+Result<Money> firstResult = Money.TryCreate(-20m, out var money2, out var error2) ? Result.Success(money2) : Result.Failure<Money>(Error.Validation(error2.Code ?? "VALIDATION", error2.Message ?? "Invalid money amount"));
 Result<Money> transactionResult = firstResult.IsSuccess ? ValidateAllowedAmount(firstResult.Value) : firstResult;
 
 if (transactionResult.IsFailure)

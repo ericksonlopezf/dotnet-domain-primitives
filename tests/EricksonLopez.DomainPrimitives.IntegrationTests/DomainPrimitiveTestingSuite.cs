@@ -7,35 +7,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.IntegrationTests;
 
-[Email]
-public readonly partial record struct TestEmail;
-
-[StrongId<Guid>]
-public readonly partial record struct TestCustomerId;
-
-[Money]
-public readonly partial record struct TestMoney;
-
-[Slug]
-public readonly partial record struct TestSlug;
-
-[CountryCode]
-public readonly partial record struct TestCountryCode;
-
-[Percentage]
-public readonly partial record struct TestPercentage;
-
-[BirthDate]
-public readonly partial record struct TestBirthDate;
-
-[SmartEnum<int>]
-public readonly partial record struct TestOrderStatus
-{
-    public static readonly TestOrderStatus Pending = new(1, "Pending");
-    public static readonly TestOrderStatus Shipped = new(2, "Shipped");
-    public static readonly TestOrderStatus Delivered = new(3, "Delivered");
-}
-
 public class DomainPrimitiveTestingSuite
 {
     [Fact]

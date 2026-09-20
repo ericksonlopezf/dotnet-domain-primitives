@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 The previous implementation of the library relied heavily on the `EricksonLopez.Result` package and allocated objects on the heap for validation errors in `TryCreate` workflows, creating unacceptable overhead in high-performance or hot-path scenarios.
 

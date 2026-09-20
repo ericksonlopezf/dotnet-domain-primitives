@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 The v4.0 Specification indicates that the `IDomainPrimitive<TSelf, TValue>` interface should declare `static abstract` factory members (`Create`, `TryCreate`) so that consumers can abstractly construct primitives. The library targets `netstandard2.0` (as required by the spec to maximize reach), but `static abstract` members were not introduced to C# until C# 11 and .NET 7.
 

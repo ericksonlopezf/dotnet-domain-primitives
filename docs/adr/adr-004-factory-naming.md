@@ -1,5 +1,11 @@
 # adr-004: Factory Method Naming for Strong IDs
 
+## Status
+Accepted
+
+## Date
+2026-08-06
+
 **Date:** 2026-08-06  
 **Status:** Accepted  
 

@@ -1,4 +1,4 @@
-# DomainPrimitives Showcase (Reference Implementation) — v1.0.0
+# DomainPrimitives Showcase (Reference Implementation) — v3.0.0
 
 This project (`OfficialSample.slnx`) is the **official reference implementation and executable documentation** of the `EricksonLopez.DomainPrimitives` public API.
 
@@ -62,7 +62,7 @@ void SendInvoice(CustomerEmail email, OrderAmount amount, OrderId orderId) { }
 - ✅ **Zero runtime reflection** — 100% AOT / NativeAOT compatible
 - ✅ **Zero GC allocations on success path** — `TryCreate()` uses stack-allocated `PrimitiveError`
 - ✅ **No registration required** — `ConfigureDomainPrimitives()` auto-discovers all types
-- ✅ **IDE integration** — Roslyn Analyzers (DP0001–DP0017) enforce correct usage at design time
+- ✅ **IDE integration** — Roslyn Analyzers (DP0001–DP0018) enforce correct usage at design time
 
 ### Trade-offs
 

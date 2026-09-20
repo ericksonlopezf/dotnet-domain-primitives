@@ -11,31 +11,6 @@ using Xunit;
 
 namespace EricksonLopez.DomainPrimitives.OpenApi.Tests;
 
-[Email]
-public readonly partial record struct OpenApiTestEmail;
-
-[StrongId<Guid>]
-public readonly partial record struct OpenApiTestUserId;
-
-[StrongId<int>]
-public readonly partial record struct OpenApiTestOrderId;
-
-[Money]
-public readonly partial record struct OpenApiTestPrice;
-
-[Percentage]
-public readonly partial record struct OpenApiTestTax;
-
-[DatePrimitive(Kind = 0)]
-public readonly partial record struct OpenApiTestDate;
-
-[SmartEnum<int>]
-public readonly partial record struct OpenApiTestStatus
-{
-    public static readonly OpenApiTestStatus Active = new(1, "Active");
-    public static readonly OpenApiTestStatus Inactive = new(2, "Inactive");
-}
-
 public class OpenApiSchemaFilterTests
 {
     private readonly DomainPrimitivesSchemaFilter _filter = new();

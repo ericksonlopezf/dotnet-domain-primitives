@@ -286,11 +286,13 @@ public class Consumer
         // DP0007: Default constructor / default expression
         var id1 = new OrderId();
         OrderId id2 = default;
+        var id3 = default(OrderId);
     }
 }
 ";
         var diags = await GetDiagnosticsAsync(analyzer, src);
         diags.Should().Contain(d => d.Id == "DP0007");
+        diags.Count(d => d.Id == "DP0007").Should().Be(3);
     }
 
     [Fact]

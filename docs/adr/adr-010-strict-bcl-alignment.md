@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 Our primitives aim to act as transparent, native types within the C# ecosystem. Some APIs deviated from standard BCL expectations, causing friction for adoption and unexpected side-effects (e.g. relying on an external JSON library or default `IFormatProvider`).
 

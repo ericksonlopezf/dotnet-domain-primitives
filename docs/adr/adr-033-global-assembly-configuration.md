@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 In large enterprise codebases, developers often want uniform normalization and validation rules across all domain primitives in an assembly (such as always trimming string inputs, enforcing non-empty strings, or setting a default maximum length). Requiring explicit decoration on every single primitive struct creates boilerplate and risks accidental omissions.
 

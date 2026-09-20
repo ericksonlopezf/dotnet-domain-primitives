@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace EricksonLopez.DomainPrimitives.Testing;
 
+/// <summary>
+/// Provides deterministic fake test data for domain primitives.
+/// </summary>
 public static partial class DomainPrimitiveFakeFactory
 {
     /// <summary>Provides deterministic fake test data for string-based domain primitives.</summary>

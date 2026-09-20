@@ -38,7 +38,7 @@
 
 ```bash
 cd benchmarks/EricksonLopez.DomainPrimitives.Benchmarks
-dotnet run -c Release --framework net9.0 -- --filter "*" --exporters json markdown
+dotnet run -c Release --framework net10.0 -- --filter "*" --exporters json markdown
 ```
 
 Results are written to `BenchmarkDotNet.Artifacts/results/`. Copy them to `benchmarks/results/` for archival.
@@ -145,6 +145,6 @@ is manual. Automated threshold gate is a v1.3.0 target.
 
 | Date | Runtime | Hardware | Report |
 |------|---------|----------|--------|
-| 2026-07-24 | .NET 10.0.10 | AMD Ryzen 7 9800X3D | [DomainPrimitiveBenchmarks (partial)](../benchmarks/EricksonLopez.DomainPrimitives.Benchmarks/BenchmarkDotNet.Artifacts/results/) |
+| 2026-07-24 | .NET 10.0.10 | AMD Ryzen 7 9800X3D | [DomainPrimitiveBenchmarks (partial)](../benchmarks/results/) |
 
 > More runs needed for trend analysis. Target: monthly runs before each minor release.

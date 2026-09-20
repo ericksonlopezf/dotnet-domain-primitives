@@ -1,5 +1,11 @@
 # adr-026: Newtonsoft.Json Support — Gap Accepted, Package Planned
 
+## Status
+Accepted
+
+## Date
+2026-08-10
+
 **Date:** 2026-08-10
 **Status:** Accepted — Implementation Planned (v1.x)
 **Authors:** Core maintainers

@@ -15,7 +15,7 @@ These four packages form the foundation. Most consumers only need `EricksonLopez
 | `EricksonLopez.DomainPrimitives` | `net8.0; net9.0; net10.0` | **Meta-package** — single install for most users. Bundles Abstractions + Generators + Analyzers. |
 | `EricksonLopez.DomainPrimitives.Abstractions` | `netstandard2.0; net8.0; net9.0; net10.0` | Marker interfaces, declaration attributes, validation attributes, normalization attributes, `PrimitiveError`. Zero external dependencies. |
 | `EricksonLopez.DomainPrimitives.Generators` | `netstandard2.0` | Roslyn Incremental Source Generator (`IIncrementalGenerator`). Compile-time only — no runtime reference. |
-| `EricksonLopez.DomainPrimitives.Analyzers` | `netstandard2.0` | Roslyn Analyzers — enforce correct usage, API surface budget (DP0001–DP0017). Compile-time only. |
+| `EricksonLopez.DomainPrimitives.Analyzers` | `netstandard2.0` | Roslyn Analyzers — enforce correct usage, immutability, API surface budget (DP0001–DP0018). Compile-time only. |
 
 > [!NOTE]
 > `Generators` and `Analyzers` are referenced by the meta-package as `OutputItemType="Analyzer" ReferenceOutputAssembly="false"`. They add zero runtime overhead.
@@ -151,15 +151,15 @@ Key pinned versions (from `Directory.Packages.props`):
 
 | Package | Version |
 |---------|---------|
-| `Microsoft.CodeAnalysis.CSharp` | `4.11.0` |
+| `Microsoft.CodeAnalysis.CSharp` | `4.14.0` |
 | `Microsoft.EntityFrameworkCore` | `8.0.11` / `9.0.0` / `10.0.0` (per TFM) |
 | `Newtonsoft.Json` | `13.0.4` |
-| `Dapper` | `2.1.35` |
+| `Dapper` | `2.1.79` |
 | `Swashbuckle.AspNetCore` | `6.6.2` |
-| `xunit` | `2.9.0` |
-| `AwesomeAssertions` | `9.5.0` |
+| `xunit` | `2.9.3` |
+| `AwesomeAssertions` | `9.6.0` |
 | `BenchmarkDotNet` | `0.15.8` |
-| `coverlet.collector` | `6.0.1` |
+| `coverlet.collector` | `10.0.1` |
 
 ---
 

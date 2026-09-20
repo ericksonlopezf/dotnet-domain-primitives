@@ -80,7 +80,7 @@ namespace Chapter17
             bool isEmailSuccess = EmailAddress.TryCreate(request.Email, out var email, out var emailError);
             if (!isEmailSuccess)
             {
-                return Error.Validation("CreateCustomer.InvalidEmail", emailError.Message);
+                return Error.Validation("CreateCustomer.InvalidEmail", emailError.Message ?? "Invalid email");
             }
 
             return await next();
@@ -90,6 +90,7 @@ namespace Chapter17
     // Business Handler
     public class CreateCustomerCommandHandler
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "MediatR handlers are instantiated services.")]
         public Task<Result<CustomerId>> Handle(CreateCustomerCommand command)
         {
             var newId = CustomerId.Create();

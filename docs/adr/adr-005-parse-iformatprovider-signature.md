@@ -1,5 +1,11 @@
 # ADR 005: Parse(string) with IFormatProvider? = null vs Separate Overloads
 
+## Status
+Accepted
+
+## Date
+2026-08-09
+
 **Date:** 2026-08-09  
 **Status:** Approved
 

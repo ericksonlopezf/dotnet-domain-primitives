@@ -1,12 +1,6 @@
 // Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using EricksonLopez.DomainPrimitives.Generators.Models;
-using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
 
@@ -37,7 +31,28 @@ internal sealed partial class StringPrimitiveGenerator
             sb.AppendLine("value = value.ToLowerInvariant();");
         if (info.UpperCase)
             sb.AppendLine("value = value.ToUpperInvariant();");
+        sb.AppendLine("try");
+        sb.OpenBrace();
         sb.AppendLine("value = value.Normalize(System.Text.NormalizationForm.FormC);");
+        sb.CloseBrace();
+        // HIGH-01: Use named 'ex' only in the branch where it is re-thrown as inner exception.
+        // When CustomExceptionType is set, the original ArgumentException is not wrapped, so we
+        // use a discard-style catch (without a named variable) to avoid CS0168 in the generated
+        // project when TreatWarningsAsErrors=true.
+        if (!string.IsNullOrEmpty(info.CustomExceptionType))
+        {
+            sb.AppendLine("catch (ArgumentException)");
+            sb.OpenBrace();
+            sb.AppendLine($"throw new {info.CustomExceptionType}(\"Value contains invalid or unpaired Unicode code points.\");");
+            sb.CloseBrace();
+        }
+        else
+        {
+            sb.AppendLine("catch (ArgumentException ex)");
+            sb.OpenBrace();
+            sb.AppendLine("throw new global::EricksonLopez.DomainPrimitives.DomainPrimitiveValidationException(new global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError(\"INVALID_UNICODE\", \"Value contains invalid or unpaired Unicode code points.\"), ex);");
+            sb.CloseBrace();
+        }
         sb.AppendLine("return value;");
 
         sb.CloseBrace();

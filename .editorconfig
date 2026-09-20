@@ -25,6 +25,7 @@ dotnet_diagnostic.CS0618.severity = error
 dotnet_diagnostic.CS0619.severity = error
 dotnet_diagnostic.CS1591.severity = error
 dotnet_diagnostic.CA1852.severity = warning
+dotnet_diagnostic.CA1707.severity = warning
 dotnet_diagnostic.CA1305.severity = suggestion
 dotnet_diagnostic.xUnit1051.severity = suggestion
 
@@ -75,12 +76,15 @@ csharp_style_namespace_declarations = file_scoped:suggestion
 [samples/**/*.cs]
 dotnet_diagnostic.CS1591.severity = none
 dotnet_diagnostic.CA1852.severity = none
+dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1305.severity = none
 csharp_style_namespace_declarations = file_scoped:suggestion
 
 [benchmarks/**/*.cs]
 dotnet_diagnostic.CS1591.severity = none
 dotnet_diagnostic.CA1852.severity = none
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1305.severity = none
 csharp_style_namespace_declarations = file_scoped:suggestion
 
 [*.txt]

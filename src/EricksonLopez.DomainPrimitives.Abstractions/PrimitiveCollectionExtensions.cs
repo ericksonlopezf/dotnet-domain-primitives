@@ -1,5 +1,6 @@
 // Copyright © Erickson Lopez. MIT License.
 using System;
+using System.Collections.Generic;
 
 namespace EricksonLopez.DomainPrimitives;
 
@@ -22,7 +23,11 @@ public static class PrimitiveCollectionExtensions
     /// A new <see cref="List{T}"/> containing one validated domain primitive for each element in <paramref name="values"/>.
     /// Never returns <see langword="null"/> but may be empty if the source sequence is empty.
     /// </returns>
-    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules</exception>
+    /// <exception cref="ArgumentException">An element in <paramref name="values"/> fails domain validation rules.
+    /// The <see cref="Exception.InnerException"/> is a <see cref="DomainPrimitiveValidationException"/> carrying the
+    /// structured error code and the zero-based element index is included in the exception message.
+    /// </exception>
+    /// <exception cref="NotSupportedException">The target framework is below .NET 7.0, which does not support static abstract interface members.</exception>
     public static List<TPrimitive> ToDomainPrimitiveList<TPrimitive, TValue>(
         this IEnumerable<TValue> values)
 #if NET7_0_OR_GREATER
@@ -32,11 +37,28 @@ public static class PrimitiveCollectionExtensions
 #endif
         where TValue : notnull
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(values);
+#else
+        if (values is null) throw new ArgumentNullException(nameof(values));
+#endif
 #if NET7_0_OR_GREATER
         var list = new List<TPrimitive>(values is ICollection<TValue> collection ? collection.Count : 4);
+        // LOW-04: Track element index for better error diagnostics when validation fails.
+        int index = 0;
         foreach (var value in values)
         {
-            list.Add(TPrimitive.Create(value));
+            try
+            {
+                list.Add(TPrimitive.Create(value));
+            }
+            catch (DomainPrimitiveValidationException ex)
+            {
+                throw new ArgumentException(
+                    $"Element at index {index} failed validation: [{ex.Error.Code}] {ex.Error.Message}",
+                    nameof(values), ex);
+            }
+            index++;
         }
         return list;
 #else
@@ -58,7 +80,10 @@ public static class PrimitiveCollectionExtensions
     /// A new array containing one validated domain primitive for each element in <paramref name="values"/>.
     /// Never returns <see langword="null"/> but may be empty if the source sequence is empty.
     /// </returns>
-    /// <exception cref="DomainPrimitiveValidationException">Any element in <paramref name="values"/> fails the domain validation rules</exception>
+    /// <exception cref="ArgumentException">An element in <paramref name="values"/> fails domain validation rules.
+    /// The <see cref="Exception.InnerException"/> is a <see cref="DomainPrimitiveValidationException"/> carrying the structured error code.
+    /// </exception>
+    /// <exception cref="NotSupportedException">The target framework is below .NET 7.0, which does not support static abstract interface members.</exception>
     public static TPrimitive[] ToDomainPrimitiveArray<TPrimitive, TValue>(
         this IEnumerable<TValue> values)
 #if NET7_0_OR_GREATER
@@ -68,6 +93,11 @@ public static class PrimitiveCollectionExtensions
 #endif
         where TValue : notnull
     {
+#if NET6_0_OR_GREATER
+        ArgumentNullException.ThrowIfNull(values);
+#else
+        if (values is null) throw new ArgumentNullException(nameof(values));
+#endif
 #if NET7_0_OR_GREATER
         if (values is ICollection<TValue> collection)
         {

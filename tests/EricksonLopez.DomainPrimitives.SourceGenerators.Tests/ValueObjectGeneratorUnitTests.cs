@@ -142,14 +142,14 @@ namespace EricksonLopez.DomainPrimitives
         var code = ValueObjectGenerator.GenerateValueObject(info).Replace("\r\n", "\n");
 
         code.Should().Contain("public readonly partial record struct Address :");
-        code.Should().Contain("public bool IsDefault => Street == default && City == default && ZipCode == default;");
+        code.Should().Contain("public bool IsDefault => !_isInitialized;");
         code.Should().Contain("static partial void Validate(ref Address value, ref global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError error);");
 
         var expectedCreate =
             "    public static Address Create(string street, string city, int zipCode)\n" +
             "    {\n" +
             "        var error = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;\n" +
-            "        var instance = new Address { Street = street, City = city, ZipCode = zipCode };\n" +
+            "        var instance = new Address { Street = street, City = city, ZipCode = zipCode, _isInitialized = true };\n" +
             "        Validate(ref instance, ref error);\n" +
             "        if (error.IsError)\n" +
             "        {\n" +
@@ -163,7 +163,7 @@ namespace EricksonLopez.DomainPrimitives
             "    public static bool TryCreate(string street, string city, int zipCode, out Address result, out global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError validationError)\n" +
             "    {\n" +
             "        validationError = global::EricksonLopez.DomainPrimitives.Validation.PrimitiveError.None;\n" +
-            "        var instance = new Address { Street = street, City = city, ZipCode = zipCode };\n" +
+            "        var instance = new Address { Street = street, City = city, ZipCode = zipCode, _isInitialized = true };\n" +
             "        Validate(ref instance, ref validationError);\n" +
             "        if (validationError.IsError)\n" +
             "        {\n" +
@@ -285,6 +285,31 @@ namespace EricksonLopez.DomainPrimitives
 
         info.Should().NotBeNull();
         info!.CustomExceptionType.Should().Contain("InvalidOperationException");
+    }
+
+    [Fact]
+    public void GenerateValueObject_WithValueTypeProperties_EmitsProperFormattingAndUnboxing()
+    {
+        var props = ImmutableArray.Create(
+            new ValueObjectPropertyInfo("Latitude", "double", "latitude", IsValueType: true, IsNullable: false),
+            new ValueObjectPropertyInfo("Longitude", "double", "longitude", IsValueType: true, IsNullable: false));
+
+        var info = new ValueObjectTypeInfo(
+            Namespace: "TestNamespace",
+            TypeName: "GeoCoordinate",
+            Accessibility: "public",
+            ContainingTypes: new EquatableArray<string>(ImmutableArray<string>.Empty),
+            Properties: new EquatableArray<ValueObjectPropertyInfo>(props));
+
+        var code = ValueObjectGenerator.GenerateValueObject(info).Replace("\r\n", "\n");
+
+        // Must not contain ?.ToString() on value types
+        code.Should().NotContain("Latitude?.ToString()");
+        code.Should().Contain("\"Latitude = \" + Latitude.ToString()");
+
+        // Json converter must unwrap with GetValueOrDefault()
+        code.Should().Contain("latitudeValue.GetValueOrDefault()");
+        code.Should().NotContain("latitudeValue!");
     }
 }
 

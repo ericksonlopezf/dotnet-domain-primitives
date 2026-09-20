@@ -1,5 +1,11 @@
 # adr-041: PublicAPI.Shipped.txt Maintenance Policy
 
+## Status
+Accepted
+
+## Date
+2026-08-24
+
 **Date:** 2026-08-24  
 **Status:** Accepted  
 **Authors:** Core maintainers  

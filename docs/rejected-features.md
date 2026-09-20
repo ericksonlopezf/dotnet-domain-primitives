@@ -26,6 +26,7 @@
 | RF-009 | AutoMapper generated configuration | Rejected — permanent | — | [adr-030](adr/adr-030-reject-automapper-integration.md) |
 | RF-010 | Per-property validation on `[ValueObject]` | Rejected — permanent | — | [adr-031](adr/adr-031-reject-per-property-validation-on-valueobject.md) |
 | RF-011 | Discriminated Unions (v1.x) | Deferred — not rejected | — | [adr-029](adr/adr-029-defer-discriminated-unions.md) |
+| RF-012 | Dedicated Mapster mapping package | Discontinued — permanent | adr-014, adr-017 | [adr-043](adr/adr-043-discontinue-mapster-package.md) |
 
 ---
 

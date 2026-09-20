@@ -53,6 +53,10 @@ Console.WriteLine("=========================================================");
 Console.WriteLine(" 📘 CHAPTER 15: ASP.NET CORE MINIMAL APIS INTEGRATION");
 Console.WriteLine("=========================================================\n");
 
+// Direct demonstration of DomainPrimitiveValidator.ValidateSingle
+var singleValidationResult = DomainPrimitiveValidator.ValidateSingle<CustomerId, Guid>(Guid.NewGuid(), "CustomerId");
+Console.WriteLine($"[Validation] DomainPrimitiveValidator.ValidateSingle: {singleValidationResult == null || singleValidationResult == System.ComponentModel.DataAnnotations.ValidationResult.Success}");
+
 // ----------------------------------------------------------------------------
 // 1. MINIMAL APIS ENDPOINTS WITH STRONGLY TYPED ID ROUTE BINDING
 // ----------------------------------------------------------------------------

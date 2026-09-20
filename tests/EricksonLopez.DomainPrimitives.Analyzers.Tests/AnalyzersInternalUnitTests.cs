@@ -125,7 +125,8 @@ public class AnalyzersInternalUnitTests
     {
         var analyzer = new ValueObjectAnalyzer();
         analyzer.SupportedDiagnostics.Should().Equal(
-            DiagnosticDescriptors.DP0008_ValueObjectRequiresInit);
+            DiagnosticDescriptors.DP0008_ValueObjectRequiresInit,
+            DiagnosticDescriptors.DP0018_ValueObjectMutableCollection);
     }
 
     [Fact]
@@ -362,28 +363,28 @@ public record struct SampleStruct;
         ctx.GeneratedCodeFlags.Should().Be(GeneratedCodeAnalysisFlags.None);
         ctx.SymbolStartActions.Should().NotBeEmpty();
     }
-}
 
-public class MockAnalysisContext : AnalysisContext
-{
-    public bool ConcurrentExecutionEnabled { get; private set; }
-    public GeneratedCodeAnalysisFlags GeneratedCodeFlags { get; private set; }
-    public List<object> SymbolActions { get; } = new();
-    public List<object> SyntaxNodeActions { get; } = new();
-    public List<object> CompilationStartActions { get; } = new();
-    public List<object> SymbolStartActions { get; } = new();
+    private sealed class MockAnalysisContext : AnalysisContext
+    {
+        public bool ConcurrentExecutionEnabled { get; private set; }
+        public GeneratedCodeAnalysisFlags GeneratedCodeFlags { get; private set; }
+        public List<object> SymbolActions { get; } = new();
+        public List<object> SyntaxNodeActions { get; } = new();
+        public List<object> CompilationStartActions { get; } = new();
+        public List<object> SymbolStartActions { get; } = new();
 
-    public override void EnableConcurrentExecution() => ConcurrentExecutionEnabled = true;
-    public override void ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags analysisMode) => GeneratedCodeFlags = analysisMode;
-    public override void RegisterSymbolAction(System.Action<SymbolAnalysisContext> action, ImmutableArray<SymbolKind> symbolKinds) => SymbolActions.Add(action);
-    public override void RegisterSyntaxNodeAction<TLanguageKindEnum>(System.Action<SyntaxNodeAnalysisContext> action, ImmutableArray<TLanguageKindEnum> syntaxKinds) => SyntaxNodeActions.Add(action);
-    public override void RegisterCompilationAction(System.Action<CompilationAnalysisContext> action) { }
-    public override void RegisterCompilationStartAction(System.Action<CompilationStartAnalysisContext> action) => CompilationStartActions.Add(action);
-    public override void RegisterSymbolStartAction(System.Action<SymbolStartAnalysisContext> action, SymbolKind symbolKind) => SymbolStartActions.Add(action);
-    public override void RegisterSemanticModelAction(System.Action<SemanticModelAnalysisContext> action) { }
-    public override void RegisterSyntaxTreeAction(System.Action<SyntaxTreeAnalysisContext> action) { }
-    public override void RegisterCodeBlockAction(System.Action<CodeBlockAnalysisContext> action) { }
-    public override void RegisterCodeBlockStartAction<TLanguageKindEnum>(System.Action<CodeBlockStartAnalysisContext<TLanguageKindEnum>> action) { }
+        public override void EnableConcurrentExecution() => ConcurrentExecutionEnabled = true;
+        public override void ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags analysisMode) => GeneratedCodeFlags = analysisMode;
+        public override void RegisterSymbolAction(System.Action<SymbolAnalysisContext> action, ImmutableArray<SymbolKind> symbolKinds) => SymbolActions.Add(action);
+        public override void RegisterSyntaxNodeAction<TLanguageKindEnum>(System.Action<SyntaxNodeAnalysisContext> action, ImmutableArray<TLanguageKindEnum> syntaxKinds) => SyntaxNodeActions.Add(action);
+        public override void RegisterCompilationAction(System.Action<CompilationAnalysisContext> action) { }
+        public override void RegisterCompilationStartAction(System.Action<CompilationStartAnalysisContext> action) => CompilationStartActions.Add(action);
+        public override void RegisterSymbolStartAction(System.Action<SymbolStartAnalysisContext> action, SymbolKind symbolKind) => SymbolStartActions.Add(action);
+        public override void RegisterSemanticModelAction(System.Action<SemanticModelAnalysisContext> action) { }
+        public override void RegisterSyntaxTreeAction(System.Action<SyntaxTreeAnalysisContext> action) { }
+        public override void RegisterCodeBlockAction(System.Action<CodeBlockAnalysisContext> action) { }
+        public override void RegisterCodeBlockStartAction<TLanguageKindEnum>(System.Action<CodeBlockStartAnalysisContext<TLanguageKindEnum>> action) { }
+    }
 }
 
 

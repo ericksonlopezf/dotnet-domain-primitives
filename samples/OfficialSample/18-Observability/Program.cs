@@ -63,6 +63,11 @@ if (!isInvalidResultSuccess)
 }
 
 // Force metrics collection
+DomainPrimitivesMetrics.RecordCreation(nameof(EmailAddress));
+DomainPrimitivesMetrics.RecordValidationSuccess(nameof(EmailAddress));
+DomainPrimitivesMetrics.RecordValidationFailure(nameof(EmailAddress), "Format", "Invalid email format");
+DomainPrimitivesDiagnostics.WriteValidationSuccess(nameof(EmailAddress));
+DomainPrimitivesDiagnostics.WriteValidationFailure(nameof(EmailAddress), "Format", "Invalid email format");
 meterListener.RecordObservableInstruments();
 
 Console.WriteLine("\nCHAPTER 18 COMPLETED SUCCESSFULLY.\n");

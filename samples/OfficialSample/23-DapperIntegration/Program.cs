@@ -20,6 +20,7 @@ using System.Data;
 using System.Threading;
 using Chapter23;
 using Dapper;
+using EricksonLopez.DomainPrimitives.Dapper;
 using EricksonLopez.DomainPrimitives.Dapper.Generated;
 using Microsoft.Data.Sqlite;
 using System.Threading.Tasks;
@@ -85,6 +86,13 @@ await connection.ExecuteAsync(
 Console.WriteLine($"[Dapper] 2 products inserted.");
 Console.WriteLine($"  Product 1: {product1Id} — Laptop Pro 15");
 Console.WriteLine($"  Product 2: {product2Id} — Mechanical Keyboard\n");
+
+// Direct invocation of DomainPrimitiveTypeHandler.SetValue
+var dapperHandler = new DomainPrimitiveTypeHandler<ProductId, Guid>();
+using var testCmd = connection.CreateCommand();
+var testParam = testCmd.CreateParameter();
+dapperHandler.SetValue(testParam, product1Id);
+Console.WriteLine($"[Dapper] DomainPrimitiveTypeHandler.SetValue verified: {testParam.Value}");
 
 // ----------------------------------------------------------------------------
 // 3. QUERY: DAPPER CONVERTS BACK TO DOMAIN PRIMITIVES AUTOMATICALLY

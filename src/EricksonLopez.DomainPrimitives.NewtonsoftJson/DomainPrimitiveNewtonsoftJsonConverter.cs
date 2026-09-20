@@ -87,7 +87,7 @@ public class DomainPrimitiveNewtonsoftJsonConverter<TPrimitive, TValue> : JsonCo
     {
         if (reader.TokenType == JsonToken.Null)
         {
-            return default;
+            throw new JsonSerializationException($"Cannot deserialize null into non-nullable domain primitive '{typeof(TPrimitive).Name}'.");
         }
 
         object? rawValue = typeof(TValue) == typeof(DateOnly)
@@ -108,7 +108,7 @@ public class DomainPrimitiveNewtonsoftJsonConverter<TPrimitive, TValue> : JsonCo
 
         if (rawValue is null)
         {
-            return default;
+            throw new JsonSerializationException($"Cannot deserialize null into non-nullable domain primitive '{typeof(TPrimitive).Name}'.");
         }
 
         if (TryCreateMethod is not null)

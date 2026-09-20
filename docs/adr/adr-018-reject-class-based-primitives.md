@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-018: Reject Class-Based Primitive Support
 
 **Date:** 2026-08-10

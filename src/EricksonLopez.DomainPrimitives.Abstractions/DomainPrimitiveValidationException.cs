@@ -30,12 +30,46 @@ public sealed class DomainPrimitiveValidationException : ArgumentException
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DomainPrimitiveValidationException"/> class
-    /// with a structured validation error and an optional parameter name.
+    /// with a structured validation error.
     /// </summary>
     /// <param name="error">The structured validation error containing the error code and message.</param>
-    /// <param name="paramName">The name of the parameter that caused the exception. Defaults to <c>"value"</c>.</param>
-    public DomainPrimitiveValidationException(PrimitiveError error, string paramName = "value")
+    public DomainPrimitiveValidationException(PrimitiveError error)
+        : this(error, "value")
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DomainPrimitiveValidationException"/> class
+    /// with a structured validation error and a parameter name.
+    /// </summary>
+    /// <param name="error">The structured validation error containing the error code and message.</param>
+    /// <param name="paramName">The name of the parameter that caused the exception.</param>
+    public DomainPrimitiveValidationException(PrimitiveError error, string paramName)
         : base($"[{error.Code}] {error.Message}", paramName)
+    {
+        Error = error;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DomainPrimitiveValidationException"/> class
+    /// with a structured validation error and an inner exception.
+    /// </summary>
+    /// <param name="error">The structured validation error containing the error code and message.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
+    public DomainPrimitiveValidationException(PrimitiveError error, Exception? innerException)
+        : this(error, innerException, "value")
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DomainPrimitiveValidationException"/> class
+    /// with a structured validation error, an inner exception, and a parameter name.
+    /// </summary>
+    /// <param name="error">The structured validation error containing the error code and message.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
+    /// <param name="paramName">The name of the parameter that caused the exception.</param>
+    public DomainPrimitiveValidationException(PrimitiveError error, Exception? innerException, string paramName)
+        : base($"[{error.Code}] {error.Message}", paramName, innerException)
     {
         Error = error;
     }

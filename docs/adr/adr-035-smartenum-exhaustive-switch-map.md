@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 When working with Smart Enums in domain modeling, developers need exhaustive pattern matching capabilities to replace `switch` statements, preventing runtime errors when new enum members are added to the codebase.
 

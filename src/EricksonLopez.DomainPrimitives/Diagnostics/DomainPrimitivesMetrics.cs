@@ -31,8 +31,14 @@ public static class DomainPrimitivesMetrics
         "domain_primitive.creation",
         description: "Number of domain primitives successfully created by type.");
 
+    private static volatile bool _isEnabled = true;
+
     /// <summary>Gets or sets a value indicating whether metrics collection is globally active. Default: <see langword="true"/>.</summary>
-    public static bool IsEnabled { get; set; } = true;
+    public static bool IsEnabled
+    {
+        get => _isEnabled;
+        set => _isEnabled = value;
+    }
 
     /// <summary>
     /// Records the successful creation of a domain primitive instance.

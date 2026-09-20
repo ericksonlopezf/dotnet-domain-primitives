@@ -3,8 +3,10 @@
 Date: 2026-07-23
 
 ## Status
-
 Accepted
+
+## Date
+2026-07-23
 
 ## Context
 

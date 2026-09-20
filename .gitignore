@@ -1,6 +1,20 @@
-# .NET Core
-bin/
-obj/
+# ─── .NET Build & Packages ────────────────────────────────────────────────────
+[Bb]in/
+[Oo]bj/
+artifacts/
+nupkgs/
+*.nupkg
+*.snupkg
+*.symbols.nupkg
+
+# ─── IDEs & Editors ───────────────────────────────────────────────────────────
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userprefs
+*.userosscache
+*.sln.docstates
 
 # Visual Studio Code
 .vscode/*
@@ -10,74 +24,66 @@ obj/
 !.vscode/extensions.json
 *.code-workspace
 
-# Visual Studio
-.vs/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# ReSharper / JetBrains
+# JetBrains Rider / ReSharper
 _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
 .idea/
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Mac
-.DS_Store
-
-# Test results
-TestResults/
-test-results/
+# ─── Testing & Quality ────────────────────────────────────────────────────────
+# Test results & Traces
 [Tt]est[Rr]esults*/
 [Tt]est-[Rr]esults*/
 *.trx
 *.coverage
 *.coveragexml
 
-# Secrets
+# Code Coverage Reports
+[Cc]overage/
+[Cc]overage[Rr]eport*/
+*.cobertura.xml
+*.opencover.xml
+coverage.json
+
+# Verify Snapshot Testing
+*.received.*
+
+# Mutation Testing (Stryker)
+StrykerOutput/
+
+# Benchmarks (BenchmarkDotNet)
+BenchmarkDotNet.Artifacts/
+benchmarks/history/current/
+
+# Static Analysis (SonarQube)
+.sonarqube/
+.sonar/
+
+# ─── Security & Secrets ───────────────────────────────────────────────────────
 appsettings.Development.json
 appsettings.Local.json
 secrets.json
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+
+# Sigstore signatures
+*.bundle
+*.sig
+
+# ─── Operating System & Temporary Files ───────────────────────────────────────
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
 
 # Temporary files
 *.tmp
 *.bak
 *.swp
-
-#AUDIT
-AUDIT.md
-REVIEW.md
-
-# Coverage reports (generated artifacts — not source control)
-CoverageReport/
-CoverageReport_*/
-coverage/
-coveragereport/
-coveragereport_*/
-*.cobertura.xml
-coverage.opencover.xml
-coverage.json
-
-# BenchmarkDotNet artifacts
-BenchmarkDotNet.Artifacts/
-benchmarks/history/current/
-
-# Stryker output
-StrykerOutput/
-**/StrykerOutput/
-
-# Temporary scripts in root (should be in tools/scripts/ if kept)
-fix_trycreate.csx
-extract.js
-extract-fv.js
-rename.ps1
-
-# Sigstore signatures
-*.bundle
-*.sig
+*~

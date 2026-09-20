@@ -15,7 +15,7 @@ namespace EricksonLopez.DomainPrimitives.AspNetCore;
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Fallback reflection binder for non-generated primitive model binding.")]
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2087", Justification = "Fallback reflection binder for non-generated primitive model binding.")]
 [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2090", Justification = "Fallback reflection binder for non-generated primitive model binding.")]
-public sealed class DomainPrimitiveModelBinder<T> : IModelBinder
+public sealed class DomainPrimitiveModelBinder<[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods)] T> : IModelBinder
 {
     private static readonly MethodInfo? Parse2ParamMethod = typeof(T).GetMethod(
         "Parse",
@@ -37,6 +37,49 @@ public sealed class DomainPrimitiveModelBinder<T> : IModelBinder
         null,
         new[] { typeof(string) },
         null);
+
+    private static readonly Func<string, IFormatProvider?, T>? CompiledParse2 = CreateParse2Delegate();
+    private static readonly Func<string, T>? CompiledParse1 = CreateParse1Delegate();
+    private static readonly Func<string, T>? CompiledCreate = CreateCreateDelegate();
+
+    private static Func<string, IFormatProvider?, T>? CreateParse2Delegate()
+    {
+        if (Parse2ParamMethod is null) return null;
+        try
+        {
+            return (Func<string, IFormatProvider?, T>)Delegate.CreateDelegate(typeof(Func<string, IFormatProvider?, T>), Parse2ParamMethod);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static Func<string, T>? CreateParse1Delegate()
+    {
+        if (Parse1ParamMethod is null) return null;
+        try
+        {
+            return (Func<string, T>)Delegate.CreateDelegate(typeof(Func<string, T>), Parse1ParamMethod);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static Func<string, T>? CreateCreateDelegate()
+    {
+        if (CreateMethod is null) return null;
+        try
+        {
+            return (Func<string, T>)Delegate.CreateDelegate(typeof(Func<string, T>), CreateMethod);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 
     /// <inheritdoc />
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Fallback reflection binder for non-generated primitive model binding.")]
@@ -64,6 +107,12 @@ public sealed class DomainPrimitiveModelBinder<T> : IModelBinder
 
         try
         {
+            if (CompiledParse2 != null)
+            {
+                var result = CompiledParse2(rawValue, valueProviderResult.Culture);
+                bindingContext.Result = ModelBindingResult.Success(result);
+                return Task.CompletedTask;
+            }
             if (Parse2ParamMethod != null)
             {
                 var result = (T)Parse2ParamMethod.Invoke(null, new object?[] { rawValue, valueProviderResult.Culture })!;
@@ -71,6 +120,12 @@ public sealed class DomainPrimitiveModelBinder<T> : IModelBinder
                 return Task.CompletedTask;
             }
 
+            if (CompiledParse1 != null)
+            {
+                var result = CompiledParse1(rawValue);
+                bindingContext.Result = ModelBindingResult.Success(result);
+                return Task.CompletedTask;
+            }
             if (Parse1ParamMethod != null)
             {
                 var result = (T)Parse1ParamMethod.Invoke(null, new object?[] { rawValue })!;
@@ -78,6 +133,12 @@ public sealed class DomainPrimitiveModelBinder<T> : IModelBinder
                 return Task.CompletedTask;
             }
 
+            if (CompiledCreate != null)
+            {
+                var result = CompiledCreate(rawValue);
+                bindingContext.Result = ModelBindingResult.Success(result);
+                return Task.CompletedTask;
+            }
             if (CreateMethod != null)
             {
                 var result = (T)CreateMethod.Invoke(null, new object?[] { rawValue })!;

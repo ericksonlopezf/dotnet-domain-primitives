@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-021: Reject Reflection-Based GetAll() for SmartEnum
 
 **Date:** 2026-08-10

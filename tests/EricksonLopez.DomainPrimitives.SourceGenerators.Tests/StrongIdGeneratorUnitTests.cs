@@ -230,8 +230,7 @@ namespace EricksonLopez.DomainPrimitives
             "    {\n" +
             "        if (Guid.TryParse(s, out var parsed))\n" +
             "        {\n" +
-            "            result = new GuidStrongId(parsed);\n" +
-            "            return true;\n" +
+            "            return TryCreate(parsed, out result, out _);\n" +
             "        }\n" +
             "        result = default;\n" +
             "        return false;\n" +
@@ -243,8 +242,7 @@ namespace EricksonLopez.DomainPrimitives
             "    {\n" +
             "        if (Guid.TryParse(s, out var parsed))\n" +
             "        {\n" +
-            "            result = new GuidStrongId(parsed);\n" +
-            "            return true;\n" +
+            "            return TryCreate(parsed, out result, out _);\n" +
             "        }\n" +
             "        result = default;\n" +
             "        return false;\n" +
@@ -256,19 +254,16 @@ namespace EricksonLopez.DomainPrimitives
             "    {\n" +
             "        if (System.Buffers.Text.Utf8Parser.TryParse(utf8, out Guid parsed, out _))\n" +
             "        {\n" +
-            "            result = new GuidStrongId(parsed);\n" +
-            "            return true;\n" +
+            "            return TryCreate(parsed, out result, out _);\n" +
             "        }\n" +
             "        result = default;\n" +
             "        return false;\n" +
             "    }\n";
         code.Should().Contain(expectedTryParseUtf8);
 
-        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => _value.ToString(format, formatProvider);\n");
-        code.Should().Contain("=> ((ISpanFormattable)_value).TryFormat(destination, out charsWritten, format, provider);");
-        code.Should().Contain("=> ((IUtf8SpanFormattable)_value).TryFormat(utf8Destination, out bytesWritten, format, provider);");
-        code.Should().Contain("public static explicit operator Guid(GuidStrongId id) => id._value;");
-        code.Should().Contain("public static explicit operator GuidStrongId(Guid value) => new(value);");
+        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => IsDefault ? string.Empty : _value.ToString(format, formatProvider);\n");
+        code.Should().Contain("public static explicit operator Guid(GuidStrongId id) =>");
+        code.Should().Contain("public static explicit operator GuidStrongId(Guid value) => Create(value);");
         code.Should().Contain("private sealed class GuidStrongIdDebugView");
     }
 
@@ -302,8 +297,7 @@ namespace EricksonLopez.DomainPrimitives
             "    {\n" +
             "        if (int.TryParse(s, provider, out var parsed))\n" +
             "        {\n" +
-            "            result = new IntStrongId(parsed);\n" +
-            "            return true;\n" +
+            "            return TryCreate(parsed, out result, out _);\n" +
             "        }\n" +
             "        result = default;\n" +
             "        return false;\n" +
@@ -315,8 +309,7 @@ namespace EricksonLopez.DomainPrimitives
             "    {\n" +
             "        if (int.TryParse(s, provider, out var parsed))\n" +
             "        {\n" +
-            "            result = new IntStrongId(parsed);\n" +
-            "            return true;\n" +
+            "            return TryCreate(parsed, out result, out _);\n" +
             "        }\n" +
             "        result = default;\n" +
             "        return false;\n" +
@@ -328,15 +321,14 @@ namespace EricksonLopez.DomainPrimitives
             "    {\n" +
             "        if (int.TryParse(utf8, provider, out var parsed))\n" +
             "        {\n" +
-            "            result = new IntStrongId(parsed);\n" +
-            "            return true;\n" +
+            "            return TryCreate(parsed, out result, out _);\n" +
             "        }\n" +
             "        result = default;\n" +
             "        return false;\n" +
             "    }\n";
         code.Should().Contain(expectedTryParseUtf8);
 
-        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => _value.ToString(format, formatProvider);\n");
+        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => IsDefault ? string.Empty : _value.ToString(format, formatProvider);\n");
         code.Should().Contain("=> _value.TryFormat(destination, out charsWritten, format, provider);");
         code.Should().Contain("=> _value.TryFormat(utf8Destination, out bytesWritten, format, provider);");
     }
@@ -356,7 +348,7 @@ namespace EricksonLopez.DomainPrimitives
 
         var code = StrongIdGenerator.GenerateStrongId(info).Replace("\r\n", "\n");
 
-        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => _value.ToString(format, formatProvider);\n");
+        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => IsDefault ? string.Empty : _value.ToString(format, formatProvider);\n");
         code.Should().Contain("if (long.TryParse(s, provider, out var parsed))");
         code.Should().Contain("if (long.TryParse(s, provider, out var parsed))");
         code.Should().Contain("if (long.TryParse(utf8, provider, out var parsed))");
@@ -383,10 +375,10 @@ namespace EricksonLopez.DomainPrimitives
         code.Should().Contain("public static StringStrongId Empty { get => new(string.Empty); }");
         code.Should().Contain("if (s is not null)");
         code.Should().Contain("var parsed = s.ToString();\n        if (parsed.Length > 0)");
-        code.Should().Contain("int count = System.Text.Encoding.UTF8.GetCharCount(utf8);");
-        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => _value.ToString();\n");
+        code.Should().Contain("public override string ToString() => _value ?? string.Empty;");
+        code.Should().Contain("public string ToString(string? format, IFormatProvider? formatProvider)\n        => _value ?? string.Empty;\n");
         code.Should().Contain("if (_value is null) { charsWritten = 0; return false; }");
-        code.Should().Contain("id._value ?? throw new InvalidOperationException(\"Cannot convert a default StringStrongId to string. Check IsDefault before casting.\");");
+        code.Should().Contain("id.IsDefault ? throw new InvalidOperationException(\"Cannot convert a default StringStrongId to string. Check IsDefault before casting.\") : id._value;");
     }
 
     [Fact]

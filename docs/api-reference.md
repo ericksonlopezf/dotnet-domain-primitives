@@ -1,336 +1,477 @@
-# API Reference
+# API Reference — EricksonLopez.DomainPrimitives
 
-This reference details the main methods and types exposed by `EricksonLopez.DomainPrimitives`. For the complete list of supported attributes, see the [API Inventory](api-inventory.md).
+Comprehensive technical documentation adhering to **Microsoft Learn** standards for the core types, methods, and extensibility points of the `EricksonLopez.DomainPrimitives` ecosystem.
 
-## Core Interfaces
+---
 
-### `IDomainPrimitive<TSelf, TValue>`
-Base interface implemented by all domain primitives.
+## 1. `IDomainPrimitive<TSelf, TValue>.Create`
 
-| Member | Signature | Description |
-|:-------|:----------|:------------|
-| `Value` | `TValue Value { get; }` | Gets the raw value encapsulated by the primitive. |
-| `Create` | `static TSelf Create(TValue value)` | Creates a new instance. Throws `DomainPrimitiveValidationException` if validation fails. Use when data comes from a trusted source. |
-| `TryCreate` | `static bool TryCreate(TValue value, out TSelf result, out PrimitiveError error)` | Attempts to create a new instance. Returns `true` on success; sets `error` on failure. Zero-allocation on the success path. |
-
-### `IDomainPrimitive<TSelf>`
-Base contract members present on all generated primitives.
-
-| Member | Signature | Description |
-|:-------|:----------|:------------|
-| `IsDefault` | `bool IsDefault { get; }` | Returns `true` if this struct holds its default (uninitialized) value. |
-| `PrimitiveName` | `static string PrimitiveName { get; }` | **.NET 7+ only.** Returns the canonical name of the primitive type (e.g., `"EmailAddress"`). Useful for logging, metrics, and diagnostics. |
-
-### `IStrongId<TSelf, TValue>`
-Base interface for strongly-typed identifiers.
-
-| Member | Signature | Description |
-|:-------|:----------|:------------|
-| `Create()` | `static TSelf Create()` | Generates a new identifier (Guid-backed: `Guid.NewGuid()`). |
-| `Create(TValue)` | `static TSelf Create(TValue value)` | Creates a typed ID from an existing value. |
-| `TryCreate` | `static bool TryCreate(TValue value, out TSelf result, out PrimitiveError error)` | Attempts creation without exceptions. |
-| `Empty` | `static TSelf Empty { get; }` | Returns the empty/default identifier. Rejected by default for Guid-backed IDs per rfc-0002. |
-
-### `PrimitiveError`
-Namespace: `EricksonLopez.DomainPrimitives.Validation`. Struct returned via `out` parameter on validation failure. Zero heap allocation on the success path.
-
-| Member | Description |
-|:-------|:------------|
-| `string? Code` | Short error code (e.g., `"FORMAT"`, `"LENGTH"`, `"RANGE"`). Null on `PrimitiveError.None`. |
-| `string? Message` | Human-readable description. Never echoes user input (SEC-005). |
-| `bool IsError` | Returns `true` if this instance represents a validation error; `false` for `PrimitiveError.None`. |
-| `static PrimitiveError None` | Sentinel value indicating no error. Default value of the struct. |
-| `static PrimitiveError Create(string code, string message)` | Factory method. |
-
-## Exceptions
-
-| Type | When Thrown | Base |
-|:-----|:------------|:-----|
-| `DomainPrimitiveValidationException` | `Create()` receives an invalid value | `ArgumentException` |
-| `System.FormatException` | `Parse()` / `TryParse()` receives unparseable input (per rfc-0003) | `System.FormatException` |
-| `DomainPrimitiveFormatException` | **Deprecated** `[Obsolete]` — use `System.FormatException` catch | `System.FormatException` |
-
-> [!IMPORTANT]
-> `DomainPrimitiveValidationException` inherits from `ArgumentException`. You can catch it with either `catch (DomainPrimitiveValidationException)` or `catch (ArgumentException)`. Access the structured error via the `.Error` property (`PrimitiveError`).
-
-## Generator Attributes
-
-### `[StringPrimitive]`
-Marks a `readonly partial record struct` for source generation of a string-backed primitive.
+### Signature
 ```csharp
-[StringPrimitive]
-[Trim][LowerCase][MaxLength(254)]
-public readonly partial record struct EmailHandle;
+public static abstract TSelf Create(TValue value);
 ```
 
-### `[NumericPrimitive<TValue>]`
-Marks a struct for generation of a numeric primitive backed by `TValue` (int, decimal, double, etc.).
+### Parameters
+- `value` (`TValue`): The raw underlying scalar value to be evaluated, normalized, and encapsulated within the domain primitive.
+
+### Returns
+- `TSelf`: An immutable domain primitive instance with all invariants validated.
+
+### Exceptions
+- `DomainPrimitiveValidationException`: Thrown when `value` violates any declared constraint or invariant (e.g. `[NotEmpty]`, `[MaxLength]`, `[PrimitiveRange]`, or custom `ICustomValidator<T>` implementations).
+- `ArgumentNullException`: Thrown when `value` is null in primitives backed by non-nullable reference types.
+
+### Remarks
+`Create` is the fail-fast factory method. It sequentially executes declared normalizers (`INormalizer<T>`, `[Trim]`, `[LowerCase]`), followed by built-in validation attributes, and finally custom validators (`ICustomValidator<T>`).
+
+### Basic Example
 ```csharp
-[NumericPrimitive<decimal>]
-[Range(0, 100)]
-public readonly partial record struct Percentage;
+// Direct creation from a valid string
+var email = CustomerEmail.Create("user@example.com");
+Console.WriteLine(email.Value); // "user@example.com"
 ```
 
-### `[DatePrimitive]`
-Marks a struct for generation of a date-backed primitive.
-
-| `Kind` value | Backing type |
-|:------------|:-------------|
-| `DatePrimitiveKind.DateOnly` (default) | `System.DateOnly` |
-| `DatePrimitiveKind.DateTime` | `System.DateTime` |
-| `DatePrimitiveKind.DateTimeOffset` | `System.DateTimeOffset` |
-| `DatePrimitiveKind.TimeOnly` | `System.TimeOnly` |
-
-### `[StrongId<TValue>]`
-Generates a strongly-typed identifier. Default `TValue` options: `Guid`, `int`, `long`, `string`.
+### Advanced Example
 ```csharp
-[StrongId<Guid>]
-public readonly partial record struct OrderId;
+// Fail-fast construction with structured error capture
+try
+{
+    var price = OrderPrice.Create(-10.5m);
+}
+catch (DomainPrimitiveValidationException ex)
+{
+    Console.WriteLine($"Business rule violation [{ex.Error.Code}]: {ex.Error.Message}");
+}
 ```
 
-### `[ValueObject]`
-Marks a `readonly partial record struct` for generation of a multi-property value object via source generator.
+### Best Practices
+- Use inside domain entity constructors, aggregates, and internal factories where data originates from trusted sources or persistence layers.
 
-### `[SmartEnum<TValue>]`
-Generates an AOT-safe strongly-typed enum with source-generated `GetAll()`, `FromName()`, and `Match<TResult>()`.
+### Performance
+Stack allocated (0 bytes on heap). Execution overhead is limited to invariant regex evaluation or scalar range comparisons.
 
-## Normalization Attributes
+### Common Pitfalls
+- Using `Create` to ingest untrusted user input without a `try/catch` block, causing unhandled 500 errors instead of clean 400 Bad Request responses.
 
-Namespace: `EricksonLopez.DomainPrimitives` (root). `LowerCaseAttribute` and `NormalizeWhitespaceAttribute` are in `EricksonLopez.DomainPrimitives.Normalization`.
+### When to Use
+- Within the domain core, entities, or aggregates where inputs have already passed boundary validation.
 
-| Attribute | Namespace | Effect |
-|:----------|:----------|:-------|
-| `[Trim]` | Root | Trims leading/trailing whitespace before validation |
-| `[TrimStart]` | Root | Trims leading whitespace only |
-| `[TrimEnd]` | Root | Trims trailing whitespace only |
-| `[LowerCase]` | `.Normalization` | Converts to lowercase invariant before validation |
-| `[UpperCase]` | Root | Converts to uppercase invariant before validation |
-| `[NormalizeWhitespace]` | `.Normalization` | Collapses internal whitespace runs to single space |
-| `[Normalize<TNormalizer>]` | Root | Applies a custom `INormalizer<T>` implementation |
+### When Not to Use
+- In HTTP controllers, Minimal APIs, or message queue consumers; use `TryCreate` instead.
 
-## Validation Constraint Attributes
+---
 
-Namespace: `EricksonLopez.DomainPrimitives`. Applied directly to string and numeric primitives to constrain the allowed value space.
+## 2. `IDomainPrimitive<TSelf, TValue>.TryCreate`
 
-| Attribute | Applies to | Description |
-|:----------|:-----------|:------------|
-| `[NotEmpty]` | String | Rejects empty or whitespace-only values. Error code: `"EMPTY"` |
-| `[MinLength(n)]` | String | Value must have ≥ `n` characters (inclusive). Error code: `"LENGTH"` |
-| `[MaxLength(n)]` | String | Value must have ≤ `n` characters (inclusive). Error code: `"LENGTH"` |
-| `[Length(min, max)]` | String | Combined min+max length in a single attribute. Error code: `"LENGTH"` |
-| `[ExactLength(n)]` | String | Value must have **exactly** `n` characters. Shorthand for `[Length(n,n)]`. Error code: `"LENGTH"` |
-| `[Regex("pattern")]` | String | Value must match the regex pattern. Supports `AllowMultiple`. Error code: `"FORMAT"` |
-| `[PrimitiveRange(min, max)]` | Numeric | Value must be within `[min, max]`. Accepts `double` or `(string, string)` overload for exact `decimal` precision. Error code: `"RANGE"` |
-
-> [!NOTE]
-> `[MaxLength(n)]` on a struct overrides the assembly-level `[DomainPrimitivesDefaults(MaxLength = 4096)]` default for that specific primitive.
-
-## Semantic Shortcut Attributes
-
-These imply `[StringPrimitive]` or `[NumericPrimitive<T>]` plus a standard normalization and validation rule set.
-
-### String Shortcuts
-
-| Attribute | Implies |
-|:----------|:--------|
-| `[Email]` | `[StringPrimitive]`, `[Trim]`, `[LowerCase]`, RFC 5321 regex |
-| `[Url]` | `[StringPrimitive]`, `[Trim]`, absolute URL with http/https |
-| `[Phone]` | `[StringPrimitive]`, `[Trim]`, E.164 format |
-| `[CountryCode]` | `[StringPrimitive]`, `[Trim]`, `[UpperCase]`, ISO 3166-1 alpha-2 |
-| `[CurrencyCode]` | `[StringPrimitive]`, `[Trim]`, `[UpperCase]`, ISO 4217 |
-| `[LanguageCode]` | `[StringPrimitive]`, `[Trim]`, `[LowerCase]`, BCP 47 |
-| `[IBAN]` | `[StringPrimitive]`, `[Trim]`, `[UpperCase]`, IBAN format |
-| `[Username]` | `[StringPrimitive]`, `[Trim]`, `[LowerCase]`, alphanumeric + underscore |
-| `[PasswordHash]` | `[StringPrimitive]`, `[NotEmpty]`, PII-safe (SEC-005) |
-| `[Slug]` | `[StringPrimitive]`, `[Trim]`, `[LowerCase]`, URL slug format |
-| `[HexColor]` | `[StringPrimitive]`, `[Trim]`, `[UpperCase]`, hex color format |
-| `[ISBN]` | `[StringPrimitive]`, `[Trim]`, ISBN-10 or ISBN-13 |
-| `[IPAddress]` | `[StringPrimitive]`, `[Trim]`, IPv4 or IPv6 |
-| `[MacAddress]` | `[StringPrimitive]`, `[Trim]`, MAC address |
-| `[VIN]` | `[StringPrimitive]`, `[Trim]`, `[UpperCase]`, VIN format |
-
-### Numeric Shortcuts
-
-| Attribute | Backing Type | Range / Notes |
-|:----------|:------------|:--------------|
-| `[Age]` | `int` | 0–150 |
-| `[Money]` | `decimal` | ≥ 0 |
-| `[Percentage]` | `decimal` | 0–100 |
-| `[Price]` | `decimal` | ≥ 0 |
-| `[TaxRate]` | `decimal` | 0–100 |
-| `[Discount]` | `decimal` | 0–100 |
-| `[Rating]` | `decimal` | 0–5 |
-| `[Score]` | `int` | 0–100 (integer scale; use `[NumericPrimitive<decimal>]` for decimal scores) |
-| `[Quantity]` | `int` | ≥ 0 |
-| `[Latitude]` | `double` | -90 to 90 |
-| `[Longitude]` | `double` | -180 to 180 |
-| `[Weight]` | `double` | 0–1000 kg (SI) |
-| `[Height]` | `double` | 0–300 cm |
-| `[Distance]` | `double` | 0–`double.MaxValue` meters |
-| `[Temperature]` | `double` | -273.15 (absolute zero) to `double.MaxValue` (Celsius) |
-
-## Integration Extension Methods
-
-### `EricksonLopez.DomainPrimitives.EFCore`
-
-Auto-discovered via source generator. Registers all `ValueConverter<TDomain, TValue>` implementations automatically on `ModelBuilder`.
-
-### `EricksonLopez.DomainPrimitives.Dapper`
-
-Auto-discovered via source generator. Generates `SqlMapper.TypeHandler` implementations for all domain primitives. At application startup, call the generated registration method:
-
+### Signature
 ```csharp
-// Generated in: EricksonLopez.DomainPrimitives.Dapper.Generated namespace
+public static abstract bool TryCreate(TValue value, out TSelf result, out PrimitiveError error);
+```
+
+### Parameters
+- `value` (`TValue`): The unprocessed raw scalar value.
+- `result` (`out TSelf`): Output parameter containing the instantiated primitive on success, or `default(TSelf)` on failure.
+- `error` (`out PrimitiveError`): Output parameter containing failure details (`Code`, `Message`), or `PrimitiveError.None` on success.
+
+### Returns
+- `bool`: `true` if the value satisfies all invariants; otherwise, `false`.
+
+### Exceptions
+- **None**. Guarantees a zero-exception execution path.
+
+### Remarks
+Forms the foundation of Railway-Oriented Programming within the ecosystem. Executes the complete normalization and validation pipeline without incurring CLR exception-throwing overhead.
+
+### Basic Example
+```csharp
+if (CustomerEmail.TryCreate("invalid-email", out var email, out var error))
+{
+    Console.WriteLine($"Valid email: {email.Value}");
+}
+else
+{
+    Console.WriteLine($"Rejected [{error.Code}]: {error.Message}");
+}
+```
+
+### Advanced Example
+```csharp
+// Seamless integration with the Result pattern
+public Result<OrderId> ResolveOrder(string input)
+{
+    return Guid.TryParse(input, out var guid) && OrderId.TryCreate(guid, out var orderId, out var error)
+        ? Result<OrderId>.Success(orderId)
+        : Result<OrderId>.Failure(Error.Validation(error.Code ?? "INVALID_ID", error.Message ?? "Invalid Order ID"));
+}
+```
+
+### Best Practices
+- Always verify the boolean return value before accessing `result.Value`.
+- Avoid re-throwing exceptions when handling boundary input; map `PrimitiveError` directly into `Result.Failure` or `ProblemDetails`.
+
+### Performance
+**Zero heap allocations** on both success and failure paths (`PrimitiveError` is a stack-allocated struct).
+
+### Common Pitfalls
+- Discarding the `out error` parameter and returning generic error messages to consumers.
+
+### When to Use
+- At application ingestion perimeters (JSON deserialization, ASP.NET Core model binders, async queue consumers).
+
+### When Not to Use
+- Static initialization code where throwing an exception on contract violation is mandatory.
+
+---
+
+## 3. `IStrongId<TSelf, TValue>.New` / `Create`
+
+### Signature
+```csharp
+public static abstract TSelf New();
+public static abstract TSelf Create();
+```
+
+### Parameters
+- None.
+
+### Returns
+- `TSelf`: A new strongly-typed identifier instance backed by a newly generated `Guid` (`Guid.NewGuid()`).
+
+### Exceptions
+- None.
+
+### Remarks
+Available exclusively on strongly-typed identifiers declared with `[StrongId<Guid>]` or `[StrongId]`.
+
+### Basic Example
+```csharp
+CustomerId newCustomerId = CustomerId.New();
+Console.WriteLine($"New customer: {newCustomerId.Value}");
+```
+
+### Advanced Example
+```csharp
+public class Order
+{
+    public OrderId Id { get; }
+
+    public Order()
+    {
+        Id = OrderId.New();
+    }
+}
+```
+
+### Best Practices
+- Use `New()` or parameterless `Create()` when instantiating new entities or aggregates in the domain.
+
+### Performance
+Zero heap allocations. Direct invocation of `Guid.NewGuid()`.
+
+### Common Pitfalls
+- Using `default(CustomerId)` instead of `CustomerId.New()`, producing an uninitialized `Guid.Empty`.
+
+### When to Use
+- When generating new entity instances prior to persisting them in a data store.
+
+### When Not to Use
+- When reconstructing existing entities from database records; use `CustomerId.Create(dbGuid)`.
+
+---
+
+## 4. `ISpanParsable<TSelf>.Parse` and `TryParse`
+
+### Signature
+```csharp
+public static abstract TSelf Parse(ReadOnlySpan<char> s, IFormatProvider? provider);
+public static abstract bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out TSelf result);
+```
+
+### Parameters
+- `s` (`ReadOnlySpan<char>`): The character span to parse.
+- `provider` (`IFormatProvider?`): Optional culture-specific format provider.
+- `result` (`out TSelf`): Output parsed instance.
+
+### Returns
+- `TSelf` (for `Parse`) or `bool` (for `TryParse`).
+
+### Exceptions
+- `FormatException`: Thrown by `Parse` if the span fails format or invariant validation (per RFC-0003).
+
+### Remarks
+Enables high-throughput parsing of memory buffers and streams without intermediate string allocations.
+
+### Basic Example
+```csharp
+ReadOnlySpan<char> slice = "user@domain.com".AsSpan();
+if (CustomerEmail.TryParse(slice, null, out var email))
+{
+    Console.WriteLine(email.Value);
+}
+```
+
+### Advanced Example
+```csharp
+// Parsing a comma-delimited network buffer
+void ProcessBuffer(ReadOnlySpan<char> buffer)
+{
+    int separatorIndex = buffer.IndexOf(',');
+    var emailSpan = buffer.Slice(0, separatorIndex);
+    var email = CustomerEmail.Parse(emailSpan, null);
+}
+```
+
+### Best Practices
+- Use in high-throughput, low-latency ingestion pipelines.
+
+### Performance
+Zero heap allocations throughout the parsing pipeline.
+
+### Common Pitfalls
+- Calling `.ToString()` on a `ReadOnlySpan<char>` before calling `TryParse`, eliminating zero-allocation benefits.
+
+### When to Use
+- In custom deserializers, binary protocols, or delimited text processing.
+
+### When Not to Use
+- When an existing `string` instance is already available and no slicing is needed.
+
+---
+
+## 5. `PrimitiveCollectionExtensions.ToDomainPrimitiveList`
+
+### Signature
+```csharp
+public static IReadOnlyList<TPrimitive> ToDomainPrimitiveList<TPrimitive, TValue>(
+    this IEnumerable<TValue> source)
+    where TPrimitive : struct, IDomainPrimitive<TPrimitive, TValue>
+    where TValue : notnull;
+```
+
+### Parameters
+- `source` (`IEnumerable<TValue>`): Raw scalar input collection.
+
+### Returns
+- `IReadOnlyList<TPrimitive>`: Read-only list of validated domain primitives.
+
+### Exceptions
+- `DomainPrimitiveValidationException`: If any element in the collection violates its invariants.
+- `ArgumentNullException`: If `source` is null.
+
+### Remarks
+Pre-allocates list capacity when `source` implements `ICollection<T>` to avoid dynamic resizing.
+
+### Basic Example
+```csharp
+var rawCodes = new[] { "US", "ES", "FR" };
+IReadOnlyList<CountryCode> countryCodes = rawCodes.ToDomainPrimitiveList<CountryCode, string>();
+```
+
+### Advanced Example
+```csharp
+// Safe transformation from bulk DTO payloads
+public void ImportCustomers(List<string> incomingEmails)
+{
+    var validatedList = incomingEmails.ToDomainPrimitiveList<CustomerEmail, string>();
+    _repository.BulkInsert(validatedList);
+}
+```
+
+### Best Practices
+- Ensure source data is pre-validated or comes from trusted storage to avoid abrupt exceptions.
+
+### Performance
+Single list allocation with pre-computed capacity.
+
+### Common Pitfalls
+- Manually writing `.Select(x => T.Create(x)).ToList()` instead of using this optimized extension.
+
+### When to Use
+- Batch imports, batch mapping from DTO collections to domain models.
+
+### When Not to Use
+- Unbounded streaming sequences or reactive async streams.
+
+---
+
+## 6. `PrimitiveBuilder<TPrimitive, TValue>`
+
+### Signature
+```csharp
+public sealed class PrimitiveBuilder<TPrimitive, TValue>
+{
+    public static PrimitiveBuilder<TPrimitive, TValue> For();
+    public PrimitiveBuilder<TPrimitive, TValue> WithValue(TValue value);
+    public PrimitiveBuilder<TPrimitive, TValue> Must(Func<TValue, bool> predicate, string errorCode, string errorMessage);
+    public bool Build(out TPrimitive result);
+    public TPrimitive BuildOrThrow();
+}
+```
+
+### Parameters
+- `predicate`: Delegate evaluating a domain condition.
+- `errorCode`: Machine-readable error code.
+- `errorMessage`: Human-readable error description.
+
+### Returns
+- Builder instance for fluent chaining, or the constructed primitive.
+
+### Exceptions
+- `DomainPrimitiveValidationException`: Thrown by `BuildOrThrow` if any predicate fails.
+
+### Remarks
+Allows injecting runtime ad-hoc validation rules that supplement compile-time declared attributes.
+
+### Basic Example
+```csharp
+var email = PrimitiveBuilder<CustomerEmail, string>.For()
+    .WithValue("admin@corp.com")
+    .Must(e => !e.StartsWith("test"), "TEST_REJECTED", "Test emails are not allowed")
+    .BuildOrThrow();
+```
+
+### Best Practices
+- Use primarily in unit testing fixtures and dynamic data migration utilities.
+
+### Performance
+Allocates a lightweight builder instance on the heap. Avoid inside high-frequency tight loops.
+
+### Common Pitfalls
+- Forgetting to invoke `WithValue()` before calling `Build()`.
+
+### When to Use
+- Dynamic validation with rules configured at runtime.
+
+### When Not to Use
+- Core business logic where invariants are static and belong directly on the type definition.
+
+---
+
+## 7. `DomainPrimitivesEFCoreExtensions.ConfigureDomainPrimitives`
+
+### Signature
+```csharp
+public static void ConfigureDomainPrimitives(this ModelConfigurationBuilder configurationBuilder);
+```
+
+### Parameters
+- `configurationBuilder` (`ModelConfigurationBuilder`): EF Core model configuration builder.
+
+### Returns
+- `void`.
+
+### Exceptions
+- `ArgumentNullException`: If `configurationBuilder` is null.
+
+### Remarks
+Call inside the `ConfigureConventions` method of your `DbContext`. Automatically registers compile-time `ValueConverter` instances, column max lengths, and precision settings for all domain primitives in the model.
+
+### Basic Example
+```csharp
+public class MyDbContext : DbContext
+{
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.ConfigureDomainPrimitives();
+    }
+}
+```
+
+### Best Practices
+- Avoid redundant manual `HasConversion` calls in `OnModelCreating` for types handled by this extension.
+
+### Performance
+Zero runtime overhead; converters and configurations are resolved at model build time.
+
+### Common Pitfalls
+- Invoking this method inside `OnModelCreating` instead of `ConfigureConventions`.
+
+### When to Use
+- In any relational persistence project utilizing EF Core.
+
+### When Not to Use
+- Projects utilizing micro-ORMs (e.g. Dapper) without Entity Framework Core.
+
+---
+
+## 8. `DapperDomainPrimitivesRegistration.RegisterAll`
+
+### Signature
+```csharp
+public static void RegisterAll();
+```
+
+### Parameters
+- None.
+
+### Returns
+- `void`.
+
+### Exceptions
+- None.
+
+### Remarks
+Idempotent and thread-safe. Registers all compile-time generated `SqlMapper.TypeHandler<T>` instances with Dapper.
+
+### Basic Example
+```csharp
+// In Program.cs
 DapperDomainPrimitivesRegistration.RegisterAll();
 ```
 
-This call is idempotent (safe to call multiple times). The generated class is emitted by `EricksonLopez.DomainPrimitives.Dapper.SourceGenerators` into your project at compile time.
+### Best Practices
+- Call once during application bootstrapping before opening SQL connections.
 
-### `EricksonLopez.DomainPrimitives.AspNetCore`
+### Performance
+One-time in-memory registration; zero per-query overhead.
 
-Auto-discovered via source generator. Generates `IModelBinder` implementations for route and query string binding. Register at startup using either:
+### Common Pitfalls
+- Forgetting registration prior to executing the first Dapper query containing domain primitives.
 
+### When to Use
+- Applications and services persisting domain primitives via Dapper.
+
+### When Not to Use
+- Applications exclusively utilizing EF Core.
+
+---
+
+## 9. `DomainPrimitivesMvcBuilderExtensions.AddDomainPrimitivesModelBinding`
+
+### Signature
 ```csharp
-// Option A: IServiceCollection extension
+public static IServiceCollection AddDomainPrimitivesModelBinding(this IServiceCollection services);
+public static MvcOptions AddDomainPrimitivesModelBinding(this MvcOptions options);
+```
+
+### Parameters
+- `services` or `options`: Service collection or MVC options configuration.
+
+### Returns
+- The same instance for fluent chaining.
+
+### Exceptions
+- `ArgumentNullException`: If the extension target is null.
+
+### Remarks
+Registers the compile-time generated `IModelBinderProvider` that binds route parameters, query strings, and form values directly to domain primitives without reflection.
+
+### Basic Example
+```csharp
 builder.Services.AddDomainPrimitivesModelBinding();
-
-// Option B: Fine-grained MvcOptions extension
-builder.Services.AddControllers(options => options.AddDomainPrimitivesModelBinding());
 ```
 
-## `PrimitiveBuilder<TPrimitive, TValue>`
+### Best Practices
+- Use in combination with both Minimal APIs and MVC Controllers.
 
-Fluent builder for constructing domain primitives programmatically with ad-hoc validation rules.
-Located in `EricksonLopez.DomainPrimitives.Advanced`.
+### Performance
+Direct, reflection-free model binding on HTTP requests.
 
-```csharp
-using EricksonLopez.DomainPrimitives.Advanced;
+### Common Pitfalls
+- Writing manual custom model binders for domain primitive types.
 
-var promoCode = PrimitiveBuilder<VoucherCode, string>
-    .For()                                       // Creates empty builder
-    .WithValue("SUMMER2026")                      // Sets the value to build
-    .Must(v => v.StartsWith("SUMMER"), "INVALID_SEASON", "Code must start with current season.")
-    .BuildOrThrow();                              // throws DomainPrimitiveValidationException
+### When to Use
+- In all ASP.NET Core Web API and Minimal API projects consuming domain primitives.
 
-// Non-throwing build:
-bool ok = PrimitiveBuilder<VoucherCode, string>
-    .For()
-    .WithValue("WINTER2026")
-    .Build(out var result);
-```
-
-| Method | Return | Description |
-|:-------|:-------|:------------|
-| `static For()` | `PrimitiveBuilder<T,V>` | Creates a new empty builder |
-| `WithValue(TValue value)` | `PrimitiveBuilder<T,V>` | Sets the value to build |
-| `Must(Func<TValue,bool>, code, msg)` | `PrimitiveBuilder<T,V>` | Adds a custom validation predicate |
-| `Build(out TPrimitive)` | `bool` | Non-throwing build; returns false on failure |
-| `BuildOrThrow()` | `TPrimitive` | Throwing build |
-| `BuildResult()` | `object` | **⚠️ Deprecated** — use `BuildOrThrow()` or `Build()` instead. Will be removed in v3.0. |
-
-> [!IMPORTANT]
-> `PrimitiveBuilder<>` requires the type to be decorated with `[NumericPrimitive<T>]` or `[StringPrimitive]` (not shortcut attributes like `[Score]`) to satisfy the `IDomainPrimitive<TSelf, TValue>` constraint.
-
----
-
-## `PrimitiveCollectionExtensions`
-
-Bulk-convert raw value collections to typed domain primitive collections.
-
-| Method | Overload | Description |
-|:-------|:---------|:------------|
-| `ToDomainPrimitiveList<T,V>()` | `IEnumerable<V>` | Converts to `List<T>`, throws on first invalid element |
-| `ToDomainPrimitiveArray<T,V>()` | `IEnumerable<V>` | Converts to `T[]`, throws on first invalid element |
-| `ToDomainPrimitiveArray<T,V>()` | `ReadOnlySpan<V>` | Zero-copy span path (NET 7+) |
-
----
-
-## `[assembly: DomainPrimitivesDefaults]`
-
-Assembly-level attribute that sets global defaults for all string primitives in an assembly.
-
-```csharp
-// Must appear after 'using' directives, before any top-level statements or type declarations
-[assembly: DomainPrimitivesDefaults(Trim = true, NotEmpty = false, MaxLength = 4096)]
-```
-
-| Property | Type | Default | Description |
-|:---------|:-----|:--------|:------------|
-| `Trim` | `bool` | `false` | If true, auto-trims all string primitives in the assembly |
-| `NotEmpty` | `bool` | `false` | If true, rejects empty strings for all string primitives |
-| `MaxLength` | `int` | `4096` | Global maximum string length (SEC-001 security gate). Set to `0` to disable. |
-| `ExceptionType` | `Type?` | `null` (uses `DomainPrimitiveValidationException`) | Custom exception type. Must have a public `(string message)` constructor (validated by DP0017). See [adr-034](../docs/adr/adr-034-configurable-exception-type.md). |
-
-Individual `[MaxLength]`, `[NotEmpty]`, `[Trim]` attributes on a struct override these assembly defaults.
-
----
-
-## `ValueObject` (Abstract Base Class)
-
-Namespace: `EricksonLopez.DomainPrimitives`. Provides structural equality semantics for multi-property value objects via C# `record class` inheritance.
-
-> [!IMPORTANT]
-> **`ValueObject` (base class) vs `[ValueObject]` (attribute):** These are two distinct mechanisms:
-> - **`ValueObject` base class** — inherit from this for multi-property value objects that live as reference types (e.g., `Money`, `Address`). Compiler generates value equality automatically.
-> - **`[ValueObject]` attribute** — apply to `readonly partial record struct` for source-generated, allocation-free, AOT-safe value objects.
-
-```csharp
-// ✅ Using ValueObject base class (reference type, structural equality)
-public sealed record Money(decimal Amount, string Currency) : ValueObject;
-
-// ✅ Using [ValueObject] attribute (struct, source-generated, AOT-safe)
-[ValueObject]
-public readonly partial record struct Address;
-```
-
----
-
-## Diagnostics (`EricksonLopez.DomainPrimitives.Diagnostics`)
-
-The Core package (`EricksonLopez.DomainPrimitives`) provides built-in observability hooks.
-
-### `DomainPrimitivesMetrics`
-
-OpenTelemetry `System.Diagnostics.Metrics.Meter`-based counters.
-
-| Member | Signature | Description |
-|:-------|:----------|:------------|
-| `MeterName` | `static readonly string` | Name of the `Meter` (`"EricksonLopez.DomainPrimitives"`). |
-| `IsEnabled` | `static bool IsEnabled { get; set; }` | Globally enables/disables metrics collection. Default: `true`. |
-| `RecordCreation` | `static void RecordCreation(string primitiveName)` | Increments the `domain_primitive.creation` counter. |
-| `RecordValidationSuccess` | `static void RecordValidationSuccess(string primitiveName)` | Increments the `domain_primitive.validation.success` counter. |
-| `RecordValidationFailure` | `static void RecordValidationFailure(string primitiveName, string errorType, string errorMessage)` | Increments the `domain_primitive.validation.failure` counter. |
-
-```csharp
-// Register OpenTelemetry meter:
-using var meterProvider = Sdk.CreateMeterProviderBuilder()
-    .AddMeter(DomainPrimitivesMetrics.MeterName)
-    .AddPrometheusExporter()
-    .Build();
-```
-
-### `DomainPrimitivesDiagnostics`
-
-`System.Diagnostics.DiagnosticListener`-based event source.
-
-| Member | Description |
-|:-------|:------------|
-| `ListenerName` | `static readonly string` — Listener name for subscribing. |
-| `Meter` | `static readonly Meter` — The shared `Meter` instance. |
-| `WriteValidationSuccess(string)` | Writes a `ValidationSuccess` event. |
-| `WriteValidationFailure(string, string, string)` | Writes a `ValidationFailure` event. |
-
-### `DomainPrimitiveEventSource`
-
-Static event source for consuming validation events without DI coupling.
-
-| Member | Description |
-|:-------|:------------|
-| `OnValidationFailed` | `static event EventHandler<ValidationFailureEventArgs>?` — Subscribe to receive validation failure events. |
-
-```csharp
-// Subscribe at application startup:
-DomainPrimitiveEventSource.OnValidationFailed += (_, e) =>
-    logger.LogWarning("Validation failed: {Primitive} — [{Code}] {Message}",
-        e.PrimitiveName, e.ErrorType, e.ErrorMessage);
-```
+### When Not to Use
+- Console applications, class libraries, or background worker services without web endpoints.

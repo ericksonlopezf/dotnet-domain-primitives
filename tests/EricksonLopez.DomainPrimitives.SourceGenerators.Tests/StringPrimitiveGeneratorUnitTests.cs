@@ -464,7 +464,7 @@ namespace EricksonLopez.DomainPrimitives.Normalization
         code.Should().Contain("return _value;");
         code.Should().Contain("var trimmed = s.ToString().Trim();");
         code.Should().Contain("finally");
-        code.Should().Contain("System.Buffers.ArrayPool<char>.Shared.Return(rented);");
+        code.Should().Contain("System.Buffers.ArrayPool<char>.Shared.Return(rented, clearArray: true);");
 
         var normalizedCode = code.Replace("\r\n", "\n");
         // Validate indentation and DecreaseIndent in TryValidate
@@ -688,6 +688,45 @@ namespace EricksonLopez.DomainPrimitives.Normalization
         shortcutInfo!.DomainShortcut.Should().Be("Username");
         shortcutInfo.MinLength.Should().Be(4);
         shortcutInfo.MaxLength.Should().Be(16);
+    }
+
+    [Fact]
+    public void GenerateStringPrimitive_CustomExceptionType_CatchesCustomExceptionInTryCreate()
+    {
+        var info = new StringPrimitiveTypeInfo(
+            Namespace: "MyNs",
+            TypeName: "CustomExPrim",
+            Accessibility: "public",
+            ContainingTypes: new EquatableArray<string>(ImmutableArray<string>.Empty),
+            Trim: false,
+            TrimStart: false,
+            TrimEnd: false,
+            LowerCase: false,
+            UpperCase: false,
+            NormalizeWhitespace: false,
+            MinLength: 3,
+            MaxLength: 20,
+            ExactLength: null,
+            NotEmpty: false,
+            RegexPatterns: new EquatableArray<RegexInfo>(ImmutableArray<RegexInfo>.Empty),
+            DomainShortcut: null,
+            HasCustomValidator: false,
+            AllowedSchemes: new EquatableArray<string>(ImmutableArray<string>.Empty),
+            CustomExceptionType: "MyCompany.Core.DomainRuleViolationException");
+
+        var code = StringPrimitiveGenerator.GenerateStringPrimitive(info);
+
+        // DP-SEC-01 (MED-04): Catch blocks MUST be specific (no broad catch-with-filter).
+        // DomainPrimitiveValidationException (more-derived) must come before ArgumentException (base).
+        // The custom exception type must have its own separate catch block.
+        code.Should().Contain("catch (global::EricksonLopez.DomainPrimitives.DomainPrimitiveValidationException ex)");
+        code.Should().Contain("catch (global::MyCompany.Core.DomainRuleViolationException ex)");
+        code.Should().Contain("catch (ArgumentException)");
+        // Verify that the broad Exception catch-with-filter pattern is NOT present.
+        code.Should().NotContain("catch (Exception ex) when");
+
+        // DP-SEC-02: Pre-normalization raw length guard MUST be present in Create and TryCreate
+        code.Should().Contain("if (value.Length > 4096)");
     }
 }
 

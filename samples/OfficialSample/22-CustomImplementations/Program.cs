@@ -54,6 +54,10 @@ Console.WriteLine($"  Create('4532015112830367'): {(isInvalid ? "✅ Valid" : "�
 bool isEmpty = LuhnCreditCardNumber.TryCreate("", out _, out var emptyError);
 Console.WriteLine($"  Create(''): {(isEmpty ? "✅" : "❌ " + emptyError.Message)}");
 
+// Direct invocation of ICustomValidator<T>.Validate
+var directLuhnError = LuhnCardValidator.Validate("4532015112830366");
+Console.WriteLine($"[CustomValidator] Direct LuhnCardValidator.Validate: IsNone={directLuhnError == PrimitiveError.None}");
+
 Console.WriteLine();
 
 // ─────────────────────────────────────────────────────────────────────────────

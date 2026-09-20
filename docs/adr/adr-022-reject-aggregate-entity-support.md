@@ -1,3 +1,9 @@
+## Status
+Rejected
+
+## Date
+2026-08-10
+
 ﻿# adr-022: Reject Aggregate and Entity Support
 
 **Date:** 2026-08-10

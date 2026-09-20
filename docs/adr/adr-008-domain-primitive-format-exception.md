@@ -1,7 +1,10 @@
 # adr-007: Parse() Throws DomainPrimitiveFormatException
 
 ## Status
-Accepted
+Deprecated (Superseded by [RFC-0003](../rfcs/rfc-0003-format-exception-standardization.md))
+
+## Date
+2026-09-04
 
 ## Context
 The v4.0 specification states that `Parse()` must throw a standard `FormatException` when parsing fails, to remain perfectly consistent with BCL types like `int.Parse()` and `Guid.Parse()`.

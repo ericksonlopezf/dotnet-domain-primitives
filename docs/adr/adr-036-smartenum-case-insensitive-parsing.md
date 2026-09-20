@@ -3,6 +3,9 @@
 ## Status
 Accepted
 
+## Date
+2026-09-04
+
 ## Context
 When parsing Smart Enum names from HTTP route parameters, query strings, or external JSON payloads, incoming values frequently vary in casing (e.g., `pending`, `Pending`, `PENDING`). Developers need an explicit, ergonomic API to parse enum members either with exact casing or case-insensitively.
 

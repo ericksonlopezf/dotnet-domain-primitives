@@ -1,3 +1,4 @@
+# Copyright © Erickson Lopez. MIT License.
 $chapters = Get-ChildItem -Path "..\*" -Directory -Exclude "obj", "bin" | Where-Object { $_.Name -match "^\d{2}-" }
 
 foreach ($chapterDir in $chapters) {

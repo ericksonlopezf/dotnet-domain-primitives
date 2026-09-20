@@ -1,12 +1,6 @@
 // Copyright © Erickson Lopez. MIT License.
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using EricksonLopez.DomainPrimitives.Generators.Models;
-using System.Threading.Tasks;
 
 namespace EricksonLopez.DomainPrimitives.Generators;
 
@@ -19,11 +13,11 @@ internal sealed partial class StringPrimitiveGenerator
 
         sb.AppendLine("public void Deconstruct(out string value) => value = _value;");
         sb.AppendLine();
-        sb.AppendLine("public override string ToString() => _value ?? string.Empty;");
+        sb.AppendLine("public override string ToString() => IsDefault ? string.Empty : (_value ?? string.Empty);");
         sb.AppendLine();
 
         sb.AppendLine("public string ToString(string? format, IFormatProvider? formatProvider)");
-        sb.AppendLine("    => _value ?? string.Empty;");
+        sb.AppendLine("    => IsDefault ? string.Empty : (_value ?? string.Empty);");
         sb.AppendLine();
 
         // ISpanFormattable

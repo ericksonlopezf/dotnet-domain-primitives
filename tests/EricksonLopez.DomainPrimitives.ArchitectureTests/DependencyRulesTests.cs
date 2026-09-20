@@ -40,7 +40,7 @@ public class DependencyRulesTests
     public void Core_Should_Not_Depend_On_Infrastructure_Or_Satellites()
     {
         // Arrange
-        var coreAssembly = typeof(EricksonLopez.DomainPrimitives.RegexAttribute).Assembly;
+        var coreAssembly = typeof(EricksonLopez.DomainPrimitives.Diagnostics.DomainPrimitivesDiagnostics).Assembly;
 
         // Act & Assert
         foreach (var satellite in SatelliteNamespaces)
