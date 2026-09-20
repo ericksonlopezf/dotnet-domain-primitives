@@ -200,6 +200,44 @@ public class NewtonsoftJsonTests
         public static void OtherSingleParamMethod(string s) { }
     }
 
+    public class DummyValidationError
+    {
+        public bool IsError { get; set; }
+        public string? Message { get; set; }
+    }
+
+    [ValueObject]
+    public readonly record struct ValidatedVo
+    {
+        public string Name { get; init; }
+        public int Age { get; init; }
+
+        public static void Validate(ValidatedVo instance, out DummyValidationError error)
+        {
+            error = new DummyValidationError();
+            if (instance.Age < 0)
+            {
+                error.IsError = true;
+                error.Message = "Age cannot be negative.";
+            }
+            else
+            {
+                error.IsError = false;
+            }
+        }
+    }
+
+    [ValueObject]
+    public readonly record struct ThrowingValidatedVo
+    {
+        public string Name { get; init; }
+
+        public static void Validate(ThrowingValidatedVo instance, DummyValidationError error)
+        {
+            throw new InvalidOperationException("Validation crashed unexpectedly");
+        }
+    }
+
     public struct NonPrimitiveStruct
     {
         public int X { get; set; }
@@ -643,6 +681,61 @@ public class NewtonsoftJsonTests
         var deserialized = JsonConvert.DeserializeObject<ReadOnlyPropVo>(json, _settings);
         deserialized.Title.Should().Be("Important Document");
         deserialized.Calculated.Should().Be(18);
+    }
+
+    [Fact]
+    public void ValueObject_WithValidation_WhenValid_DeserializesSuccessfully()
+    {
+        var json = "{\"Name\":\"Alice\",\"Age\":30}";
+        var deserialized = JsonConvert.DeserializeObject<ValidatedVo>(json, _settings);
+        deserialized.Name.Should().Be("Alice");
+        deserialized.Age.Should().Be(30);
+    }
+
+    [Fact]
+    public void ValueObject_WithValidation_WhenInvalid_ThrowsJsonSerializationException()
+    {
+        var json = "{\"Name\":\"Bob\",\"Age\":-5}";
+        var act = () => JsonConvert.DeserializeObject<ValidatedVo>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Age cannot be negative.*");
+    }
+
+    [Fact]
+    public void ValueObject_WithThrowingValidation_ThrowsJsonSerializationExceptionWithInnerException()
+    {
+        var json = "{\"Name\":\"Charlie\"}";
+        var act = () => JsonConvert.DeserializeObject<ThrowingValidatedVo>(json, _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Validation crashed unexpectedly*")
+            .WithInnerException<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void UniversalConverter_NullablePrimitive_WhenJsonIsNull_ReturnsNull()
+    {
+        var result = JsonConvert.DeserializeObject<EmailDummyVo?>("null", _settings);
+        result.Should().BeNull();
+    }
+
+    public readonly record struct NullableEmailContainer
+    {
+        public EmailDummyVo? Email { get; init; }
+    }
+
+    [Fact]
+    public void UniversalConverter_NullableProperty_WhenJsonIsNull_ReturnsNull()
+    {
+        var result = JsonConvert.DeserializeObject<NullableEmailContainer>("{\"Email\":null}", _settings);
+        result.Email.Should().BeNull();
+    }
+
+    [Fact]
+    public void UniversalConverter_NonNullablePrimitive_WhenJsonIsNull_ThrowsJsonSerializationException()
+    {
+        var act = () => JsonConvert.DeserializeObject<EmailDummyVo>("null", _settings);
+        act.Should().Throw<JsonSerializationException>()
+            .WithMessage("*Cannot deserialize null into non-nullable domain primitive 'EmailDummyVo'.*");
     }
 
     #endregion
@@ -1245,6 +1338,24 @@ public class NewtonsoftJsonTests
         var act = () => JsonConvert.DeserializeObject<EmailAddress>("null", _settings);
         act.Should().Throw<JsonSerializationException>()
             .WithMessage("*Cannot deserialize null into non-nullable domain primitive*");
+    }
+
+    [Fact]
+    public void UniversalConverter_DeserializeNull_NullableStruct_ReturnsNull()
+    {
+        DomainPrimitiveUniversalNewtonsoftJsonConverter.ClearCache();
+        var result = JsonConvert.DeserializeObject<EmailAddress?>("null", _settings);
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public void UniversalConverter_ReadJson_NullRawValue_NullableStruct_ReturnsNull()
+    {
+        DomainPrimitiveUniversalNewtonsoftJsonConverter.ClearCache();
+        var conv = new DomainPrimitiveUniversalNewtonsoftJsonConverter();
+        var reader = new NullStringReader();
+        var result = conv.ReadJson(reader, typeof(EmailAddress?), null, JsonSerializer.CreateDefault());
+        result.Should().BeNull();
     }
 
     #endregion

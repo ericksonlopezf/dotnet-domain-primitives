@@ -21,6 +21,7 @@ namespace EricksonLopez.DomainPrimitives
 {
     public class DapperAttribute : System.Attribute { }
     public class ValueObjectAttribute : System.Attribute { }
+    public interface IDomainPrimitive<TSelf, TValue> { }
 }
 namespace System
 {
@@ -94,6 +95,35 @@ public readonly partial record struct EmptyObject { }
         var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
         generatedSource.Should().Contain("class EmptyObjectDapperExtensions");
         generatedSource.Should().Contain("return EmptyObject.Create();");
+    }
+
+    [Fact]
+    public void Generator_WithValueObjectHavingDomainPrimitiveProperty_ShouldGenerateCode()
+    {
+        string source = @"
+namespace TestNamespace;
+public readonly partial record struct PrimitiveProperty : EricksonLopez.DomainPrimitives.IDomainPrimitive<PrimitiveProperty, string>
+{
+    public string Value { get; init; }
+    public bool IsDefault => false;
+    public static PrimitiveProperty Create(string value) => default;
+}
+
+[EricksonLopez.DomainPrimitives.DapperAttribute]
+[EricksonLopez.DomainPrimitives.ValueObjectAttribute]
+public readonly partial record struct OrderInfo
+{
+    public PrimitiveProperty Code { get; init; }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperValueObjectGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("parameters.Add($\"{prefix}Code\", value.Code.IsDefault ? (object)global::System.DBNull.Value : value.Code.Value);");
+        generatedSource.Should().Contain("var val_Code = record.IsDBNull(idx_Code) ? default : global::TestNamespace.PrimitiveProperty.Create((string)record.GetValue(idx_Code));");
     }
 
     [Fact]

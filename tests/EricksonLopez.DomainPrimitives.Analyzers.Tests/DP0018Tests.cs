@@ -75,4 +75,32 @@ namespace System.Runtime.CompilerServices { public class IsExternalInit {} }
         var test = new CSharpAnalyzerTest { TestCode = testCode };
         await test.RunAsync();
     }
+
+    [Theory]
+    [InlineData("Dictionary<string, int>")]
+    [InlineData("HashSet<string>")]
+    [InlineData("Queue<string>")]
+    [InlineData("Stack<string>")]
+    [InlineData("LinkedList<string>")]
+    [InlineData("SortedDictionary<string, int>")]
+    [InlineData("SortedList<string, int>")]
+    [InlineData("SortedSet<string>")]
+    public async Task ValueObject_WithMutableCollectionProperty_TriggersDP0018(string collectionType)
+    {
+        var testCode = $@"
+using System.Collections.Generic;
+using EricksonLopez.DomainPrimitives;
+
+{AttributeCode}
+[ValueObject]
+public readonly partial record struct OrderDetails
+{{
+    public {{|DP0018:{collectionType}|}} Items {{ get; init; }}
+}}
+namespace System.Runtime.CompilerServices {{ public class IsExternalInit {{}} }}
+";
+
+        var test = new CSharpAnalyzerTest { TestCode = testCode };
+        await test.RunAsync();
+    }
 }

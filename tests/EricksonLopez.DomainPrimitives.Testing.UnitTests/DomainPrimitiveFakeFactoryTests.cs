@@ -14,8 +14,14 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void ValidEmails_ShouldReturnNonEmpty_AndCreateSuccessfully()
     {
-        DomainPrimitiveFakeFactory.Strings.ValidEmails.Should().NotBeEmpty();
-        DomainPrimitiveFakeFactory.Strings.ValidEmail.Should().Be(DomainPrimitiveFakeFactory.Strings.ValidEmails[0]);
+        DomainPrimitiveFakeFactory.Strings.ValidEmails.Should().Equal(
+            "user@example.com",
+            "user.name+tag@example.co.uk",
+            "firstname.lastname@subdomain.example.com",
+            "x@example.com",
+            "valid-email@domain.org"
+        );
+        DomainPrimitiveFakeFactory.Strings.ValidEmail.Should().Be("user@example.com");
         foreach (var email in DomainPrimitiveFakeFactory.Strings.ValidEmails)
         {
             var created = ScenarioEmail.Create(email);
@@ -26,7 +32,17 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void InvalidEmails_ShouldThrowValidationException()
     {
-        DomainPrimitiveFakeFactory.Strings.InvalidEmails.Should().NotBeEmpty();
+        DomainPrimitiveFakeFactory.Strings.InvalidEmails.Should().Equal(
+            "",
+            "   ",
+            "notanemail",
+            "@missing-local.org",
+            "missing-at-sign",
+            "missing-domain@",
+            "two@@at.com",
+            "space in@email.com",
+            "toolong" + new string('a', 320) + "@example.com"
+        );
         foreach (var invalidEmail in DomainPrimitiveFakeFactory.Strings.InvalidEmails)
         {
             Action act = () => ScenarioEmail.Create(invalidEmail);
@@ -37,8 +53,13 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void ValidPhones_ShouldReturnNonEmpty_AndCreateSuccessfully()
     {
-        DomainPrimitiveFakeFactory.Strings.ValidPhones.Should().NotBeEmpty();
-        DomainPrimitiveFakeFactory.Strings.ValidPhone.Should().Be(DomainPrimitiveFakeFactory.Strings.ValidPhones[0]);
+        DomainPrimitiveFakeFactory.Strings.ValidPhones.Should().Equal(
+            "+12125551234",
+            "+442071234567",
+            "+34911234567",
+            "+525512345678"
+        );
+        DomainPrimitiveFakeFactory.Strings.ValidPhone.Should().Be("+12125551234");
         foreach (var phone in DomainPrimitiveFakeFactory.Strings.ValidPhones)
         {
             var created = ScenarioPhone.Create(phone);
@@ -49,7 +70,13 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void InvalidPhones_ShouldThrowValidationException()
     {
-        DomainPrimitiveFakeFactory.Strings.InvalidPhones.Should().NotBeEmpty();
+        DomainPrimitiveFakeFactory.Strings.InvalidPhones.Should().Equal(
+            "",
+            "5551234",
+            "+1",
+            "+(12) 345-6789",
+            "+9999999999999999"
+        );
         foreach (var invalidPhone in DomainPrimitiveFakeFactory.Strings.InvalidPhones)
         {
             Action act = () => ScenarioPhone.Create(invalidPhone);
@@ -60,21 +87,37 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void ValidUrls_ShouldReturnNonEmpty()
     {
-        DomainPrimitiveFakeFactory.Strings.ValidUrls.Should().NotBeEmpty();
-        DomainPrimitiveFakeFactory.Strings.ValidUrl.Should().Be(DomainPrimitiveFakeFactory.Strings.ValidUrls[0]);
+        DomainPrimitiveFakeFactory.Strings.ValidUrls.Should().Equal(
+            "https://www.example.com",
+            "https://example.com/path?query=1",
+            "http://localhost:5000/api/v1",
+            "https://sub.domain.example.org/page#anchor"
+        );
+        DomainPrimitiveFakeFactory.Strings.ValidUrl.Should().Be("https://www.example.com");
     }
 
     [Fact]
     public void InvalidUrls_ShouldReturnNonEmpty()
     {
-        DomainPrimitiveFakeFactory.Strings.InvalidUrls.Should().NotBeEmpty();
+        DomainPrimitiveFakeFactory.Strings.InvalidUrls.Should().Equal(
+            "",
+            "not-a-url",
+            "ftp://blocked-scheme.com",
+            "javascript:alert('xss')",
+            "/relative/path"
+        );
     }
 
     [Fact]
     public void ValidSlugs_ShouldReturnNonEmpty_AndCreateSuccessfully()
     {
-        DomainPrimitiveFakeFactory.Strings.ValidSlugs.Should().NotBeEmpty();
-        DomainPrimitiveFakeFactory.Strings.ValidSlug.Should().Be(DomainPrimitiveFakeFactory.Strings.ValidSlugs[0]);
+        DomainPrimitiveFakeFactory.Strings.ValidSlugs.Should().Equal(
+            "my-article-title",
+            "product-123",
+            "a",
+            "hello-world-2024"
+        );
+        DomainPrimitiveFakeFactory.Strings.ValidSlug.Should().Be("my-article-title");
         foreach (var slug in DomainPrimitiveFakeFactory.Strings.ValidSlugs)
         {
             var created = ScenarioSlug.Create(slug);
@@ -85,14 +128,23 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void InvalidSlugs_ShouldReturnNonEmpty()
     {
-        DomainPrimitiveFakeFactory.Strings.InvalidSlugs.Should().NotBeEmpty();
+        DomainPrimitiveFakeFactory.Strings.InvalidSlugs.Should().Equal(
+            "",
+            "   ",
+            "Has Spaces",
+            "HAS_UPPERCASE",
+            "special!chars@here",
+            new string('a', 201)
+        );
     }
 
     [Fact]
     public void ValidCountryCodes_ShouldReturnNonEmpty_AndCreateSuccessfully()
     {
-        DomainPrimitiveFakeFactory.Strings.ValidCountryCodes.Should().NotBeEmpty();
-        DomainPrimitiveFakeFactory.Strings.ValidCountryCode.Should().Be(DomainPrimitiveFakeFactory.Strings.ValidCountryCodes[0]);
+        DomainPrimitiveFakeFactory.Strings.ValidCountryCodes.Should().Equal(
+            "US", "GB", "DE", "ES", "FR", "JP", "CN", "BR"
+        );
+        DomainPrimitiveFakeFactory.Strings.ValidCountryCode.Should().Be("US");
         foreach (var code in DomainPrimitiveFakeFactory.Strings.ValidCountryCodes)
         {
             var created = ScenarioCountryCode.Create(code);
@@ -324,7 +376,7 @@ public class DomainPrimitiveFakeFactoryTests
     [Fact]
     public void ValidBusinessDates_ShouldNotFallOnWeekends()
     {
-        DomainPrimitiveFakeFactory.Dates.ValidBusinessDates.Should().HaveCount(2);
+        DomainPrimitiveFakeFactory.Dates.ValidBusinessDates.Should().HaveCount(7);
         foreach (var date in DomainPrimitiveFakeFactory.Dates.ValidBusinessDates)
         {
             date.DayOfWeek.Should().NotBe(DayOfWeek.Saturday).And.NotBe(DayOfWeek.Sunday);

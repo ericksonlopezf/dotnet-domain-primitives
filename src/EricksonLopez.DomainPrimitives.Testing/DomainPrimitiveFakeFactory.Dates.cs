@@ -50,7 +50,7 @@ public static partial class DomainPrimitiveFakeFactory
 
         /// <summary>Gets valid business dates (Monday-Friday) for testing, computed dynamically from today.</summary>
         /// <remarks>Dates are computed at class initialization time to avoid clock drift within a single test run.</remarks>
-        public static List<DateOnly> ValidBusinessDates { get; } = GetNextWeekdays(2);
+        public static List<DateOnly> ValidBusinessDates { get; } = GetNextWeekdays(7);
 
         /// <summary>Gets invalid business dates (weekends) for testing.</summary>
         public static List<DateOnly> InvalidBusinessDates { get; } = GetNextWeekendDays(2);

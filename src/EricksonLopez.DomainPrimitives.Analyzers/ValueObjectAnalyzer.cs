@@ -39,7 +39,7 @@ public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzePropertyDeclaration, SyntaxKind.PropertyDeclaration);
     }
 
-    private void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
+    internal void AnalyzePropertyDeclaration(SyntaxNodeAnalysisContext context)
     {
         var propertyDecl = (PropertyDeclarationSyntax)context.Node;
         
@@ -104,7 +104,7 @@ public sealed class ValueObjectAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsValueObjectType(TypeDeclarationSyntax parentType, INamedTypeSymbol symbol)
+    internal static bool IsValueObjectType(TypeDeclarationSyntax parentType, INamedTypeSymbol symbol)
     {
         if (parentType.IsKind(SyntaxKind.RecordStructDeclaration) &&
             symbol.GetAttributes().Any(a => a.AttributeClass?.Name is "ValueObjectAttribute" or "ValueObject"))

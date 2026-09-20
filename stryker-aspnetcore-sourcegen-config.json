@@ -1,5 +1,6 @@
 {
   "stryker-config": {
+    "solution": "Stryker.slnx",
     "project": "EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.csproj",
     "test-projects": [
       "EricksonLopez.DomainPrimitives.AspNetCore.SourceGenerators.Tests.csproj"

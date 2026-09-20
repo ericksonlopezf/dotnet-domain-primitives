@@ -102,14 +102,14 @@ public class DomainPrimitiveTypeHandlerTests
     {
         // Arrange
         var handler = new DomainPrimitiveTypeHandler<StubPrimitive, string>();
-        var parameter = Substitute.For<IDbDataParameter>();
+        var parameter = new FakeDbDataParameter();
         var primitive = StubPrimitive.Create("test_value");
 
         // Act
         handler.SetValue(parameter, primitive);
 
         // Assert
-        parameter.Received().Value = "test_value";
+        parameter.Value.Should().Be("test_value");
     }
 
     [Fact]
@@ -231,19 +231,35 @@ public class DomainPrimitiveTypeHandlerTests
            .WithMessage("*Invalid value*");
     }
 
+    private sealed class FakeDbDataParameter : IDbDataParameter
+    {
+        public object? Value { get; set; }
+        public DbType DbType { get; set; }
+        public ParameterDirection Direction { get; set; }
+        public bool IsNullable { get; set; }
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+        public string ParameterName { get; set; } = string.Empty;
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+        public string SourceColumn { get; set; } = string.Empty;
+        public DataRowVersion SourceVersion { get; set; }
+        public byte Precision { get; set; }
+        public byte Scale { get; set; }
+        public int Size { get; set; }
+    }
+
     [Fact]
     public void SetValue_WithDefaultPrimitive_ShouldSetDefaultValue()
     {
         // Arrange
         var handler = new DomainPrimitiveTypeHandler<StubPrimitive, string>();
-        var parameter = Substitute.For<IDbDataParameter>();
+        var parameter = new FakeDbDataParameter();
         var defaultPrimitive = default(StubPrimitive);
 
         // Act
         handler.SetValue(parameter, defaultPrimitive);
 
         // Assert
-        parameter.Received().Value = DBNull.Value;
+        parameter.Value.Should().Be(DBNull.Value);
     }
 
     private readonly struct DecimalStubPrimitive : IDomainPrimitive<DecimalStubPrimitive, decimal>

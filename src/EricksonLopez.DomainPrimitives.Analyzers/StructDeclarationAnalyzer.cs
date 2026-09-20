@@ -55,7 +55,7 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(AnalyzeStructDeclaration, SyntaxKind.StructDeclaration, SyntaxKind.RecordStructDeclaration);
     }
 
-    private void AnalyzeStructDeclaration(SyntaxNodeAnalysisContext context)
+    internal void AnalyzeStructDeclaration(SyntaxNodeAnalysisContext context)
     {
         var typeDecl = (TypeDeclarationSyntax)context.Node;
         
@@ -77,8 +77,7 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
 
         if (!hasDomainAttribute) return;
 
-        var symbol = context.SemanticModel.GetDeclaredSymbol(typeDecl, context.CancellationToken) as INamedTypeSymbol;
-        if (symbol is null) return;
+        var typeName = typeDecl.Identifier.Text;
 
         // DP0003: Must be record struct
         if (!typeDecl.IsKind(SyntaxKind.RecordStructDeclaration))
@@ -86,7 +85,7 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.DP0003_MustBeRecordStruct, 
                 typeDecl.Identifier.GetLocation(), 
-                symbol.Name));
+                typeName));
             return; // If it's not a record struct, no need to check further modifiers since the fix is completely structural
         }
 
@@ -97,7 +96,7 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.DP0001_MustBePartial, 
                 typeDecl.Identifier.GetLocation(), 
-                symbol.Name));
+                typeName));
         }
 
         // DP0002: Must be readonly
@@ -107,7 +106,7 @@ public sealed class StructDeclarationAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.DP0002_MustBeReadonly, 
                 typeDecl.Identifier.GetLocation(), 
-                symbol.Name));
+                typeName));
         }
     }
 }

@@ -364,6 +364,169 @@ public record struct SampleStruct;
         ctx.SymbolStartActions.Should().NotBeEmpty();
     }
 
+    [Fact]
+    public void ValueObjectAnalyzer_IsValueObjectType_EdgeCases_Covered()
+    {
+        // 1. Record struct with [ValueObject] (without Attribute suffix)
+        var sourceWithVoAttr = @"
+public class ValueObject : System.Attribute {}
+[ValueObject]
+public readonly record struct StructWithVo {}
+";
+        var tree1 = CSharpSyntaxTree.ParseText(sourceWithVoAttr);
+        var comp1 = CSharpCompilation.Create("Test1", new[] { tree1 }, Basic.Reference.Assemblies.Net80.References.All);
+        var model1 = comp1.GetSemanticModel(tree1);
+        var decl1 = tree1.GetRoot().DescendantNodes().OfType<RecordDeclarationSyntax>().First();
+        var symbol1 = model1.GetDeclaredSymbol(decl1)!;
+
+        ValueObjectAnalyzer.IsValueObjectType(decl1, symbol1).Should().BeTrue();
+
+        // 2. Class inheriting from ValueObject in global namespace
+        var sourceGlobalVo = @"
+public abstract class ValueObject {}
+public class DerivedGlobalVo : ValueObject {}
+public class NonVoBase {}
+public class DerivedNonVo : NonVoBase {}
+";
+        var tree2 = CSharpSyntaxTree.ParseText(sourceGlobalVo);
+        var comp2 = CSharpCompilation.Create("Test2", new[] { tree2 }, Basic.Reference.Assemblies.Net80.References.All);
+        var model2 = comp2.GetSemanticModel(tree2);
+        var decl2 = tree2.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().First(c => c.Identifier.Text == "DerivedGlobalVo");
+        var symbol2 = model2.GetDeclaredSymbol(decl2)!;
+        ValueObjectAnalyzer.IsValueObjectType(decl2, symbol2).Should().BeTrue();
+
+        // 3. Class inheriting from base not named ValueObject (verifies && vs ||)
+        var decl3 = tree2.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().First(c => c.Identifier.Text == "DerivedNonVo");
+        var symbol3 = model2.GetDeclaredSymbol(decl3)!;
+        ValueObjectAnalyzer.IsValueObjectType(decl3, symbol3).Should().BeFalse();
+
+        // 4. Class inheriting from ValueObject in a third-party non-DomainPrimitives namespace (kills mutant 1029)
+        var sourceThirdPartyVo = @"
+namespace ThirdParty
+{
+    public abstract class ValueObject {}
+}
+namespace MyProject
+{
+    public class DerivedThirdPartyVo : ThirdParty.ValueObject {}
+}
+";
+        var tree4 = CSharpSyntaxTree.ParseText(sourceThirdPartyVo);
+        var comp4 = CSharpCompilation.Create("Test4", new[] { tree4 }, Basic.Reference.Assemblies.Net80.References.All);
+        var model4 = comp4.GetSemanticModel(tree4);
+        var decl4 = tree4.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().First(c => c.Identifier.Text == "DerivedThirdPartyVo");
+        var symbol4 = model4.GetDeclaredSymbol(decl4)!;
+        ValueObjectAnalyzer.IsValueObjectType(decl4, symbol4).Should().BeFalse();
+
+        // 5. Class inheriting from ValueObject in EricksonLopez.DomainPrimitives namespace
+        var sourceElVo = @"
+namespace EricksonLopez.DomainPrimitives
+{
+    public abstract class ValueObject {}
+}
+namespace MyProject
+{
+    public class DerivedElVo : EricksonLopez.DomainPrimitives.ValueObject {}
+}
+";
+        var tree5 = CSharpSyntaxTree.ParseText(sourceElVo);
+        var comp5 = CSharpCompilation.Create("Test5", new[] { tree5 }, Basic.Reference.Assemblies.Net80.References.All);
+        var model5 = comp5.GetSemanticModel(tree5);
+        var decl5 = tree5.GetRoot().DescendantNodes().OfType<ClassDeclarationSyntax>().First(c => c.Identifier.Text == "DerivedElVo");
+        var symbol5 = model5.GetDeclaredSymbol(decl5)!;
+        ValueObjectAnalyzer.IsValueObjectType(decl5, symbol5).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ValueObjectAnalyzer_WhenParentTypeIsNull_DoesNotThrow()
+    {
+        var analyzer = new ValueObjectAnalyzer();
+        var detachedTree = CSharpSyntaxTree.ParseText("int Prop { get; set; }");
+        var propNode = detachedTree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>().First();
+
+        var emptyTree = CSharpSyntaxTree.ParseText("// empty");
+        var comp = CSharpCompilation.Create("Empty", new[] { emptyTree });
+        var model = comp.GetSemanticModel(emptyTree);
+
+#pragma warning disable CS0618
+        var context = new SyntaxNodeAnalysisContext(propNode, model, new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty), _ => { }, _ => true, CancellationToken.None);
+#pragma warning restore CS0618
+        var act = () => analyzer.AnalyzePropertyDeclaration(context);
+        act.Should().NotThrow();
+    }
+
+    [Fact]
+    public void ApiReviewAnalyzer_IsGeneratedMember_EvaluatesFilePathsCorrectly()
+    {
+        var gTree = CSharpSyntaxTree.ParseText("public class GenFoo {}", path: "C:\\MyPath\\GenFoo.g.cs");
+        var genTree = CSharpSyntaxTree.ParseText("public class GenBar {}", path: "C:\\MyPath\\GenBar.generated.cs");
+        var nonGenTree = CSharpSyntaxTree.ParseText("public class PlainBaz {}", path: "C:\\MyPath\\PlainBaz.cs");
+        var noPathTree = CSharpSyntaxTree.ParseText("public class NoPathQux {}");
+
+        var comp = CSharpCompilation.Create("TestComp", new[] { gTree, genTree, nonGenTree, noPathTree });
+
+        var genFoo = comp.GetTypeByMetadataName("GenFoo")!;
+        var genBar = comp.GetTypeByMetadataName("GenBar")!;
+        var plainBaz = comp.GetTypeByMetadataName("PlainBaz")!;
+        var noPathQux = comp.GetTypeByMetadataName("NoPathQux")!;
+
+        ApiReviewAnalyzer.IsGeneratedMember(genFoo).Should().BeTrue();
+        ApiReviewAnalyzer.IsGeneratedMember(genBar).Should().BeTrue();
+        ApiReviewAnalyzer.IsGeneratedMember(plainBaz).Should().BeFalse();
+        ApiReviewAnalyzer.IsGeneratedMember(noPathQux).Should().BeFalse();
+    }
+
+    [Fact]
+    public void PublicConstructorBypassAnalyzer_AnalyzeNamedType_WithMetadataConstructor_DoesNotReportDiagnostic()
+    {
+        string dummyAttr = @"
+namespace EricksonLopez.DomainPrimitives
+{
+    public class StringPrimitiveAttribute : System.Attribute { }
+}
+namespace Test
+{
+    [EricksonLopez.DomainPrimitives.StringPrimitive]
+    public readonly record struct MetadataPrimitive
+    {
+        public MetadataPrimitive(string s) {}
+    }
+}";
+        var refCompilation = CSharpCompilation.Create(
+            "ExternalLib",
+            new[] { CSharpSyntaxTree.ParseText(dummyAttr) },
+            new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location) },
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        using var ms = new System.IO.MemoryStream();
+        var emitResult = refCompilation.Emit(ms);
+        emitResult.Success.Should().BeTrue();
+
+        var metaRef = MetadataReference.CreateFromImage(ms.ToArray());
+        var consumerComp = CSharpCompilation.Create(
+            "Consumer",
+            Array.Empty<SyntaxTree>(),
+            new[] { MetadataReference.CreateFromFile(typeof(object).Assembly.Location), metaRef },
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        var typeSymbol = consumerComp.GetTypeByMetadataName("Test.MetadataPrimitive")!;
+        var diagnostics = new List<Diagnostic>();
+
+#pragma warning disable CS0618
+        var context = new SymbolAnalysisContext(
+            typeSymbol,
+            consumerComp,
+            new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty),
+            diagnostics.Add,
+            _ => true,
+            CancellationToken.None);
+#pragma warning restore CS0618
+
+        PublicConstructorBypassAnalyzer.AnalyzeNamedType(context);
+
+        diagnostics.Should().BeEmpty();
+    }
+
     private sealed class MockAnalysisContext : AnalysisContext
     {
         public bool ConcurrentExecutionEnabled { get; private set; }
