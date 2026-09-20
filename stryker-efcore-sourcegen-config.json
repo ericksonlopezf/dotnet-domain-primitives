@@ -1,5 +1,6 @@
 {
   "stryker-config": {
+    "solution": "Stryker.slnx",
     "project": "EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.csproj",
     "test-projects": [
       "EricksonLopez.DomainPrimitives.EFCore.SourceGenerators.Tests.csproj"

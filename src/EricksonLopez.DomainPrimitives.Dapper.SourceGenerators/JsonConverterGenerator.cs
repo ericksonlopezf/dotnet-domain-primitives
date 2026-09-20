@@ -114,7 +114,7 @@ internal sealed class JsonConverterGenerator : IIncrementalGenerator
         return GetPrimitiveInfoFromSymbol(symbol);
     }
 
-    private static PrimitiveInfo? GetPrimitiveInfoFromSymbol(INamedTypeSymbol symbol)
+    internal static PrimitiveInfo? GetPrimitiveInfoFromSymbol(INamedTypeSymbol symbol)
     {
         if (!symbol.IsValueType) return null;
 
@@ -186,9 +186,7 @@ internal sealed class JsonConverterGenerator : IIncrementalGenerator
             if (!seenFullNames.Add(fullName))
                 continue;
 
-            var safeNamespace = primitive.Namespace == "<global namespace>"
-                ? "Global"
-                : primitive.Namespace.Replace(".", "_").Replace("<", "").Replace(">", "");
+            var safeNamespace = DapperTypeHandlerGenerator.GetSafeNamespace(primitive.Namespace);
 
             var converterClassName = seenTypeNames.Add(primitive.TypeName)
                 ? $"{primitive.TypeName}JsonConverter"

@@ -550,6 +550,253 @@ public class Dummy { }
 
         generatedCode.Should().Contain("RncTypeHandler");
     }
+
+    [Fact]
+    public void Generator_WithNamespaceCollision_EmitsSafeNamespacePrefixedHandler()
+    {
+        string source = @"
+namespace NS1
+{
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    [EricksonLopez.DomainPrimitives.StringPrimitiveAttribute]
+    public readonly partial struct ProductId { }
+}
+namespace NS2
+{
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    [EricksonLopez.DomainPrimitives.StringPrimitiveAttribute]
+    public readonly partial struct ProductId { }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("class ProductIdTypeHandler");
+        generatedSource.Should().Contain("class NS2_ProductIdTypeHandler");
+    }
+
+    [Fact]
+    public void Generator_WithIdConvention_WithoutCreateMethod_ShouldNotGenerateHandler()
+    {
+        string source = @"
+namespace TestNamespace;
+public readonly partial struct NoCreateId
+{
+    public string Value { get; }
+    public NoCreateId(string value) => Value = value;
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        generatedTrees.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Generator_WithScalarValueObjects_GeneratesHandlers()
+    {
+        string source = @"
+namespace TestNamespace;
+public readonly partial struct BirthDateVo
+{
+    public System.DateOnly Value { get; }
+    public static BirthDateVo Create(System.DateOnly value) => default;
+}
+public readonly partial struct CreatedAtVo
+{
+    public System.DateTime Value { get; }
+    public static CreatedAtVo Create(System.DateTime value) => default;
+}
+public readonly partial struct TimestampVo
+{
+    public System.DateTimeOffset Value { get; }
+    public static TimestampVo Create(System.DateTimeOffset value) => default;
+}
+public readonly partial struct StartTimeVo
+{
+    public System.TimeOnly Value { get; }
+    public static StartTimeVo Create(System.TimeOnly value) => default;
+}
+public readonly partial struct TokenVo
+{
+    public System.Guid Value { get; }
+    public static TokenVo Create(System.Guid value) => default;
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("class BirthDateVoTypeHandler");
+        generatedSource.Should().Contain("class CreatedAtVoTypeHandler");
+        generatedSource.Should().Contain("class TimestampVoTypeHandler");
+        generatedSource.Should().Contain("class StartTimeVoTypeHandler");
+        generatedSource.Should().Contain("class TokenVoTypeHandler");
+    }
+
+    [Fact]
+    public void Generator_WithIdConvention_WithResultReturningCreate_ShouldGenerateResultHandlingCode()
+    {
+        string dummyResult = @"
+namespace TestNamespace;
+public readonly struct Result<T>
+{
+    public bool IsFailure => false;
+    public T Value => default!;
+    public Error Error => default;
+}
+public readonly struct Error { public string Description => """"; }
+public readonly partial struct InvoiceId
+{
+    public string Value { get; }
+    public static Result<InvoiceId> Create(string value) => default;
+}
+";
+        var compilation = CreateCompilation(dummyResult);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("class InvoiceIdTypeHandler");
+        generatedSource.Should().Contain("var result = global::TestNamespace.InvoiceId.Create(raw);");
+        generatedSource.Should().Contain("if (result.IsFailure)");
+    }
+
+    [Fact]
+    public void Generator_WithGlobalNamespacePrimitive_GeneratesGlobalPrefix()
+    {
+        string source = @"
+[EricksonLopez.DomainPrimitives.DapperAttribute]
+[EricksonLopez.DomainPrimitives.StringPrimitiveAttribute]
+public readonly partial struct RootId { }
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        var generatedSource = string.Join(Environment.NewLine, generatedTrees.Select(t => t.ToString()));
+        generatedSource.Should().NotContain("using <global namespace>;");
+        generatedSource.Should().Contain("internal sealed class RootIdTypeHandler : SqlMapper.TypeHandler<RootId>");
+    }
+
+    [Fact]
+    public void Generator_WithDuplicateTypeNameAcrossNamespaces_GeneratesUniqueClassNames()
+    {
+        string source = @"
+namespace ModuleA
+{
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    [EricksonLopez.DomainPrimitives.StringPrimitiveAttribute]
+    public readonly partial struct ProductId { }
+}
+namespace ModuleB
+{
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    [EricksonLopez.DomainPrimitives.StringPrimitiveAttribute]
+    public readonly partial struct ProductId { }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("class ProductIdTypeHandler");
+        generatedSource.Should().Contain("class ModuleB_ProductIdTypeHandler");
+    }
+
+    [Fact]
+    public void Generator_WithDuplicateSymbolAcrossPartialDeclarations_HandlesDeduplication()
+    {
+        string source = @"
+namespace ModuleA
+{
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    [EricksonLopez.DomainPrimitives.StringPrimitiveAttribute]
+    public readonly partial struct AccountId { }
+
+    [EricksonLopez.DomainPrimitives.DapperAttribute]
+    public readonly partial struct AccountId { }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        generatedTrees.Count(t => t.ToString().Contains("class AccountIdTypeHandler", StringComparison.Ordinal)).Should().Be(1);
+    }
+
+    [Fact]
+    public void Generator_WithEntityIdWithoutValueProperty_DefaultsToGuidBacking()
+    {
+        string dummyEntityId = @"
+namespace EricksonLopez.DomainPrimitives
+{
+    public interface IEntityId<TSelf> { }
+}
+namespace TestNamespace
+{
+    public readonly partial struct NoValEntityId : EricksonLopez.DomainPrimitives.IEntityId<NoValEntityId>
+    {
+    }
+}
+";
+        var compilation = CreateCompilation(dummyEntityId);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedSource = string.Join(Environment.NewLine, outputCompilation.SyntaxTrees.Skip(2).Select(t => t.ToString()));
+        generatedSource.Should().Contain("class NoValEntityIdTypeHandler");
+        generatedSource.Should().Contain("if (value is Guid g)");
+    }
+
+    [Fact]
+    public void Generator_WithNonMatchingTypes_DoesNotGenerateHandlers()
+    {
+        string source = @"
+namespace TestNamespace
+{
+    public struct MutableVo
+    {
+        public string Value { get; set; }
+        public static MutableVo Create(string v) => default;
+    }
+    internal readonly struct InternalVo
+    {
+        public string Value { get; }
+        public static InternalVo Create(string v) => default;
+    }
+    public class CustomPayload {}
+    public readonly struct ComplexVo
+    {
+        public CustomPayload Value { get; }
+        public static ComplexVo Create(CustomPayload v) => default;
+    }
+}
+";
+        var compilation = CreateCompilation(source);
+        var generator = new DapperTypeHandlerGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        generatedTrees.Should().BeEmpty();
+    }
 }
 
 

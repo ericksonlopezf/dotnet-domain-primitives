@@ -31,6 +31,45 @@ function findJsonReports(dir) {
   return results;
 }
 
+function hasMutableFiles(configFile) {
+  try {
+    if (!fs.existsSync(configFile)) return true;
+    const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+    const project = config['stryker-config']?.project || config.project;
+    if (!project) return true;
+
+    const srcDir = path.resolve('src');
+    let projectDir = null;
+    if (fs.existsSync(srcDir)) {
+      for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
+        if (entry.isDirectory()) {
+          const candidate = path.join(srcDir, entry.name, project);
+          if (fs.existsSync(candidate)) {
+            projectDir = path.join(srcDir, entry.name);
+            break;
+          }
+        }
+      }
+    }
+    if (!projectDir) return true;
+
+    function countCs(dir) {
+      let count = 0;
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        if (e.name === 'bin' || e.name === 'obj') continue;
+        const full = path.join(dir, e.name);
+        if (e.isDirectory()) count += countCs(full);
+        else if (e.name.endsWith('.cs') && !e.name.endsWith('.g.cs') && !e.name.endsWith('.AssemblyInfo.cs')) count++;
+      }
+      return count;
+    }
+
+    return countCs(projectDir) > 0;
+  } catch {
+    return true;
+  }
+}
+
 function main() {
   const targetDir = process.argv[2] || 'StrykerOutput/ci';
   const pkgName = process.argv[3] || 'DomainPrimitives';
@@ -41,6 +80,7 @@ function main() {
   let killed = 0;
   let total = 0;
   let foundReport = false;
+  let isMetapackage = false;
 
   const jsonFiles = findJsonReports(targetDir);
   if (jsonFiles.length > 0) {
@@ -64,15 +104,29 @@ function main() {
       if (total > 0 && data.mutationScore === undefined) {
         score = Math.round((killed / total) * 10000) / 100;
       }
+      if (total === 0 && !hasMutableFiles(configFile)) {
+        score = 100;
+        killed = 0;
+        total = 0;
+        isMetapackage = true;
+      }
       foundReport = true;
     } catch (err) {
       console.warn(`Error parsing ${jsonFiles[0]}: ${err.message}`);
     }
+  } else if (!hasMutableFiles(configFile)) {
+    // Project has zero mutable source files (metapackage)
+    score = 100;
+    killed = 0;
+    total = 0;
+    foundReport = true;
+    isMetapackage = true;
   }
 
-  const passedGate = score >= thresholds.break && foundReport;
+  const passedGate = (score >= thresholds.break && foundReport) || isMetapackage;
   let statusLabel = '❌ FAILED';
-  if (score >= thresholds.high) statusLabel = '✅ HIGH';
+  if (isMetapackage) statusLabel = '✅ HIGH';
+  else if (score >= thresholds.high) statusLabel = '✅ HIGH';
   else if (score >= thresholds.low) statusLabel = '🟡 LOW';
   else if (score >= thresholds.break) statusLabel = '🟠 WARNING';
 

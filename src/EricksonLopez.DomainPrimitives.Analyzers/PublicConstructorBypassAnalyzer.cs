@@ -62,7 +62,7 @@ public sealed class PublicConstructorBypassAnalyzer : DiagnosticAnalyzer
         context.RegisterSymbolAction(AnalyzeNamedType, SymbolKind.NamedType);
     }
 
-    private static void AnalyzeNamedType(SymbolAnalysisContext context)
+    internal static void AnalyzeNamedType(SymbolAnalysisContext context)
     {
         var typeSymbol = (INamedTypeSymbol)context.Symbol;
 

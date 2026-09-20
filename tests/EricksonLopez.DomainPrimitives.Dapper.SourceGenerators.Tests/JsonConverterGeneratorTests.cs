@@ -21,6 +21,10 @@ public sealed class JsonConverterGeneratorTests
         const string dummyInfrastructure = @"
 namespace EricksonLopez.DomainPrimitives
 {
+    public interface IEntityId
+    {
+        System.Guid Value { get; }
+    }
     public interface IEntityId<TSelf> where TSelf : IEntityId<TSelf>
     {
         System.Guid Value { get; }
@@ -314,5 +318,143 @@ public class MyService { }";
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
 
         outputCompilation.SyntaxTrees.Count().Should().Be(2);
+    }
+
+    [Fact]
+    public void Generator_WithNamespaceCollision_EmitsSafeNamespacePrefixedConverter()
+    {
+        const string source = @"
+namespace NS1
+{
+    public readonly record struct ProductId(System.Guid Value)
+    {
+        public static ProductId Create(System.Guid value) => new(value);
+    }
+}
+namespace NS2
+{
+    public readonly record struct ProductId(System.Guid Value)
+    {
+        public static ProductId Create(System.Guid value) => new(value);
+    }
+}";
+        var generatedSource = RunGenerator(source);
+
+        generatedSource.Should().Contain("class ProductIdJsonConverter");
+        generatedSource.Should().Contain("class NS2_ProductIdJsonConverter");
+    }
+
+    [Fact]
+    public void Generator_WithStrongIdInterface_EmitsCorrectConverter()
+    {
+        const string source = @"
+namespace TestNamespace;
+public readonly record struct LongId(long Value) : EricksonLopez.DomainPrimitives.IStrongId<LongId, long>
+{
+    public static LongId Create(long value) => new(value);
+}";
+        var generatedSource = RunGenerator(source);
+
+        generatedSource.Should().Contain("LongIdJsonConverter");
+        generatedSource.Should().Contain("reader.GetInt64()");
+    }
+
+    [Fact]
+    public void Generator_WithNonGenericIEntityId_ShouldGenerateJsonConverter()
+    {
+        const string source = @"
+namespace TestNamespace;
+public readonly record struct LegacyId(System.Guid Value) : EricksonLopez.DomainPrimitives.IEntityId
+{
+    public static LegacyId Create(System.Guid value) => new(value);
+}";
+        var generatedSource = RunGenerator(source);
+
+        generatedSource.Should().Contain("LegacyIdJsonConverter");
+        generatedSource.Should().Contain("reader.GetGuid()");
+    }
+
+    [Fact]
+    public void Generator_WithGlobalNamespacePrimitive_EmitsGlobalPrefix()
+    {
+        const string source = @"
+[EricksonLopez.DomainPrimitives.StrongIdAttribute<System.Guid>]
+public readonly record struct RootGlobalId(System.Guid Value)
+{
+    public static RootGlobalId Create(System.Guid value) => new(value);
+}";
+        var compilation = CreateCompilation(source);
+        var generator = new JsonConverterGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        var generatedSource = string.Join(Environment.NewLine, generatedTrees.Select(t => t.ToString()));
+        generatedSource.Should().NotContain("using <global namespace>;");
+        generatedSource.Should().Contain("internal sealed class RootGlobalIdJsonConverter : JsonConverter<RootGlobalId>");
+    }
+
+    [Fact]
+    public void Generator_WithDuplicateSymbolAcrossPartialDeclarations_HandlesDeduplication()
+    {
+        const string source = @"
+namespace ModuleA
+{
+    public readonly partial record struct OrderId(System.Guid Value)
+    {
+        public static OrderId Create(System.Guid value) => new(value);
+    }
+
+    public readonly partial record struct OrderId
+    {
+    }
+}";
+        var compilation = CreateCompilation(source);
+        var generator = new JsonConverterGenerator();
+        var driver = CSharpGeneratorDriver.Create(generator);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out _);
+
+        var generatedTrees = outputCompilation.SyntaxTrees.Skip(2).ToList();
+        generatedTrees.Count(t => t.ToString().Contains("class OrderIdJsonConverter", StringComparison.Ordinal)).Should().Be(1);
+    }
+
+    [Fact]
+    public void Generator_WithClassInsteadOfStruct_IsIgnored()
+    {
+        const string source = @"
+namespace TestNamespace;
+public class ClassId : EricksonLopez.DomainPrimitives.IStrongId<ClassId, long>
+{
+    public long Value { get; set; }
+    public static ClassId Create(long value) => new();
+}";
+        var generatedTrees = RunGenerator(source);
+        generatedTrees.Should().NotContain("ClassIdJsonConverter");
+    }
+
+    [Fact]
+    public void Generator_WithNonMatchingInterface_IsIgnored()
+    {
+        const string source = @"
+namespace TestNamespace
+{
+    public interface IOtherInterface<T1, T2> { }
+    public readonly record struct NonIdStruct(long Value) : IOtherInterface<NonIdStruct, long>
+    {
+    }
+}";
+        var generatedTrees = RunGenerator(source);
+        generatedTrees.Should().NotContain("NonIdStructJsonConverter");
+    }
+
+    [Fact]
+    public void Generator_WithIdEndingWithoutCreate_IsIgnored()
+    {
+        const string source = @"
+namespace TestNamespace;
+public readonly record struct NoCreateId(long Value);
+";
+        var generatedTrees = RunGenerator(source);
+        generatedTrees.Should().NotContain("NoCreateIdJsonConverter");
     }
 }
