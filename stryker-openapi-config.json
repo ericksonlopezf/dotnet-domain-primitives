@@ -1,5 +1,6 @@
 {
   "stryker-config": {
+    "solution": "Stryker.slnx",
     "project": "EricksonLopez.DomainPrimitives.OpenApi.csproj",
     "test-projects": [
       "EricksonLopez.DomainPrimitives.OpenApi.Tests.csproj"
